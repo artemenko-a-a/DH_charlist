@@ -36,3 +36,8 @@
    - **Reason:** данных недостаточно about exact UX debounce target; 500ms is a conservative reversible default.
    - **Type:** Assumption.
    - **Impact:** Reduces write churn compared to per-keystroke persistence while keeping no-explicit-save UX for this slice.
+
+8. **Decision:** Guard autosave cleanup with a per-save token so only the currently tracked task can clear its own pending entry.
+   - **Reason:** Actor re-entrancy across awaits can resume older tasks after a newer save has been registered.
+   - **Type:** Fact.
+   - **Impact:** Prevents newer pending saves from being dropped while preserving debounce/coalescing semantics.

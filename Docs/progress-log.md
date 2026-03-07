@@ -44,6 +44,12 @@
 - **results:** presentation no longer constructs infrastructure directly; detail/profile now use `characterID` + shared state source; autosave is debounced/coalesced; targeted tests pass.
 - **blockers:** iOS simulator/runtime validation blocked here (`xcodebuild` unavailable).
 
+### Batch 5 corrective micro-pass — Fix autosave tracking race
+- **status:** blocked
+- **checks run:** `swift test`, `swift build`, `xcodebuild -list`
+- **results:** autosave cleanup is token-guarded; new tests cover pending tracking and per-character isolation.
+- **blockers:** `swift test`/`swift build` cannot write `.build` under sandbox; `xcodebuild -list` fails because the repo is a Swift package without an Xcode project/workspace, plus CoreSimulator/log access is blocked.
+
 ### Batch 6 — Characteristics/resources UI depth
 - **status:** planned
 

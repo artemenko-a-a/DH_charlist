@@ -1,7 +1,12 @@
 import Foundation
 
 public actor ProfileAutosaveCoordinator {
-    private var pendingTasks: [UUID: Task<Void, Never>] = [:]
+    private struct PendingSave {
+        let token: UUID
+        let task: Task<Void, Never>
+    }
+
+    private var pendingTasks: [UUID: PendingSave] = [:]
     private let debounceNanoseconds: UInt64
 
     public init(debounceNanoseconds: UInt64 = 500_000_000) {
@@ -13,9 +18,10 @@ public actor ProfileAutosaveCoordinator {
         profile: Profile,
         perform: @escaping @Sendable (UUID, Profile) async -> Void
     ) {
-        pendingTasks[characterID]?.cancel()
+        pendingTasks[characterID]?.task.cancel()
 
-        pendingTasks[characterID] = Task {
+        let token = UUID()
+        let task = Task {
             do {
                 try await Task.sleep(nanoseconds: debounceNanoseconds)
             } catch {
@@ -24,18 +30,21 @@ public actor ProfileAutosaveCoordinator {
 
             guard !Task.isCancelled else { return }
             await perform(characterID, profile)
-            await clearPendingTask(for: characterID)
+            await clearPendingTask(for: characterID, token: token)
         }
+
+        pendingTasks[characterID] = PendingSave(token: token, task: task)
     }
 
     public func waitForPendingSaves() async {
-        let tasks = pendingTasks.values
+        let tasks = pendingTasks.values.map { $0.task }
         for task in tasks {
             await task.value
         }
     }
 
-    private func clearPendingTask(for characterID: UUID) async {
+    private func clearPendingTask(for characterID: UUID, token: UUID) async {
+        guard pendingTasks[characterID]?.token == token else { return }
         pendingTasks[characterID] = nil
     }
 }

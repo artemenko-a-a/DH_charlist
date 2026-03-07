@@ -69,7 +69,10 @@
 - **blockers:** none.
 
 ### Batch 8 — Notes/Talents/Traits UI depth
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** integrated Notes into accepted character detail flow with `characterID` + shared observable state; implemented editable sections for talents/traits/mutations/disorders/psychic powers/special abilities plus freeform notes; list-based notes sections support add/edit/delete and persist via `CharacterUseCases.updateNotes` through the validated JSON-backed repository path; added persistence tests for notes add/edit/delete/freeform behavior and character scoping while retaining Batch 5–7 coverage.
+- **blockers:** none.
 
 ### Batch 9 — Equipment UI depth
 - **status:** planned

@@ -63,6 +63,16 @@ public struct CharacterUseCases: Sendable {
         return character
     }
 
+    public func updateNotes(characterID: UUID, notes: NotesState) async throws -> Character {
+        guard var character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+        character.notes = notes
+        character.updatedAt = .now
+        try await repository.save(character)
+        return character
+    }
+
     public func deleteCharacter(id: UUID) async throws {
         try await repository.delete(id: id)
     }

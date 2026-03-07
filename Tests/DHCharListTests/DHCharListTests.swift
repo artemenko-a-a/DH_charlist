@@ -226,6 +226,97 @@ import Testing
     #expect(persisted?.skills.first?.specialisations == ["High Gothic", "Techna-Lingua", "Underworld Cant"])
 }
 
+@Test func addNotesListEntryPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("notes-add")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Notes Add"))
+    let editedNotes = NotesState(talents: ["Rapid Reload"])
+
+    let updated = try await useCases.updateNotes(characterID: created.id, notes: editedNotes)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.notes.talents == ["Rapid Reload"])
+    #expect(persisted?.notes.talents == ["Rapid Reload"])
+}
+
+@Test func editNotesListEntryPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("notes-edit")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Notes Edit"))
+    _ = try await useCases.updateNotes(
+        characterID: created.id,
+        notes: NotesState(talents: ["Melee Weapon Training"])
+    )
+
+    let editedNotes = NotesState(talents: ["Melee Weapon Training (Chain)"])
+    let updated = try await useCases.updateNotes(characterID: created.id, notes: editedNotes)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.notes.talents == ["Melee Weapon Training (Chain)"])
+    #expect(persisted?.notes.talents == ["Melee Weapon Training (Chain)"])
+}
+
+@Test func deleteNotesListEntryPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("notes-delete")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Notes Delete"))
+    _ = try await useCases.updateNotes(
+        characterID: created.id,
+        notes: NotesState(traits: ["Dark Sight", "Unnatural Strength"])
+    )
+
+    let editedNotes = NotesState(traits: ["Unnatural Strength"])
+    let updated = try await useCases.updateNotes(characterID: created.id, notes: editedNotes)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.notes.traits == ["Unnatural Strength"])
+    #expect(persisted?.notes.traits == ["Unnatural Strength"])
+}
+
+@Test func freeformNotesPersistCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("notes-freeform")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Notes Freeform"))
+    let text = "Interrogation lead in lower habs. Verify contact at dusk."
+    let editedNotes = NotesState(notes: text)
+
+    let updated = try await useCases.updateNotes(characterID: created.id, notes: editedNotes)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.notes.notes == text)
+    #expect(persisted?.notes.notes == text)
+}
+
+@Test func notesEditsRemainScopedToSelectedCharacter() async throws {
+    let fileURL = uniqueTestFileURL("notes-scoping")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let first = try await useCases.createCharacter(profile: Profile(name: "First Notes"))
+    let second = try await useCases.createCharacter(profile: Profile(name: "Second Notes"))
+
+    _ = try await useCases.updateNotes(
+        characterID: first.id,
+        notes: NotesState(psychicPowers: ["Precognition"], notes: "First character notes")
+    )
+
+    let firstPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: first.id)
+    let secondPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: second.id)
+
+    #expect(firstPersisted?.notes.psychicPowers == ["Precognition"])
+    #expect(firstPersisted?.notes.notes == "First character notes")
+    #expect(secondPersisted?.notes.psychicPowers.isEmpty == true)
+    #expect(secondPersisted?.notes.notes.isEmpty == true)
+}
+
 @Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
     let fileURL = uniqueTestFileURL("duplicate")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)

@@ -97,3 +97,17 @@
 - **checks run:** Xcode `XcodeRefreshCodeIssuesInFile` on edited screens/tests, Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
 - **results:** completed regression hardening across accepted JSON-backed flows by adding missing tests for not-found update failures, import replacement semantics, and post-import visible-state error handling in `CharacterListViewModel`; added accessibility labels/hints and VoiceOver-friendly combined summaries on major implemented UI surfaces (character list/detail, profile, characteristics/resources, skills, notes, equipment, session mode) without architecture or feature-scope expansion; refreshed `README.md` and `Docs/manual-smoke-checklist.md` to match current implemented/validated scope and runtime limits.
 - **blockers:** SwiftData runtime validation remains blocked in this environment; simulator/UI runtime smoke execution remains blocked here.
+### Revalidation sweep — Batch 3 / Batch 4 / Batch 5 (post-Batch-12 state)
+- **Batch 3 status:** blocked
+- **Batch 3 checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **Batch 3 results:** availability-gated `SwiftDataCharacterRepository` still compiles in current codebase as a placeholder adapter behind `#if canImport(SwiftData)`; no runtime SwiftData execution path was validated in this environment.
+- **Batch 3 blockers:** SwiftData runtime validation remains unavailable here, so Batch 3 cannot be marked validated.
+- **Batch 4 status:** validated
+- **Batch 4 checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **Batch 4 results:** app host/app shell, tab flow foundation, and `AppContainer` composition-root wiring compile and remain intact after later batches; no regression observed from subsequent UI integrations.
+- **Batch 4 blockers:** none.
+- **Batch 5 status:** validated
+- **Batch 5 checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **Batch 5 results:** character lifecycle slice remains valid on current branch (list load, create, open details, profile autosave edit path, duplicate, delete, and overview/state persistence behavior) with existing tests passing and no regression fix required.
+- **Batch 5 blockers:** none.
+

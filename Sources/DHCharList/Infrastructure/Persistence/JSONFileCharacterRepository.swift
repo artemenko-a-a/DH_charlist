@@ -41,32 +41,3 @@ public actor JSONFileCharacterRepository: CharacterRepository {
         try data.write(to: fileURL, options: .atomic)
     }
 }
-
-#if canImport(SwiftData)
-import SwiftData
-
-@available(iOS 17, macOS 14, *)
-public actor SwiftDataCharacterRepository: CharacterRepository {
-    private let modelContext: ModelContext
-
-    public init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
-
-    public func fetchAll() async throws -> [Character] {
-        []
-    }
-
-    public func fetch(id: UUID) async throws -> Character? {
-        nil
-    }
-
-    public func save(_ character: Character) async throws {
-        _ = character
-    }
-
-    public func delete(id: UUID) async throws {
-        _ = id
-    }
-}
-#endif

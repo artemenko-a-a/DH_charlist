@@ -52,6 +52,7 @@ final class CharacterListViewModel: ObservableObject {
         defer { isLoading = false }
         do {
             characters = try await useCases.listCharacters()
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -70,6 +71,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateProfile(characterID: characterID, profile: profile)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -79,6 +81,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateCharacteristics(characterID: characterID, characteristics: characteristics)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -88,6 +91,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateResources(characterID: characterID, resources: resources)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -97,6 +101,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateSkills(characterID: characterID, skills: skills)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -106,6 +111,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateNotes(characterID: characterID, notes: notes)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -115,6 +121,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateEquipment(characterID: characterID, equipment: equipment)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -124,6 +131,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             let updated = try await useCases.updateSession(characterID: characterID, session: session)
             replaceInMemory(updated)
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -133,6 +141,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             try await useCases.deleteCharacter(id: id)
             characters.removeAll { $0.id == id }
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -143,6 +152,7 @@ final class CharacterListViewModel: ObservableObject {
             let duplicated = try await useCases.duplicateCharacter(id: id)
             characters.insert(duplicated, at: 0)
             characters.sort { $0.updatedAt > $1.updatedAt }
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -150,7 +160,9 @@ final class CharacterListViewModel: ObservableObject {
 
     func exportPayload() async -> Data? {
         do {
-            return try await useCases.exportCharacters(using: importExportService)
+            let payload = try await useCases.exportCharacters(using: importExportService)
+            errorMessage = nil
+            return payload
         } catch {
             errorMessage = error.localizedDescription
             return nil
@@ -161,6 +173,7 @@ final class CharacterListViewModel: ObservableObject {
         do {
             _ = try await useCases.importCharacters(from: data, using: importExportService)
             await load()
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -213,10 +226,11 @@ public struct CharacterListScreen: View {
                         Task { await viewModel.deleteCharacter(id: character.id) }
                     }
                 }
+                .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
             }
             .overlay {
                 if viewModel.characters.isEmpty, !viewModel.isLoading {
-                    ContentUnavailableView("No Characters", systemImage: "person.crop.circle.badge.plus", description: Text("Create your first acolyte."))
+                    ContentUnavailableView("No Characters", systemImage: "person.crop.circle.badge.plus", description: Text("Create your first acolyte from the plus button in the toolbar."))
                 }
             }
             .navigationTitle("Characters")
@@ -291,7 +305,7 @@ public struct CharacterListScreen: View {
                     viewModel.errorMessage = error.localizedDescription
                 }
             }
-            .alert("Error", isPresented: .constant(viewModel.errorMessage != nil), actions: {
+            .alert("Error", isPresented: isShowingErrorAlert, actions: {
                 Button("OK") { viewModel.errorMessage = nil }
             }, message: {
                 Text(viewModel.errorMessage ?? "")
@@ -337,6 +351,7 @@ struct CharacterRowView: View {
 struct CharacterDetailScreen: View {
     let characterID: UUID
     @ObservedObject var viewModel: CharacterListViewModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         if let character = viewModel.character(by: characterID) {
@@ -377,7 +392,28 @@ struct CharacterDetailScreen: View {
                 systemImage: "person.crop.circle.badge.exclamationmark",
                 description: Text("This character is no longer available.")
             )
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Back to Characters") {
+                        dismiss()
+                    }
+                }
+            }
         }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private extension CharacterListScreen {
+    var isShowingErrorAlert: Binding<Bool> {
+        Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    viewModel.errorMessage = nil
+                }
+            }
+        )
     }
 }
 #endif

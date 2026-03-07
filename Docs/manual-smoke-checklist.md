@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted JSON-backed implementation (Batches 5-12).
+This checklist tracks the currently accepted JSON-backed implementation through Batch 13 runtime polish.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -39,12 +39,15 @@ This checklist tracks the currently accepted JSON-backed implementation (Batches
     - import a valid JSON payload
     - verify visible list refreshes to imported state
     - import an invalid payload and verify error alert is shown
+    - import a valid payload immediately after a failed import and verify stale error alert is cleared
 14. Accessibility sanity:
     - with VoiceOver enabled, verify key controls/rows announce meaningful labels
     - verify row summaries read useful values (not fragmented decorative text)
+    - from a removed/deleted character detail route, verify `Character Not Found` screen provides a clear way back (`Back to Characters`)
 15. Dynamic Type sanity:
     - run with larger text sizes and verify major forms/screens remain usable for data entry and navigation.
 
-Blocked in this container:
-- simulator/UI runtime execution
-- SwiftData runtime validation
+Latest local validation status (2026-03-07):
+- Host app compiles successfully in Xcode (`BuildProject`).
+- SwiftPM regression/build validation passes (`swift test`, `swift build`).
+- Manual simulator interaction remains a human-run checklist and should be recorded per run (pass/fail + notes).

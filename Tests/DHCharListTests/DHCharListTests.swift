@@ -1,6 +1,9 @@
 import Foundation
 import Testing
 @testable import DHCharList
+#if canImport(SwiftData)
+import SwiftData
+#endif
 
 @Test func derivedValueCalculatorUsesCharacteristicAndTraining() {
     let characteristics = CharacteristicSet(weaponSkill: 40, ballisticSkill: 30, strength: 35, toughness: 32, agility: 45, intelligence: 28, perception: 31, willpower: 37, fellowship: 26)
@@ -143,6 +146,25 @@ import Testing
 
     #expect(viewModel.characters.map(\.profile.name) == ["Visible Character"])
     #expect(viewModel.errorMessage != nil)
+}
+
+@Test @MainActor func importSuccessClearsPreviousViewModelError() async throws {
+    let fileURL = uniqueTestFileURL("batch13-viewmodel-error-recovery")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    await viewModel.importPayload(Data("not json".utf8))
+    #expect(viewModel.errorMessage != nil)
+
+    let incoming = Character(profile: Profile(name: "Recovered Import"))
+    let payload = try service.exportCharacters([incoming])
+    await viewModel.importPayload(payload)
+
+    #expect(viewModel.errorMessage == nil)
+    #expect(viewModel.characters.count == 1)
+    #expect(viewModel.characters.first?.profile.name == "Recovered Import")
 }
 #endif
 
@@ -904,6 +926,117 @@ import Testing
     #expect(names == Set(["One", "Two"]))
 }
 
+#if canImport(SwiftData)
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataRepositorySaveFetchRoundtrip() async throws {
+    let repository = try makeSwiftDataRepository(testName: "swiftdata-roundtrip")
+    let character = sampleCharacter(name: "SwiftData Roundtrip")
+
+    try await repository.save(character)
+    let fetched = try await repository.fetch(id: character.id)
+    let all = try await repository.fetchAll()
+
+    #expect(fetched == character)
+    #expect(all.count == 1)
+    #expect(all.first == character)
+}
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataRepositoryUpdatePreservesNestedData() async throws {
+    let repository = try makeSwiftDataRepository(testName: "swiftdata-update")
+    let base = sampleCharacter(name: "SwiftData Update")
+    try await repository.save(base)
+
+    var updated = base
+    updated.profile.description = "Updated description"
+    updated.characteristics.perception = 49
+    updated.resources.experienceSpent = 250
+    updated.skills[0].training = .veteran
+    updated.notes.notes = "Updated notes body"
+    updated.equipment.inventory.append(InventoryItem(name: "Medkit", quantity: 1, weight: 1.5))
+    updated.session.temporaryModifiers["Smoke"] = -20
+    updated.updatedAt = Date(timeIntervalSince1970: base.updatedAt.timeIntervalSince1970 + 60)
+
+    try await repository.save(updated)
+    let fetched = try await repository.fetch(id: base.id)
+
+    #expect(fetched == updated)
+}
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataRepositoryDeleteRemovesCharacter() async throws {
+    let repository = try makeSwiftDataRepository(testName: "swiftdata-delete")
+    let character = sampleCharacter(name: "SwiftData Delete")
+    try await repository.save(character)
+
+    try await repository.delete(id: character.id)
+    let fetched = try await repository.fetch(id: character.id)
+    let all = try await repository.fetchAll()
+
+    #expect(fetched == nil)
+    #expect(all.isEmpty)
+}
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataRepositoryKeepsMultipleCharactersIsolated() async throws {
+    let repository = try makeSwiftDataRepository(testName: "swiftdata-isolation")
+    let first = sampleCharacter(name: "First")
+    var second = sampleCharacter(name: "Second")
+    second.profile.role = "Sage"
+
+    try await repository.save(first)
+    try await repository.save(second)
+
+    let firstFetched = try await repository.fetch(id: first.id)
+    let secondFetched = try await repository.fetch(id: second.id)
+    let all = try await repository.fetchAll()
+
+    #expect(firstFetched == first)
+    #expect(secondFetched == second)
+    #expect(Set(all.map(\.id)) == Set([first.id, second.id]))
+}
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataRepositoryMatchesJSONRepositoryForAcceptedCrudFlow() async throws {
+    let jsonURL = uniqueTestFileURL("swiftdata-parity-json")
+    let jsonRepository = JSONFileCharacterRepository(fileURL: jsonURL)
+    let swiftDataRepository = try makeSwiftDataRepository(testName: "swiftdata-parity-store")
+
+    let original = sampleCharacter(name: "Parity")
+    var updated = original
+    updated.profile.homeWorld = "Hive World"
+    updated.resources.currentWounds = 8
+    updated.skills[0].specialisations = ["Urban"]
+    updated.notes.talents = ["Rapid Reload"]
+    updated.equipment.weapons[0].name = "Bolt Pistol"
+    updated.session.pinnedChecks = ["Awareness +10"]
+    updated.updatedAt = Date(timeIntervalSince1970: original.updatedAt.timeIntervalSince1970 + 120)
+    let toDelete = sampleCharacter(name: "Delete Me")
+
+    for repository in [jsonRepository as any CharacterRepository, swiftDataRepository as any CharacterRepository] {
+        try await repository.save(original)
+        try await repository.save(updated)
+        try await repository.save(toDelete)
+        try await repository.delete(id: toDelete.id)
+    }
+
+    let jsonAll = try await jsonRepository.fetchAll()
+    let swiftDataAll = try await swiftDataRepository.fetchAll()
+    let jsonFetched = try await jsonRepository.fetch(id: original.id)
+    let swiftDataFetched = try await swiftDataRepository.fetch(id: original.id)
+    let jsonDeleted = try await jsonRepository.fetch(id: toDelete.id)
+    let swiftDataDeleted = try await swiftDataRepository.fetch(id: toDelete.id)
+
+    #expect(jsonFetched == updated)
+    #expect(swiftDataFetched == updated)
+    #expect(jsonDeleted == nil)
+    #expect(swiftDataDeleted == nil)
+    #expect(jsonAll.count == 1)
+    #expect(swiftDataAll.count == 1)
+    #expect(jsonAll.first == swiftDataAll.first)
+}
+#endif
+
 private actor SaveRecorder {
     private var stored: [(UUID, Profile)] = []
 
@@ -997,4 +1130,93 @@ private extension JSONDecoder {
 private func uniqueTestFileURL(_ suffix: String) -> URL {
     URL(filePath: NSTemporaryDirectory())
         .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
+}
+
+#if canImport(SwiftData)
+@available(iOS 17, macOS 14, *)
+private func makeSwiftDataRepository(testName: String) throws -> SwiftDataCharacterRepository {
+    let storeURL = URL(filePath: NSTemporaryDirectory())
+        .appending(path: "dh_charlist_tests_\(testName)_\(UUID().uuidString).store")
+    let configuration = ModelConfiguration(url: storeURL)
+    let container = try ModelContainer(for: SwiftDataCharacterRecord.self, configurations: configuration)
+    return SwiftDataCharacterRepository(modelContext: ModelContext(container))
+}
+#endif
+
+private func sampleCharacter(name: String) -> Character {
+    Character(
+        id: UUID(),
+        profile: Profile(
+            name: name,
+            homeWorld: "Voidborn",
+            background: "Adeptus Administratum",
+            role: "Chirurgeon",
+            aptitudes: ["Knowledge", "Intelligence"],
+            description: "Sample description"
+        ),
+        characteristics: CharacteristicSet(
+            weaponSkill: 31,
+            ballisticSkill: 37,
+            strength: 29,
+            toughness: 34,
+            agility: 41,
+            intelligence: 43,
+            perception: 38,
+            willpower: 36,
+            fellowship: 28
+        ),
+        resources: ResourceState(
+            currentWounds: 10,
+            maxWounds: 14,
+            fatigue: 1,
+            corruption: 0,
+            insanity: 2,
+            currentFate: 2,
+            maxFate: 3,
+            experienceSpent: 100,
+            experienceTotal: 500
+        ),
+        skills: [
+            Skill(
+                id: UUID(),
+                name: "Awareness",
+                characteristic: .perception,
+                training: .trained,
+                specialisations: ["Sight"]
+            )
+        ],
+        notes: NotesState(
+            talents: ["Meditation"],
+            traits: ["Dark Sight"],
+            mutations: [],
+            disorders: [],
+            psychicPowers: [],
+            specialAbilities: ["Peer (Adeptus Administratum)"],
+            notes: "Sample notes"
+        ),
+        equipment: EquipmentState(
+            weapons: [
+                Weapon(
+                    id: UUID(),
+                    name: "Laspistol",
+                    type: "Pistol",
+                    range: "30m",
+                    damage: "1d10+2 E",
+                    penetration: "0",
+                    clip: "30",
+                    reload: "Half",
+                    traits: "Reliable"
+                )
+            ],
+            armour: [Armour(id: UUID(), location: "Body", armourPoints: 4)],
+            movement: MovementProfile(halfMove: 3, fullMove: 6, charge: 9, run: 18),
+            inventory: [InventoryItem(id: UUID(), name: "Data-slate", quantity: 1, weight: 0.8)]
+        ),
+        session: SessionState(
+            modeEnabled: true,
+            pinnedChecks: ["Medicae +10"],
+            temporaryModifiers: ["Darkness": -10]
+        ),
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_000)
+    )
 }

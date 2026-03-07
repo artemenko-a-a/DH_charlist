@@ -2,14 +2,15 @@
 
 Dark Heresy II character manager (iPhone/iPad-first scope) implemented as a Swift Package.
 
-## Current validated state (Batch 0-12)
+## Current validated state (through Batch 14)
 - Domain layer and use-cases are implemented and tested (domain remains independent of SwiftUI/SwiftData).
 - JSON-backed local persistence path is implemented and validated:
   - `JSONFileCharacterRepository`
   - `CharacterJSONImportExportService`
-- SwiftData runtime path is still placeholder-only:
-  - availability-gated adapter exists
-  - runtime validation remains blocked in this environment
+- SwiftData local persistence adapter is implemented and runtime-validated in this environment:
+  - `SwiftDataCharacterRepository` supports `fetchAll`, `fetch(id:)`, `save(_)`, `delete(id:)`
+  - composition selects backend via `AppContainer.live(persistence:)`
+  - JSON remains the default backend; SwiftData is opt-in
 - App composition root is preserved (`AppContainer`) and presentation does not construct infrastructure directly.
 - Accepted user flows implemented on the JSON path:
   - character lifecycle (list/create/open/edit profile autosave/duplicate/delete)
@@ -23,6 +24,10 @@ Dark Heresy II character manager (iPhone/iPad-first scope) implemented as a Swif
   - regression-focused coverage added for missing gaps
   - accessibility labels/hints and VoiceOver row summaries added on major UI surfaces
   - docs updated to match implemented and validated truth
+- Batch 13 runtime polish completed on accepted JSON-backed flow:
+  - safer error lifecycle in list/import/export/editing flow (stale error cleared after successful operations)
+  - character-detail missing-state now includes explicit return action to avoid dead-end navigation
+  - manual smoke checklist expanded for accessibility/dynamic-type/runtime coherence verification
 
 ## Validation commands used
 ```bash
@@ -54,6 +59,13 @@ struct DHCharListHostApp: App {
 
 After this step, run that app scheme on an iOS Simulator.
 
+To opt into SwiftData backend for host validation, switch composition to:
+
+```swift
+DHCharListAppShell(container: .live(persistence: .swiftData))
+```
+
 ## Runtime blockers
-- SwiftData runtime validation is blocked in this environment.
 - Full simulator/UI runtime smoke execution is not validated in this environment.
+
+See [Docs/manual-smoke-checklist.md](/Users/an.artemenko/repos/DH_charlist/Docs/manual-smoke-checklist.md) for the exact human-run simulator checks.

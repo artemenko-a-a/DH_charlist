@@ -51,3 +51,13 @@
    - **Reason:** Repository has no committed runnable iOS target/project; adding/committing a safe `.xcodeproj` target setup was not completed in this environment.
    - **Type:** Fact.
    - **Impact:** No feature behavior change; simulator launch becomes available immediately after creating one minimal iOS host target wired to the existing package entry path.
+
+11. **Decision:** Implement SwiftData persistence with a conservative reversible model (`SwiftDataCharacterRecord`) that stores `id`, `updatedAt`, and a serialized `Character` payload, with explicit mapper functions between domain and persistence.
+   - **Reason:** Full normalized SwiftData graph modeling for all nested fields is more invasive than Batch 14 scope; payload-backed storage preserves current domain shape and minimizes migration risk while still providing a real working SwiftData adapter.
+   - **Type:** Fact.
+   - **Impact:** SwiftData adapter is operational now (`fetchAll`, `fetch(id:)`, `save`, `delete`) and persists/restores accepted nested domain data without changing domain contracts.
+
+12. **Decision:** Add explicit persistence selection at composition root (`AppContainer.live(persistence:)`) and keep JSON as default runtime backend.
+   - **Reason:** Preserve accepted JSON-backed behavior while enabling controlled SwiftData opt-in and safe fallback if SwiftData store initialization fails.
+   - **Type:** Fact.
+   - **Impact:** JSON path remains intact/validated; SwiftData path can be enabled for validation and rollout without forcing migration by default.

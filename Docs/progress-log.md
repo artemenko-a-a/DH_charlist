@@ -112,8 +112,35 @@
 - **Batch 5 blockers:** none.
 
 ### Batch 13 — Minimal iOS host-app readiness (package-to-simulator bridge)
-- **status:** partial (manual Xcode target creation pending)
-- **checks run:** repository structure inspection via Xcode project navigator tools, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-- **results:** confirmed no runnable committed iOS app target/`.xcodeproj` exists; confirmed accepted package host entry path already exists and is public (`DHCharListAppShell(container: .live())` via `DHCharListIOSAppHost`); updated `README.md` with exact minimal simulator launch setup steps for a new host target.
-- **blockers:** creating/committing a new Xcode app target/project was not completed in this environment; one manual Xcode target creation step remains.
+- **status:** validated
+- **checks run:** repository structure inspection via Xcode project navigator tools, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`, simulator launch/manual run via `DHCharListHost`
+- **results:** host-app bridge is now complete: a minimal iOS host app target/project was created, linked to the local `DHCharList` package, configured to launch the accepted package UI, and successfully builds and launches in simulator.
+- **blockers:** none.
 
+### Batch 14 — Real SwiftData persistence adapter + composition selection
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`, Xcode `ExecuteSnippet` in `DHCharListHostApp.swift` using `.live(persistence: .swiftData)`
+- **results:** replaced placeholder with a working `SwiftDataCharacterRepository` supporting `fetchAll`, `fetch(id:)`, `save(_)`, and `delete(id:)`; implemented explicit domain-to-persistence mapping using a conservative SwiftData record (`id`, `updatedAt`, serialized character payload) to persist and restore accepted nested scope (`profile`, `characteristics/resources`, `skills`, `notes`, `equipment`, `session`); added composition-level persistence selection in `AppContainer.live(persistence:)` while preserving JSON default and automatic fallback to JSON if SwiftData initialization is unavailable; added SwiftData repository CRUD/isolation/parity tests against the accepted JSON-backed behavior; host runtime snippet confirmed SwiftData path persisted and listed data (`swiftdata_runtime_probe_count 1`, first name `Runtime Probe`).
+- **blockers:** none for Batch 14 implementation/validation in this environment.
+- **Batch 3 reclassification:** Batch 3 moves from **blocked** to **validated** based on real adapter implementation plus runtime-backed SwiftData validation in this environment.
+
+### Batch 13 — Runtime polish, accessibility, and simulator-smoke hardening (JSON-backed path)
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`
+- **results:** applied runtime polish in accepted JSON-backed flows without feature-scope expansion: list/import/export/edit operations now clear stale error state after successful actions; error alert presentation uses a stable dismissable binding; character detail missing-state screen now includes an explicit `Back to Characters` action to avoid navigation dead-ends; added regression test `importSuccessClearsPreviousViewModelError`; refreshed manual smoke checklist with runtime coherence, accessibility, and Dynamic Type verification steps.
+- **blockers:** no code-level blockers; simulator interaction checks remain manual checklist execution.
+
+### Current canonical batch status summary
+- Batch 3 — validated
+- Batch 4 — validated
+- Batch 5 — validated
+- Batch 6 — validated
+- Batch 7 — validated
+- Batch 8 — validated
+- Batch 9 — validated
+- Batch 10 — validated
+- Batch 11 — validated
+- Batch 12 — validated
+- Batch 13 (host-app readiness) — validated
+- Batch 13 (runtime polish/accessibility) — validated
+- Batch 14 (real SwiftData adapter) — validated

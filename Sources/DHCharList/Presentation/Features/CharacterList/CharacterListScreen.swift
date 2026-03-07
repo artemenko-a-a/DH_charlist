@@ -94,6 +94,15 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func saveSession(characterID: UUID, session: SessionState) async {
+        do {
+            let updated = try await useCases.updateSession(characterID: characterID, session: session)
+            replaceInMemory(updated)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func deleteCharacter(id: UUID) async {
         do {
             try await useCases.deleteCharacter(id: id)
@@ -228,6 +237,9 @@ struct CharacterDetailScreen: View {
                     }
                     NavigationLink("Equipment") {
                         EquipmentScreen(characterID: characterID, viewModel: viewModel)
+                    }
+                    NavigationLink("Session Mode") {
+                        SessionModeScreen(characterID: characterID, viewModel: viewModel)
                     }
                 }
             }

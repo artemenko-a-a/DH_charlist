@@ -5,13 +5,305 @@ import SwiftUI
 
 @available(iOS 17, macOS 14, *)
 public struct SessionModeScreen: View {
-    public init() {}
+    private enum Context {
+        case unscoped
+        case character(characterID: UUID, viewModel: CharacterListViewModel)
+    }
+
+    private let context: Context
+
+    @State private var session: SessionState
+    @State private var pinnedCheckDraft: PinnedCheckDraft?
+    @State private var temporaryModifierDraft: TemporaryModifierDraft?
+
+    public init() {
+        context = .unscoped
+        _session = State(initialValue: .init())
+    }
+
+    init(characterID: UUID, viewModel: CharacterListViewModel) {
+        context = .character(characterID: characterID, viewModel: viewModel)
+        _session = State(initialValue: viewModel.character(by: characterID)?.session ?? .init())
+    }
+
     public var body: some View {
-        Form {
-            Text("Session Mode")
-            Text("Pin checks and temporary modifiers")
+        Group {
+            switch context {
+            case .unscoped:
+                ContentUnavailableView(
+                    "Select a Character",
+                    systemImage: "person.crop.circle.badge.exclamationmark",
+                    description: Text("Open Session Mode from a character detail screen to edit session state.")
+                )
+            case .character:
+                sessionForm
+            }
         }
         .navigationTitle("Session")
+        .onAppear(perform: refreshFromSharedState)
+        .onChange(of: session) { _, updated in
+            persist(updated)
+        }
+        .sheet(item: $pinnedCheckDraft) { draft in
+            PinnedCheckEditorView(
+                draft: draft,
+                onCancel: { pinnedCheckDraft = nil },
+                onSave: { updated in
+                    upsertPinnedCheck(from: updated)
+                    pinnedCheckDraft = nil
+                }
+            )
+        }
+        .sheet(item: $temporaryModifierDraft) { draft in
+            TemporaryModifierEditorView(
+                draft: draft,
+                onCancel: { temporaryModifierDraft = nil },
+                onSave: { updated in
+                    upsertTemporaryModifier(from: updated)
+                    temporaryModifierDraft = nil
+                }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var sessionForm: some View {
+        Form {
+            Section("Session") {
+                Toggle("Session Mode Enabled", isOn: $session.modeEnabled)
+            }
+
+            Section("Pinned Checks") {
+                if session.pinnedChecks.isEmpty {
+                    Text("No pinned checks")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(Array(session.pinnedChecks.enumerated()), id: \.offset) { index, check in
+                        Button {
+                            pinnedCheckDraft = PinnedCheckDraft(index: index, value: check)
+                        } label: {
+                            Text(check)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .onDelete(perform: deletePinnedChecks)
+                }
+
+                Button {
+                    pinnedCheckDraft = PinnedCheckDraft()
+                } label: {
+                    Label("Add Pinned Check", systemImage: "plus")
+                }
+            }
+
+            Section("Temporary Modifiers") {
+                if sortedTemporaryModifiers.isEmpty {
+                    Text("No temporary modifiers")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
+                        Button {
+                            temporaryModifierDraft = TemporaryModifierDraft(originalKey: key, key: key, valueText: String(value))
+                        } label: {
+                            HStack {
+                                Text(key)
+                                Spacer()
+                                Text(value >= 0 ? "+\(value)" : "\(value)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .onDelete(perform: deleteTemporaryModifiers)
+                }
+
+                Button {
+                    temporaryModifierDraft = TemporaryModifierDraft()
+                } label: {
+                    Label("Add Temporary Modifier", systemImage: "plus")
+                }
+            }
+        }
+    }
+
+    private var sortedTemporaryModifiers: [(String, Int)] {
+        session.temporaryModifiers
+            .map { ($0.key, $0.value) }
+            .sorted { $0.0.localizedCaseInsensitiveCompare($1.0) == .orderedAscending }
+    }
+
+    private func refreshFromSharedState() {
+        guard case let .character(characterID, viewModel) = context,
+              let character = viewModel.character(by: characterID)
+        else {
+            return
+        }
+        session = character.session
+    }
+
+    private func persist(_ updated: SessionState) {
+        guard case let .character(characterID, viewModel) = context else { return }
+        Task {
+            await viewModel.saveSession(characterID: characterID, session: updated)
+        }
+    }
+
+    private func deletePinnedChecks(at offsets: IndexSet) {
+        session.pinnedChecks.remove(atOffsets: offsets)
+    }
+
+    private func upsertPinnedCheck(from draft: PinnedCheckDraft) {
+        let cleaned = draft.value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return }
+
+        if let index = draft.index, session.pinnedChecks.indices.contains(index) {
+            session.pinnedChecks[index] = cleaned
+        } else {
+            session.pinnedChecks.append(cleaned)
+        }
+    }
+
+    private func deleteTemporaryModifiers(at offsets: IndexSet) {
+        let keys = sortedTemporaryModifiers.map { $0.0 }
+        for offset in offsets where keys.indices.contains(offset) {
+            session.temporaryModifiers.removeValue(forKey: keys[offset])
+        }
+    }
+
+    private func upsertTemporaryModifier(from draft: TemporaryModifierDraft) {
+        let cleanedKey = draft.key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedKey.isEmpty, let value = Int(draft.valueText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            return
+        }
+
+        if let originalKey = draft.originalKey, originalKey != cleanedKey {
+            session.temporaryModifiers.removeValue(forKey: originalKey)
+        }
+        session.temporaryModifiers[cleanedKey] = value
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct PinnedCheckEditorView: View {
+    @State private var draft: PinnedCheckDraft
+    let onCancel: () -> Void
+    let onSave: (PinnedCheckDraft) -> Void
+
+    init(
+        draft: PinnedCheckDraft,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping (PinnedCheckDraft) -> Void
+    ) {
+        _draft = State(initialValue: draft)
+        self.onCancel = onCancel
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Pinned Check", text: $draft.value)
+            }
+            .navigationTitle(draft.isNew ? "Add Check" : "Edit Check")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(draft)
+                    }
+                    .disabled(draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+private struct PinnedCheckDraft: Identifiable {
+    let id: UUID
+    let index: Int?
+    var value: String
+
+    var isNew: Bool { index == nil }
+
+    init() {
+        id = UUID()
+        index = nil
+        value = ""
+    }
+
+    init(index: Int, value: String) {
+        id = UUID()
+        self.index = index
+        self.value = value
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct TemporaryModifierEditorView: View {
+    @State private var draft: TemporaryModifierDraft
+    let onCancel: () -> Void
+    let onSave: (TemporaryModifierDraft) -> Void
+
+    init(
+        draft: TemporaryModifierDraft,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping (TemporaryModifierDraft) -> Void
+    ) {
+        _draft = State(initialValue: draft)
+        self.onCancel = onCancel
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Label", text: $draft.key)
+                TextField("Modifier", text: $draft.valueText)
+            }
+            .navigationTitle(draft.isNew ? "Add Modifier" : "Edit Modifier")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(draft)
+                    }
+                    .disabled(!draft.isValid)
+                }
+            }
+        }
+    }
+}
+
+private struct TemporaryModifierDraft: Identifiable {
+    let id: UUID
+    let originalKey: String?
+    var key: String
+    var valueText: String
+
+    var isNew: Bool { originalKey == nil }
+
+    var isValid: Bool {
+        let cleanedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedValue = valueText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !cleanedKey.isEmpty && Int(cleanedValue) != nil
+    }
+
+    init() {
+        id = UUID()
+        originalKey = nil
+        key = ""
+        valueText = "0"
+    }
+
+    init(originalKey: String, key: String, valueText: String) {
+        id = UUID()
+        self.originalKey = originalKey
+        self.key = key
+        self.valueText = valueText
     }
 }
 #endif

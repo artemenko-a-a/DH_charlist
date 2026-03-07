@@ -83,6 +83,16 @@ public struct CharacterUseCases: Sendable {
         return character
     }
 
+    public func updateSession(characterID: UUID, session: SessionState) async throws -> Character {
+        guard var character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+        character.session = session
+        character.updatedAt = .now
+        try await repository.save(character)
+        return character
+    }
+
     public func deleteCharacter(id: UUID) async throws {
         try await repository.delete(id: id)
     }

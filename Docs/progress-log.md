@@ -81,7 +81,10 @@
 - **blockers:** none.
 
 ### Batch 10 — Session mode UI depth
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** implemented Session Mode depth in accepted app flow by adding a character-scoped `SessionModeScreen` entry from character detail; session state now supports mode toggle, pinned checks add/edit/delete, and temporary modifiers add/edit/delete with editor sheets; session edits persist through `CharacterUseCases.updateSession` into the validated JSON-backed repository path via shared `CharacterListViewModel` source-of-truth; added persistence tests for session toggle, pinned check CRUD, temporary modifier CRUD, and character-scoped session edits while keeping existing Batch 5–9 coverage green.
+- **blockers:** none.
 
 ### Batch 11 — Import/export user-facing UI flow
 - **status:** planned

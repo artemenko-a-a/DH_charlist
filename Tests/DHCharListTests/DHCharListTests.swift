@@ -473,6 +473,102 @@ import Testing
     #expect(secondPersisted?.equipment == EquipmentState())
 }
 
+@Test func sessionModeTogglePersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("session-toggle")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Session Toggle"))
+
+    let enabled = SessionState(modeEnabled: true)
+    let updated = try await useCases.updateSession(characterID: created.id, session: enabled)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.session.modeEnabled == true)
+    #expect(persisted?.session.modeEnabled == true)
+}
+
+@Test func addEditDeletePinnedCheckPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("session-pinned-check-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Session Pinned"))
+
+    _ = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(pinnedChecks: ["Awareness +10"])
+    )
+
+    let afterEdit = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(pinnedChecks: ["Awareness +20"])
+    )
+
+    let afterDelete = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(pinnedChecks: [])
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(afterEdit.session.pinnedChecks == ["Awareness +20"])
+    #expect(afterDelete.session.pinnedChecks.isEmpty)
+    #expect(persisted?.session.pinnedChecks.isEmpty == true)
+}
+
+@Test func addEditDeleteTemporaryModifierPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("session-temp-modifier-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Session Modifiers"))
+
+    _ = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(temporaryModifiers: ["Darkness": -30])
+    )
+
+    let afterEdit = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(temporaryModifiers: ["Darkness": -20])
+    )
+
+    let afterDelete = try await useCases.updateSession(
+        characterID: created.id,
+        session: SessionState(temporaryModifiers: [:])
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(afterEdit.session.temporaryModifiers == ["Darkness": -20])
+    #expect(afterDelete.session.temporaryModifiers.isEmpty)
+    #expect(persisted?.session.temporaryModifiers.isEmpty == true)
+}
+
+@Test func sessionEditsRemainScopedToSelectedCharacter() async throws {
+    let fileURL = uniqueTestFileURL("session-scoping")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let first = try await useCases.createCharacter(profile: Profile(name: "First Session"))
+    let second = try await useCases.createCharacter(profile: Profile(name: "Second Session"))
+
+    let firstSession = SessionState(
+        modeEnabled: true,
+        pinnedChecks: ["Dodge +10", "Awareness +20"],
+        temporaryModifiers: ["Smoke": -20, "Blessing": 10]
+    )
+
+    _ = try await useCases.updateSession(characterID: first.id, session: firstSession)
+
+    let firstPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: first.id)
+    let secondPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: second.id)
+
+    #expect(firstPersisted?.session == firstSession)
+    #expect(secondPersisted?.session == SessionState())
+}
+
 @Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
     let fileURL = uniqueTestFileURL("duplicate")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)

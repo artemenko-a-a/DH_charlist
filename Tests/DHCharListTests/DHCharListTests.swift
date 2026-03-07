@@ -166,6 +166,42 @@ import SwiftData
     #expect(viewModel.characters.count == 1)
     #expect(viewModel.characters.first?.profile.name == "Recovered Import")
 }
+
+@Test @MainActor func exportSuccessClearsPreviousViewModelError() async throws {
+    let fileURL = uniqueTestFileURL("batch15-viewmodel-export-error-recovery")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    await viewModel.importPayload(Data("not json".utf8))
+    #expect(viewModel.errorMessage != nil)
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Export Recovery"))
+    await viewModel.load()
+    let payload = await viewModel.exportPayload()
+
+    #expect(payload != nil)
+    #expect(viewModel.errorMessage == nil)
+}
+
+@Test @MainActor func deleteSuccessClearsPreviousViewModelError() async throws {
+    let fileURL = uniqueTestFileURL("batch15-viewmodel-delete-error-recovery")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    await viewModel.importPayload(Data("not json".utf8))
+    #expect(viewModel.errorMessage != nil)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Delete Recovery"))
+    await viewModel.load()
+    await viewModel.deleteCharacter(id: created.id)
+
+    #expect(viewModel.errorMessage == nil)
+    #expect(viewModel.characters.isEmpty)
+}
 #endif
 
 @Test func updateOperationsThrowNotFoundForMissingCharacter() async throws {

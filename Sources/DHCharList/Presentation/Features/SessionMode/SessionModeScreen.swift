@@ -33,7 +33,7 @@ public struct SessionModeScreen: View {
                 ContentUnavailableView(
                     "Select a Character",
                     systemImage: "person.crop.circle.badge.exclamationmark",
-                    description: Text("Open Session Mode from a character detail screen to edit session state.")
+                    description: Text("Open Session Mode from a character detail screen to edit pinned checks and temporary modifiers.")
                 )
             case .character:
                 sessionForm
@@ -53,6 +53,8 @@ public struct SessionModeScreen: View {
                     pinnedCheckDraft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $temporaryModifierDraft) { draft in
             TemporaryModifierEditorView(
@@ -63,6 +65,8 @@ public struct SessionModeScreen: View {
                     temporaryModifierDraft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -72,11 +76,12 @@ public struct SessionModeScreen: View {
             Section("Session") {
                 Toggle("Session Mode Enabled", isOn: $session.modeEnabled)
                     .accessibilityLabel("Session Mode Enabled")
+                    .accessibilityHint("Enable quick session-focused modifiers and checks.")
             }
 
-            Section("Pinned Checks") {
+            Section {
                 if session.pinnedChecks.isEmpty {
-                    Text("No pinned checks")
+                    Text("No pinned checks yet")
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(Array(session.pinnedChecks.enumerated()), id: \.offset) { index, check in
@@ -98,11 +103,15 @@ public struct SessionModeScreen: View {
                     Label("Add Pinned Check", systemImage: "plus")
                 }
                 .accessibilityLabel("Add Pinned Check")
+            } header: {
+                Text("Pinned Checks")
+            } footer: {
+                Text("Tap a row to edit. Swipe left to remove.")
             }
 
-            Section("Temporary Modifiers") {
+            Section {
                 if sortedTemporaryModifiers.isEmpty {
-                    Text("No temporary modifiers")
+                    Text("No temporary modifiers yet")
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
@@ -111,6 +120,8 @@ public struct SessionModeScreen: View {
                         } label: {
                             HStack {
                                 Text(key)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
                                 Spacer()
                                 Text(value >= 0 ? "+\(value)" : "\(value)")
                                     .foregroundStyle(.secondary)
@@ -130,8 +141,14 @@ public struct SessionModeScreen: View {
                     Label("Add Temporary Modifier", systemImage: "plus")
                 }
                 .accessibilityLabel("Add Temporary Modifier")
+            } header: {
+                Text("Temporary Modifiers")
+            } footer: {
+                Text("Use signed numbers such as +10 or -20.")
             }
         }
+        .formContentWidth()
+        .formStyle(.grouped)
     }
 
     private var sortedTemporaryModifiers: [(String, Int)] {
@@ -272,6 +289,9 @@ private struct TemporaryModifierEditorView: View {
                     .accessibilityLabel("Modifier Label")
                 TextField("Modifier", text: $draft.valueText)
                     .accessibilityLabel("Modifier Value")
+#if os(iOS)
+                    .keyboardType(.numbersAndPunctuation)
+#endif
             }
             .navigationTitle(draft.isNew ? "Add Modifier" : "Edit Modifier")
             .toolbar {

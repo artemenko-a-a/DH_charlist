@@ -26,6 +26,8 @@ struct EquipmentScreen: View {
             movementSection
             inventorySection
         }
+        .formContentWidth()
+        .formStyle(.grouped)
         .navigationTitle("Equipment")
         .onAppear(perform: refreshFromSharedState)
         .onChange(of: equipment) { _, updated in
@@ -42,6 +44,8 @@ struct EquipmentScreen: View {
                     weaponDraft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $armourDraft) { value in
             ArmourEditorView(
@@ -52,6 +56,8 @@ struct EquipmentScreen: View {
                     armourDraft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $inventoryDraft) { value in
             InventoryItemEditorView(
@@ -62,14 +68,16 @@ struct EquipmentScreen: View {
                     inventoryDraft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
     @ViewBuilder
     private var weaponsSection: some View {
-        Section("Weapons") {
+        Section {
             if equipment.weapons.isEmpty {
-                Text("No weapons")
+                Text("No weapons yet")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(equipment.weapons) { weapon in
@@ -89,14 +97,18 @@ struct EquipmentScreen: View {
                 Label("Add Weapon", systemImage: "plus")
             }
             .accessibilityLabel("Add Weapon")
+        } header: {
+            Text("Weapons")
+        } footer: {
+            Text("Tap a weapon to edit it. Swipe left to delete.")
         }
     }
 
     @ViewBuilder
     private var armourSection: some View {
-        Section("Armour") {
+        Section {
             if equipment.armour.isEmpty {
-                Text("No armour entries")
+                Text("No armour entries yet")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(equipment.armour) { armour in
@@ -123,24 +135,32 @@ struct EquipmentScreen: View {
                 Label("Add Armour", systemImage: "plus")
             }
             .accessibilityLabel("Add Armour")
+        } header: {
+            Text("Armour")
+        } footer: {
+            Text("Use one entry per body location.")
         }
     }
 
     @ViewBuilder
     private var movementSection: some View {
-        Section("Movement") {
+        Section {
             intRow("Half Move", value: $equipment.movement.halfMove)
             intRow("Full Move", value: $equipment.movement.fullMove)
             intRow("Charge", value: $equipment.movement.charge)
             intRow("Run", value: $equipment.movement.run)
+        } header: {
+            Text("Movement")
+        } footer: {
+            Text("Movement values are used during session checks and combat.")
         }
     }
 
     @ViewBuilder
     private var inventorySection: some View {
-        Section("Inventory") {
+        Section {
             if equipment.inventory.isEmpty {
-                Text("No inventory items")
+                Text("No inventory items yet")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(equipment.inventory) { item in
@@ -153,6 +173,7 @@ struct EquipmentScreen: View {
                                 Text("Weight \(item.weight.formatted(.number.precision(.fractionLength(0...2))))")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                    .lineLimit(1)
                             }
                             Spacer()
                             Text("x\(item.quantity)")
@@ -173,6 +194,10 @@ struct EquipmentScreen: View {
                 Label("Add Item", systemImage: "plus")
             }
             .accessibilityLabel("Add Item")
+        } header: {
+            Text("Inventory")
+        } footer: {
+            Text("Tap an item to edit quantity/weight. Swipe left to delete.")
         }
     }
 
@@ -186,6 +211,9 @@ struct EquipmentScreen: View {
                 .frame(maxWidth: 100)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
+#if os(iOS)
+                .keyboardType(.numberPad)
+#endif
         }
     }
 
@@ -256,6 +284,8 @@ private struct WeaponRowView: View {
                 Text(detail.joined(separator: " • "))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             let extra = [
@@ -269,6 +299,8 @@ private struct WeaponRowView: View {
                 Text(extra.joined(separator: " • "))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .accessibilityElement(children: .ignore)
@@ -409,6 +441,9 @@ private struct ArmourEditorView: View {
                     .accessibilityLabel("Armour Location")
                 TextField("Armour Points", value: $draft.armourPoints, format: .number)
                     .accessibilityLabel("Armour Points")
+#if os(iOS)
+                    .keyboardType(.numberPad)
+#endif
             }
             .navigationTitle(draft.isNew ? "Add Armour" : "Edit Armour")
             .toolbar {
@@ -477,8 +512,14 @@ private struct InventoryItemEditorView: View {
                     .accessibilityLabel("Item Name")
                 TextField("Quantity", value: $draft.quantity, format: .number)
                     .accessibilityLabel("Item Quantity")
+#if os(iOS)
+                    .keyboardType(.numberPad)
+#endif
                 TextField("Weight", value: $draft.weight, format: .number)
                     .accessibilityLabel("Item Weight")
+#if os(iOS)
+                    .keyboardType(.decimalPad)
+#endif
             }
             .navigationTitle(draft.isNew ? "Add Item" : "Edit Item")
             .toolbar {

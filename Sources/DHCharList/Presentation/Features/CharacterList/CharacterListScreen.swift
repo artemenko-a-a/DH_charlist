@@ -200,6 +200,8 @@ public struct CharacterListScreen: View {
     @State private var isShowingExportPicker = false
     @State private var exportDocument: CharacterExportDocument?
     @State private var exportFileName = "dh_characters"
+    @State private var pendingDeleteCharacterID: UUID?
+    @State private var isShowingDeleteConfirmation = false
 
     public init(useCases: CharacterUseCases, importExportService: any CharacterImportExportService) {
         _viewModel = StateObject(
@@ -212,27 +214,38 @@ public struct CharacterListScreen: View {
 
     public var body: some View {
         NavigationStack {
-            List(viewModel.characters) { character in
-                NavigationLink(value: character.id) {
-                    CharacterRowView(character: character)
-                }
-                .swipeActions {
-                    Button("Duplicate") {
-                        Task { await viewModel.duplicateCharacter(id: character.id) }
-                    }
-                    .tint(.blue)
+            List {
+                Section("All Characters") {
+                    ForEach(viewModel.characters) { character in
+                        NavigationLink(value: character.id) {
+                            CharacterRowView(character: character)
+                        }
+                        .swipeActions {
+                            Button("Duplicate") {
+                                Task { await viewModel.duplicateCharacter(id: character.id) }
+                            }
+                            .tint(.blue)
 
-                    Button("Delete", role: .destructive) {
-                        Task { await viewModel.deleteCharacter(id: character.id) }
+                            Button("Delete", role: .destructive) {
+                                pendingDeleteCharacterID = character.id
+                                isShowingDeleteConfirmation = true
+                            }
+                        }
+                        .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
                     }
                 }
-                .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
             }
             .overlay {
                 if viewModel.characters.isEmpty, !viewModel.isLoading {
-                    ContentUnavailableView("No Characters", systemImage: "person.crop.circle.badge.plus", description: Text("Create your first acolyte from the plus button in the toolbar."))
+                    ContentUnavailableView(
+                        "No Characters",
+                        systemImage: "person.crop.circle.badge.plus",
+                        description: Text("Create your first acolyte from the plus button, then open it to fill profile, skills, notes, equipment, and session data.")
+                    )
                 }
             }
+            .formContentWidth()
+            .platformInsetGroupedListStyle()
             .navigationTitle("Characters")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
@@ -292,6 +305,9 @@ public struct CharacterListScreen: View {
                         viewModel.errorMessage = error.localizedDescription
                     }
                 case .failure(let error):
+                    if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled {
+                        return
+                    }
                     viewModel.errorMessage = error.localizedDescription
                 }
             }
@@ -301,9 +317,24 @@ public struct CharacterListScreen: View {
                 contentType: .json,
                 defaultFilename: exportFileName
             ) { result in
-                if case .failure(let error) = result {
+                switch result {
+                case .success:
+                    viewModel.errorMessage = nil
+                case .failure(let error):
                     viewModel.errorMessage = error.localizedDescription
                 }
+            }
+            .confirmationDialog(
+                "Delete Character?",
+                isPresented: $isShowingDeleteConfirmation,
+                titleVisibility: .visible,
+                presenting: pendingDeleteCharacterID
+            ) { characterID in
+                Button("Delete", role: .destructive) {
+                    Task { await viewModel.deleteCharacter(id: characterID) }
+                }
+            } message: { characterID in
+                Text("This permanently removes \(characterName(for: characterID)).")
             }
             .alert("Error", isPresented: isShowingErrorAlert, actions: {
                 Button("OK") { viewModel.errorMessage = nil }
@@ -319,6 +350,11 @@ public struct CharacterListScreen: View {
         let stamp = formatter.string(from: .now)
         return "dh_characters_\(stamp)"
     }
+
+    private func characterName(for id: UUID) -> String {
+        let name = viewModel.character(by: id)?.profile.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return name.isEmpty ? "this character" : name
+    }
 }
 
 @available(iOS 17, macOS 14, *)
@@ -329,21 +365,33 @@ struct CharacterRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(character.profile.name.isEmpty ? "Unnamed" : character.profile.name)
                 .font(.headline)
-            Text("\(character.profile.homeWorld) · \(character.profile.background) · \(character.profile.role)")
+            Text(summaryLine)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
         .accessibilityHint("Opens character details.")
     }
 
+    private var summaryLine: String {
+        let details = [
+            character.profile.homeWorld,
+            character.profile.background,
+            character.profile.role
+        ]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        return details.isEmpty ? "No profile details yet" : details.joined(separator: " · ")
+    }
+
     private var accessibilitySummary: String {
         let name = character.profile.name.isEmpty ? "Unnamed" : character.profile.name
-        let homeWorld = character.profile.homeWorld.isEmpty ? "Unknown home world" : character.profile.homeWorld
-        let background = character.profile.background.isEmpty ? "Unknown background" : character.profile.background
-        let role = character.profile.role.isEmpty ? "Unknown role" : character.profile.role
-        return "\(name). \(homeWorld). \(background). \(role)."
+        let details = summaryLine == "No profile details yet" ? "No profile details yet." : "\(summaryLine)."
+        return "\(name). \(details)"
     }
 }
 
@@ -364,7 +412,7 @@ struct CharacterDetailScreen: View {
                     LabeledContent("Updated", value: character.updatedAt.formatted(date: .abbreviated, time: .shortened))
                 }
 
-                Section("Edit") {
+                Section {
                     NavigationLink("Edit Profile") {
                         ProfileScreen(characterID: characterID, viewModel: viewModel)
                     }
@@ -383,8 +431,14 @@ struct CharacterDetailScreen: View {
                     NavigationLink("Session Mode") {
                         SessionModeScreen(characterID: characterID, viewModel: viewModel)
                     }
+                } header: {
+                    Text("Edit")
+                } footer: {
+                    Text("Open each section to edit and save values automatically.")
                 }
             }
+            .formContentWidth()
+            .platformInsetGroupedListStyle()
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
         } else {
             ContentUnavailableView(

@@ -22,22 +22,10 @@ struct SkillsScreen: View {
 
     var body: some View {
         List {
-            if skills.isEmpty {
-                ContentUnavailableView("No Skills", systemImage: "list.bullet.rectangle", description: Text("Add a skill to start tracking targets and training."))
-            } else {
-                Section("Skills") {
-                    ForEach(skills) { skill in
-                        Button {
-                            draft = SkillDraft(skill: skill)
-                        } label: {
-                            SkillRowView(skill: skill, target: target(for: skill))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .onDelete(perform: deleteSkills)
-                }
-            }
+            skillsListContent
         }
+        .formContentWidth()
+        .platformInsetGroupedListStyle()
         .navigationTitle("Skills")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -65,6 +53,35 @@ struct SkillsScreen: View {
                     draft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    @ViewBuilder
+    private var skillsListContent: some View {
+        if skills.isEmpty {
+            ContentUnavailableView(
+                "No Skills",
+                systemImage: "list.bullet.rectangle",
+                description: Text("Add skills to track training level, specialisations, and derived targets.")
+            )
+        } else {
+            Section {
+                ForEach(skills) { skill in
+                    Button {
+                        draft = SkillDraft(skill: skill)
+                    } label: {
+                        SkillRowView(skill: skill, target: target(for: skill))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .onDelete(perform: deleteSkills)
+            } header: {
+                Text("Skills")
+            } footer: {
+                Text("Swipe left on a skill row to delete it.")
+            }
         }
     }
 
@@ -98,6 +115,9 @@ private struct SkillRowView: View {
     let target: Int
 
     var body: some View {
+        let trainingModifier = skill.training.modifier
+        let trainingSummary = "\(skill.characteristic.label) · \(skill.training.label) (\(trainingModifier >= 0 ? "+" : "")\(trainingModifier))"
+
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(skill.name.isEmpty ? "Unnamed Skill" : skill.name)
@@ -107,13 +127,15 @@ private struct SkillRowView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            Text("\(skill.characteristic.label) · \(skill.training.label) (\(skill.training.modifier >= 0 ? "+" : "")\(skill.training.modifier))")
+            Text(trainingSummary)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             if !skill.specialisations.isEmpty {
                 Text(skill.specialisations.joined(separator: ", "))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .accessibilityElement(children: .ignore)
@@ -173,6 +195,7 @@ private struct SkillEditorView: View {
                     TextField("Comma-separated", text: $draft.specialisationsText, axis: .vertical)
                         .lineLimit(2...4)
                         .accessibilityLabel("Specialisations")
+                        .accessibilityHint("Separate items with commas, semicolons, or line breaks.")
                 }
 
                 Section("Derived") {

@@ -21,7 +21,7 @@ struct CharacteristicsScreen: View {
 
     var body: some View {
         Form {
-            Section("Characteristics") {
+            Section {
                 characteristicRow("Weapon Skill", value: $characteristics.weaponSkill, bonus: characteristics.bonus.weaponSkill)
                 characteristicRow("Ballistic Skill", value: $characteristics.ballisticSkill, bonus: characteristics.bonus.ballisticSkill)
                 characteristicRow("Strength", value: $characteristics.strength, bonus: characteristics.bonus.strength)
@@ -31,9 +31,13 @@ struct CharacteristicsScreen: View {
                 characteristicRow("Perception", value: $characteristics.perception, bonus: characteristics.bonus.perception)
                 characteristicRow("Willpower", value: $characteristics.willpower, bonus: characteristics.bonus.willpower)
                 characteristicRow("Fellowship", value: $characteristics.fellowship, bonus: characteristics.bonus.fellowship)
+            } header: {
+                Text("Characteristics")
+            } footer: {
+                Text("Bonuses are derived from characteristic tens digits.")
             }
 
-            Section("Resources") {
+            Section {
                 intRow("Current Wounds", value: $resources.currentWounds)
                 intRow("Max Wounds", value: $resources.maxWounds)
                 intRow("Fatigue", value: $resources.fatigue)
@@ -46,8 +50,14 @@ struct CharacteristicsScreen: View {
                 LabeledContent("Experience Available", value: String(resources.experienceAvailable))
                     .accessibilityLabel("Experience Available")
                     .accessibilityValue(String(resources.experienceAvailable))
+            } header: {
+                Text("Resources")
+            } footer: {
+                Text("Experience Available updates from total minus spent.")
             }
         }
+        .formContentWidth()
+        .formStyle(.grouped)
         .navigationTitle("Characteristics")
         .onAppear {
             if let character = viewModel.character(by: characterID) {
@@ -77,6 +87,9 @@ struct CharacteristicsScreen: View {
                 .frame(maxWidth: 100)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
+#if os(iOS)
+                .keyboardType(.numberPad)
+#endif
             Text("B: \(bonus)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -97,6 +110,9 @@ struct CharacteristicsScreen: View {
                 .frame(maxWidth: 100)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
+#if os(iOS)
+                .keyboardType(.numberPad)
+#endif
         }
     }
 }

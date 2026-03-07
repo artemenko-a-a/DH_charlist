@@ -18,18 +18,30 @@ struct ProfileScreen: View {
 
     public var body: some View {
         Form {
-            TextField("Name", text: $draft.name)
-                .accessibilityLabel("Character Name")
-            TextField("Home world", text: $draft.homeWorld)
-                .accessibilityLabel("Home World")
-            TextField("Background", text: $draft.background)
-                .accessibilityLabel("Background")
-            TextField("Role", text: $draft.role)
-                .accessibilityLabel("Role")
-            TextField("Description", text: $draft.description, axis: .vertical)
-                .lineLimit(3...6)
-                .accessibilityLabel("Description")
+            Section("Identity") {
+                TextField("Name", text: $draft.name)
+                    .accessibilityLabel("Character Name")
+                TextField("Home world", text: $draft.homeWorld)
+                    .accessibilityLabel("Home World")
+                TextField("Background", text: $draft.background)
+                    .accessibilityLabel("Background")
+                TextField("Role", text: $draft.role)
+                    .accessibilityLabel("Role")
+            }
+
+            Section {
+                TextField("Description", text: $draft.description, axis: .vertical)
+                    .lineLimit(3...6)
+                    .accessibilityLabel("Description")
+                    .accessibilityHint("Brief notes about origin, personality, and appearance.")
+            } header: {
+                Text("Description")
+            } footer: {
+                Text("Changes save automatically while you edit.")
+            }
         }
+        .formContentWidth()
+        .formStyle(.grouped)
         .navigationTitle("Profile")
         .onAppear {
             if let latest = viewModel.character(by: characterID)?.profile {

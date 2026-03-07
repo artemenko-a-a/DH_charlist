@@ -144,3 +144,9 @@
 - Batch 13 (host-app readiness) — validated
 - Batch 13 (runtime polish/accessibility) — validated
 - Batch 14 (real SwiftData adapter) — validated
+
+### Batch 15 — Runtime UX polish + iPad refinement
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`, `xcrun simctl list devices available`
+- **results:** completed focused polish pass on existing accepted flows only: improved empty-state and inline guidance copy across character detail/features; added safer destructive confirmation for character delete; tightened row rendering for long/empty values; added practical accessibility hints/labels and Dynamic Type-friendly multiline behavior on major list/form/detail surfaces; standardized sheet presentation behavior for existing editors; applied iPad-oriented content width refinement to major list/form screens without changing navigation architecture; preserved accepted JSON-default + SwiftData-alternative behavior and current composition root patterns; added regression tests `exportSuccessClearsPreviousViewModelError` and `deleteSuccessClearsPreviousViewModelError`.
+- **blockers:** simulator runtime sanity execution was not available in this environment because `CoreSimulatorService` was unavailable (`Connection invalid/refused`), so manual runtime checklist execution remains required outside this run.

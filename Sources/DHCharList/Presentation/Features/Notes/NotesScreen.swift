@@ -26,12 +26,19 @@ struct NotesScreen: View {
             listSection(.psychicPowers)
             listSection(.specialAbilities)
 
-            Section("Freeform Notes") {
+            Section {
                 TextEditor(text: $notes.notes)
                     .frame(minHeight: 140)
                     .accessibilityLabel("Freeform Notes")
+                    .accessibilityHint("Use this area for longer unstructured session notes.")
+            } header: {
+                Text("Freeform Notes")
+            } footer: {
+                Text("List sections are for short tagged entries. Use Freeform Notes for long text.")
             }
         }
+        .formContentWidth()
+        .formStyle(.grouped)
         .navigationTitle("Notes")
         .onAppear(perform: refreshFromSharedState)
         .onChange(of: notes) { _, updated in
@@ -48,15 +55,17 @@ struct NotesScreen: View {
                     draft = nil
                 }
             )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
     @ViewBuilder
     private func listSection(_ section: NotesListSection) -> some View {
-        Section(section.title) {
+        Section {
             let entries = entries(for: section)
             if entries.isEmpty {
-                Text("No entries")
+                Text("No \(section.title.lowercased()) yet")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(Array(entries.enumerated()), id: \.offset) { index, value in
@@ -64,6 +73,9 @@ struct NotesScreen: View {
                         draft = NoteEntryDraft(section: section, index: index, value: value)
                     } label: {
                         Text(value)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(section.singularTitle): \(value)")
@@ -80,6 +92,10 @@ struct NotesScreen: View {
                 Label("Add \(section.singularTitle)", systemImage: "plus")
             }
             .accessibilityLabel("Add \(section.singularTitle)")
+        } header: {
+            Text(section.title)
+        } footer: {
+            Text("Tap an entry to edit it. Swipe left to delete.")
         }
     }
 
@@ -152,6 +168,7 @@ private struct NoteEntryEditorView: View {
                 TextField(draft.section.singularTitle, text: $draft.value, axis: .vertical)
                     .lineLimit(2...4)
                     .accessibilityLabel(draft.section.singularTitle)
+                    .accessibilityHint("Enter a short note for this section.")
             }
             .navigationTitle(draft.isNew ? "Add \(draft.section.singularTitle)" : "Edit \(draft.section.singularTitle)")
             .toolbar {

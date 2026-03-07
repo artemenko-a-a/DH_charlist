@@ -32,8 +32,10 @@ struct ProfileScreen: View {
             }
         }
         .onChange(of: draft) { _, newValue in
-            viewModel.autosaveCoordinator.scheduleSave(characterID: characterID, profile: newValue) { id, profile in
-                await viewModel.saveProfile(characterID: id, profile: profile)
+            Task {
+                await viewModel.autosaveCoordinator.scheduleSave(characterID: characterID, profile: newValue) { id, profile in
+                    await viewModel.saveProfile(characterID: id, profile: profile)
+                }
             }
         }
     }

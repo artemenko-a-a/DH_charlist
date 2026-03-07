@@ -110,6 +110,122 @@ import Testing
     #expect(persisted?.resources.experienceAvailable == 350)
 }
 
+@Test func addSkillPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("skills-add")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Skills Add"))
+    let added = Skill(name: "Awareness", characteristic: .perception, training: .known)
+
+    let updated = try await useCases.updateSkills(characterID: created.id, skills: [added])
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.skills == [added])
+    #expect(persisted?.skills == [added])
+}
+
+@Test func editSkillPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("skills-edit")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Skills Edit"))
+    let original = Skill(name: "Stealth", characteristic: .agility, training: .known)
+    _ = try await useCases.updateSkills(characterID: created.id, skills: [original])
+
+    var edited = original
+    edited.name = "Stealth Advanced"
+    edited.characteristic = .intelligence
+    edited.training = .veteran
+    edited.specialisations = ["Urban", "Low-light"]
+
+    let updated = try await useCases.updateSkills(characterID: created.id, skills: [edited])
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.skills == [edited])
+    #expect(persisted?.skills == [edited])
+}
+
+@Test func deleteSkillPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("skills-delete")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Skills Delete"))
+    let first = Skill(name: "Charm", characteristic: .fellowship, training: .known)
+    let second = Skill(name: "Dodge", characteristic: .agility, training: .trained)
+    _ = try await useCases.updateSkills(characterID: created.id, skills: [first, second])
+
+    let updated = try await useCases.updateSkills(characterID: created.id, skills: [second])
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.skills == [second])
+    #expect(persisted?.skills == [second])
+}
+
+@Test func derivedSkillTargetReflectsEditedCharacteristicValuesAndTrainingLevel() async throws {
+    let fileURL = uniqueTestFileURL("skills-derived")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Skills Derived"))
+    let initialCharacteristics = CharacteristicSet(
+        weaponSkill: 30,
+        ballisticSkill: 30,
+        strength: 30,
+        toughness: 30,
+        agility: 30,
+        intelligence: 30,
+        perception: 35,
+        willpower: 30,
+        fellowship: 30
+    )
+    let editedCharacteristics = CharacteristicSet(
+        weaponSkill: 30,
+        ballisticSkill: 30,
+        strength: 30,
+        toughness: 30,
+        agility: 30,
+        intelligence: 30,
+        perception: 42,
+        willpower: 30,
+        fellowship: 30
+    )
+
+    _ = try await useCases.updateCharacteristics(characterID: created.id, characteristics: initialCharacteristics)
+    let baselineSkill = Skill(name: "Awareness", characteristic: .perception, training: .untrained)
+    let baselineCharacter = try await useCases.updateSkills(characterID: created.id, skills: [baselineSkill])
+    let baselineTarget = DerivedValueCalculator.skillTarget(for: baselineCharacter.skills[0], characteristics: baselineCharacter.characteristics)
+
+    _ = try await useCases.updateCharacteristics(characterID: created.id, characteristics: editedCharacteristics)
+    let editedSkill = Skill(id: baselineSkill.id, name: baselineSkill.name, characteristic: .perception, training: .veteran)
+    let editedCharacter = try await useCases.updateSkills(characterID: created.id, skills: [editedSkill])
+    let editedTarget = DerivedValueCalculator.skillTarget(for: editedCharacter.skills[0], characteristics: editedCharacter.characteristics)
+
+    #expect(baselineTarget == 15)
+    #expect(editedTarget == 62)
+}
+
+@Test func skillSpecialisationsPersistCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("skills-specialisations")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Skills Specs"))
+    let skill = Skill(
+        name: "Linguistics",
+        characteristic: .intelligence,
+        training: .trained,
+        specialisations: ["High Gothic", "Techna-Lingua", "Underworld Cant"]
+    )
+
+    _ = try await useCases.updateSkills(characterID: created.id, skills: [skill])
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(persisted?.skills.first?.specialisations == ["High Gothic", "Techna-Lingua", "Underworld Cant"])
+}
+
 @Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
     let fileURL = uniqueTestFileURL("duplicate")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)

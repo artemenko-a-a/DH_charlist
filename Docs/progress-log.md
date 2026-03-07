@@ -57,7 +57,16 @@
 - **blockers:** none.
 
 ### Batch 7 — Skills UI depth
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** integrated a full skills screen into the accepted character detail flow using `characterID` + shared observable state; implemented skills CRUD (add/edit/delete), editable fields (name/characteristic/training/specialisations), and derived skill target rendering from current characteristic values + training modifier; skill edits persist through `CharacterUseCases.updateSkills` into the validated JSON-backed repository path; added tests covering skill add/edit/delete persistence, specialisations persistence, and derived target behavior after characteristic/training edits.
+- **blockers:** none.
+
+### Batch 7 recovery pass — Profile autosave actor-isolation compile fix
+- **status:** validated
+- **checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** fixed `ProfileScreen` compile issue by invoking `ProfileAutosaveCoordinator.scheduleSave(...)` asynchronously from `.onChange` via `Task { await ... }`, preserving existing autosave behavior while satisfying actor isolation; Xcode and SwiftPM validation commands pass.
+- **blockers:** none.
 
 ### Batch 8 — Notes/Talents/Traits UI depth
 - **status:** planned

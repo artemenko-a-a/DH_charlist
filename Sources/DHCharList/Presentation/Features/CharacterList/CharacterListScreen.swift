@@ -67,6 +67,15 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func saveSkills(characterID: UUID, skills: [Skill]) async {
+        do {
+            let updated = try await useCases.updateSkills(characterID: characterID, skills: skills)
+            replaceInMemory(updated)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func deleteCharacter(id: UUID) async {
         do {
             try await useCases.deleteCharacter(id: id)
@@ -192,6 +201,9 @@ struct CharacterDetailScreen: View {
                     }
                     NavigationLink("Characteristics & Resources") {
                         CharacteristicsScreen(characterID: characterID, viewModel: viewModel)
+                    }
+                    NavigationLink("Skills") {
+                        SkillsScreen(characterID: characterID, viewModel: viewModel)
                     }
                 }
             }

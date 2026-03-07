@@ -93,4 +93,7 @@
 - **blockers:** none.
 
 ### Batch 12 — Hardening + accessibility + regressions + docs
-- **status:** planned
+- **status:** validated
+- **checks run:** Xcode `XcodeRefreshCodeIssuesInFile` on edited screens/tests, Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** completed regression hardening across accepted JSON-backed flows by adding missing tests for not-found update failures, import replacement semantics, and post-import visible-state error handling in `CharacterListViewModel`; added accessibility labels/hints and VoiceOver-friendly combined summaries on major implemented UI surfaces (character list/detail, profile, characteristics/resources, skills, notes, equipment, session mode) without architecture or feature-scope expansion; refreshed `README.md` and `Docs/manual-smoke-checklist.md` to match current implemented/validated scope and runtime limits.
+- **blockers:** SwiftData runtime validation remains blocked in this environment; simulator/UI runtime smoke execution remains blocked here.

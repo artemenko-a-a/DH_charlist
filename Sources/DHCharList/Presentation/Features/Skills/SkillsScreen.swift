@@ -46,6 +46,7 @@ struct SkillsScreen: View {
                 } label: {
                     Label("Add Skill", systemImage: "plus")
                 }
+                .accessibilityLabel("Add Skill")
             }
         }
         .onAppear(perform: refreshFromSharedState)
@@ -115,6 +116,19 @@ private struct SkillRowView: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to edit skill.")
+    }
+
+    private var accessibilitySummary: String {
+        let name = skill.name.isEmpty ? "Unnamed Skill" : skill.name
+        let characteristic = skill.characteristic.label
+        let training = skill.training.label
+        if skill.specialisations.isEmpty {
+            return "\(name). Target \(target). \(characteristic). \(training)."
+        }
+        return "\(name). Target \(target). \(characteristic). \(training). Specialisations: \(skill.specialisations.joined(separator: ", "))."
     }
 }
 
@@ -142,6 +156,7 @@ private struct SkillEditorView: View {
             Form {
                 Section("Details") {
                     TextField("Skill name", text: $draft.name)
+                        .accessibilityLabel("Skill Name")
                     Picker("Characteristic", selection: $draft.characteristic) {
                         ForEach(SkillCharacteristic.allCases, id: \.self) { characteristic in
                             Text(characteristic.label).tag(characteristic)
@@ -157,6 +172,7 @@ private struct SkillEditorView: View {
                 Section("Specialisations") {
                     TextField("Comma-separated", text: $draft.specialisationsText, axis: .vertical)
                         .lineLimit(2...4)
+                        .accessibilityLabel("Specialisations")
                 }
 
                 Section("Derived") {
@@ -173,6 +189,7 @@ private struct SkillEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .disabled(draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }

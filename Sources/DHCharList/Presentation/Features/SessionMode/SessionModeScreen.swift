@@ -71,6 +71,7 @@ public struct SessionModeScreen: View {
         Form {
             Section("Session") {
                 Toggle("Session Mode Enabled", isOn: $session.modeEnabled)
+                    .accessibilityLabel("Session Mode Enabled")
             }
 
             Section("Pinned Checks") {
@@ -85,6 +86,8 @@ public struct SessionModeScreen: View {
                             Text(check)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Pinned Check: \(check)")
+                        .accessibilityHint("Double tap to edit pinned check.")
                     }
                     .onDelete(perform: deletePinnedChecks)
                 }
@@ -94,6 +97,7 @@ public struct SessionModeScreen: View {
                 } label: {
                     Label("Add Pinned Check", systemImage: "plus")
                 }
+                .accessibilityLabel("Add Pinned Check")
             }
 
             Section("Temporary Modifiers") {
@@ -113,6 +117,9 @@ public struct SessionModeScreen: View {
                             }
                         }
                         .buttonStyle(.plain)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Temporary Modifier: \(key), \(value >= 0 ? "+" : "")\(value)")
+                        .accessibilityHint("Double tap to edit temporary modifier.")
                     }
                     .onDelete(perform: deleteTemporaryModifiers)
                 }
@@ -122,6 +129,7 @@ public struct SessionModeScreen: View {
                 } label: {
                     Label("Add Temporary Modifier", systemImage: "plus")
                 }
+                .accessibilityLabel("Add Temporary Modifier")
             }
         }
     }
@@ -203,6 +211,7 @@ private struct PinnedCheckEditorView: View {
         NavigationStack {
             Form {
                 TextField("Pinned Check", text: $draft.value)
+                    .accessibilityLabel("Pinned Check")
             }
             .navigationTitle(draft.isNew ? "Add Check" : "Edit Check")
             .toolbar {
@@ -260,7 +269,9 @@ private struct TemporaryModifierEditorView: View {
         NavigationStack {
             Form {
                 TextField("Label", text: $draft.key)
+                    .accessibilityLabel("Modifier Label")
                 TextField("Modifier", text: $draft.valueText)
+                    .accessibilityLabel("Modifier Value")
             }
             .navigationTitle(draft.isNew ? "Add Modifier" : "Edit Modifier")
             .toolbar {

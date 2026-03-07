@@ -29,6 +29,7 @@ struct NotesScreen: View {
             Section("Freeform Notes") {
                 TextEditor(text: $notes.notes)
                     .frame(minHeight: 140)
+                    .accessibilityLabel("Freeform Notes")
             }
         }
         .navigationTitle("Notes")
@@ -65,6 +66,8 @@ struct NotesScreen: View {
                         Text(value)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(section.singularTitle): \(value)")
+                    .accessibilityHint("Double tap to edit.")
                 }
                 .onDelete { offsets in
                     deleteEntries(at: offsets, section: section)
@@ -76,6 +79,7 @@ struct NotesScreen: View {
             } label: {
                 Label("Add \(section.singularTitle)", systemImage: "plus")
             }
+            .accessibilityLabel("Add \(section.singularTitle)")
         }
     }
 
@@ -147,6 +151,7 @@ private struct NoteEntryEditorView: View {
             Form {
                 TextField(draft.section.singularTitle, text: $draft.value, axis: .vertical)
                     .lineLimit(2...4)
+                    .accessibilityLabel(draft.section.singularTitle)
             }
             .navigationTitle(draft.isNew ? "Add \(draft.section.singularTitle)" : "Edit \(draft.section.singularTitle)")
             .toolbar {

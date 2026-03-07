@@ -236,6 +236,8 @@ public struct CharacterListScreen: View {
                             }
                         }
                     }
+                    .accessibilityLabel("Import or Export Characters")
+                    .accessibilityHint("Import characters from JSON or export all characters to JSON.")
                 }
 
                 ToolbarItem(placement: .primaryAction) {
@@ -244,6 +246,8 @@ public struct CharacterListScreen: View {
                     } label: {
                         Label("Create", systemImage: "plus")
                     }
+                    .accessibilityLabel("Create Character")
+                    .accessibilityHint("Creates a new character.")
                 }
             }
             .navigationDestination(for: UUID.self) { id in
@@ -315,6 +319,17 @@ struct CharacterRowView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Opens character details.")
+    }
+
+    private var accessibilitySummary: String {
+        let name = character.profile.name.isEmpty ? "Unnamed" : character.profile.name
+        let homeWorld = character.profile.homeWorld.isEmpty ? "Unknown home world" : character.profile.homeWorld
+        let background = character.profile.background.isEmpty ? "Unknown background" : character.profile.background
+        let role = character.profile.role.isEmpty ? "Unknown role" : character.profile.role
+        return "\(name). \(homeWorld). \(background). \(role)."
     }
 }
 
@@ -357,7 +372,11 @@ struct CharacterDetailScreen: View {
             }
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
         } else {
-            Text("Character not found")
+            ContentUnavailableView(
+                "Character Not Found",
+                systemImage: "person.crop.circle.badge.exclamationmark",
+                description: Text("This character is no longer available.")
+            )
         }
     }
 }

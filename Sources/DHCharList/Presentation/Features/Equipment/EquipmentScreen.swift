@@ -88,6 +88,7 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Weapon", systemImage: "plus")
             }
+            .accessibilityLabel("Add Weapon")
         }
     }
 
@@ -110,6 +111,8 @@ struct EquipmentScreen: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(armour.location.isEmpty ? "Unnamed Location" : armour.location), armour points \(armour.armourPoints)")
+                    .accessibilityHint("Double tap to edit armour.")
                 }
                 .onDelete(perform: deleteArmourEntries)
             }
@@ -119,6 +122,7 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Armour", systemImage: "plus")
             }
+            .accessibilityLabel("Add Armour")
         }
     }
 
@@ -156,6 +160,9 @@ struct EquipmentScreen: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(item.name.isEmpty ? "Unnamed Item" : item.name), quantity \(item.quantity), weight \(item.weight.formatted(.number.precision(.fractionLength(0...2))))")
+                    .accessibilityHint("Double tap to edit inventory item.")
                 }
                 .onDelete(perform: deleteInventoryItems)
             }
@@ -165,6 +172,7 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Item", systemImage: "plus")
             }
+            .accessibilityLabel("Add Item")
         }
     }
 
@@ -176,6 +184,8 @@ struct EquipmentScreen: View {
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .accessibilityLabel(title)
+                .accessibilityValue(String(value.wrappedValue))
         }
     }
 
@@ -261,6 +271,21 @@ private struct WeaponRowView: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to edit weapon.")
+    }
+
+    private var accessibilitySummary: String {
+        let name = weapon.name.isEmpty ? "Unnamed Weapon" : weapon.name
+        let base = "\(name). Type \(weapon.type.isEmpty ? "Unknown" : weapon.type). Range \(weapon.range.isEmpty ? "Unknown" : weapon.range). Damage \(weapon.damage.isEmpty ? "Unknown" : weapon.damage). Penetration \(weapon.penetration.isEmpty ? "Unknown" : weapon.penetration)."
+        let clipReload = [weapon.clip.isEmpty ? nil : "Clip \(weapon.clip)", weapon.reload.isEmpty ? nil : "Reload \(weapon.reload)"]
+            .compactMap { $0 }
+            .joined(separator: ". ")
+        if clipReload.isEmpty {
+            return base
+        }
+        return "\(base) \(clipReload)."
     }
 }
 
@@ -280,14 +305,22 @@ private struct WeaponEditorView: View {
         NavigationStack {
             Form {
                 TextField("Name", text: $draft.name)
+                    .accessibilityLabel("Weapon Name")
                 TextField("Type", text: $draft.type)
+                    .accessibilityLabel("Weapon Type")
                 TextField("Range", text: $draft.range)
+                    .accessibilityLabel("Weapon Range")
                 TextField("Damage", text: $draft.damage)
+                    .accessibilityLabel("Weapon Damage")
                 TextField("Penetration", text: $draft.penetration)
+                    .accessibilityLabel("Weapon Penetration")
                 TextField("Clip", text: $draft.clip)
+                    .accessibilityLabel("Weapon Clip")
                 TextField("Reload", text: $draft.reload)
+                    .accessibilityLabel("Weapon Reload")
                 TextField("Traits", text: $draft.traits, axis: .vertical)
                     .lineLimit(2...4)
+                    .accessibilityLabel("Weapon Traits")
             }
             .navigationTitle(draft.isNew ? "Add Weapon" : "Edit Weapon")
             .toolbar {
@@ -373,7 +406,9 @@ private struct ArmourEditorView: View {
         NavigationStack {
             Form {
                 TextField("Location", text: $draft.location)
+                    .accessibilityLabel("Armour Location")
                 TextField("Armour Points", value: $draft.armourPoints, format: .number)
+                    .accessibilityLabel("Armour Points")
             }
             .navigationTitle(draft.isNew ? "Add Armour" : "Edit Armour")
             .toolbar {
@@ -439,8 +474,11 @@ private struct InventoryItemEditorView: View {
         NavigationStack {
             Form {
                 TextField("Name", text: $draft.name)
+                    .accessibilityLabel("Item Name")
                 TextField("Quantity", value: $draft.quantity, format: .number)
+                    .accessibilityLabel("Item Quantity")
                 TextField("Weight", value: $draft.weight, format: .number)
+                    .accessibilityLabel("Item Weight")
             }
             .navigationTitle(draft.isNew ? "Add Item" : "Edit Item")
             .toolbar {

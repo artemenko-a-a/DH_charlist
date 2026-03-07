@@ -19,11 +19,16 @@ struct ProfileScreen: View {
     public var body: some View {
         Form {
             TextField("Name", text: $draft.name)
+                .accessibilityLabel("Character Name")
             TextField("Home world", text: $draft.homeWorld)
+                .accessibilityLabel("Home World")
             TextField("Background", text: $draft.background)
+                .accessibilityLabel("Background")
             TextField("Role", text: $draft.role)
+                .accessibilityLabel("Role")
             TextField("Description", text: $draft.description, axis: .vertical)
                 .lineLimit(3...6)
+                .accessibilityLabel("Description")
         }
         .navigationTitle("Profile")
         .onAppear {

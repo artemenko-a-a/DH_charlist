@@ -44,6 +44,8 @@ struct CharacteristicsScreen: View {
                 intRow("Experience Spent", value: $resources.experienceSpent)
                 intRow("Experience Total", value: $resources.experienceTotal)
                 LabeledContent("Experience Available", value: String(resources.experienceAvailable))
+                    .accessibilityLabel("Experience Available")
+                    .accessibilityValue(String(resources.experienceAvailable))
             }
         }
         .navigationTitle("Characteristics")
@@ -73,11 +75,16 @@ struct CharacteristicsScreen: View {
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .accessibilityLabel(title)
+                .accessibilityValue(String(value.wrappedValue))
             Text("B: \(bonus)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 40, alignment: .trailing)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title), bonus \(bonus)")
     }
 
     @ViewBuilder
@@ -88,6 +95,8 @@ struct CharacteristicsScreen: View {
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .accessibilityLabel(title)
+                .accessibilityValue(String(value.wrappedValue))
         }
     }
 }

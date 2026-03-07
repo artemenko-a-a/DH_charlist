@@ -66,6 +66,25 @@ import Testing
     #expect(persisted.first?.profile.name == "Imported Acolyte")
 }
 
+@Test func useCasesImportReplacesExistingRepositoryState() async throws {
+    let fileURL = uniqueTestFileURL("batch12-import-replace")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Old One"))
+    _ = try await useCases.createCharacter(profile: Profile(name: "Old Two"))
+
+    let incoming = Character(profile: Profile(name: "Imported Only"))
+    let payload = try service.exportCharacters([incoming])
+    _ = try await useCases.importCharacters(from: payload, using: service)
+
+    let persisted = try await repository.fetchAll()
+    #expect(persisted.count == 1)
+    #expect(persisted.first?.id == incoming.id)
+    #expect(persisted.first?.profile.name == "Imported Only")
+}
+
 @Test func useCasesImportRejectsUnsupportedSchemaVersion() async throws {
     let fileURL = uniqueTestFileURL("batch11-schema")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -108,7 +127,59 @@ import Testing
     #expect(viewModel.characters.first?.profile.name == "Imported Character")
     #expect(viewModel.characters.first?.id == replacement.id)
 }
+
+@Test @MainActor func importFailureSetsViewModelErrorAndKeepsCurrentVisibleState() async throws {
+    let fileURL = uniqueTestFileURL("batch12-viewmodel-import-failure")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Visible Character"))
+    await viewModel.load()
+    #expect(viewModel.characters.map(\.profile.name) == ["Visible Character"])
+
+    await viewModel.importPayload(Data("not json".utf8))
+
+    #expect(viewModel.characters.map(\.profile.name) == ["Visible Character"])
+    #expect(viewModel.errorMessage != nil)
+}
 #endif
+
+@Test func updateOperationsThrowNotFoundForMissingCharacter() async throws {
+    let fileURL = uniqueTestFileURL("batch12-not-found-updates")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let missingID = UUID()
+
+    await expectNotFound {
+        _ = try await useCases.updateProfile(characterID: missingID, profile: Profile(name: "Missing"))
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateCharacteristics(characterID: missingID, characteristics: .empty)
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateResources(characterID: missingID, resources: .init())
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateSkills(characterID: missingID, skills: [])
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateNotes(characterID: missingID, notes: .init())
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateEquipment(characterID: missingID, equipment: .init())
+    }
+
+    await expectNotFound {
+        _ = try await useCases.updateSession(characterID: missingID, session: .init())
+    }
+}
 
 @Test func profileUpdatePersistsDataAndUpdatesTimestamp() async throws {
     let fileURL = uniqueTestFileURL("update-roundtrip")
@@ -893,6 +964,17 @@ private actor CompletionProbe {
 
     func isComplete() -> Bool {
         completed
+    }
+}
+
+private func expectNotFound(_ operation: () async throws -> Void) async {
+    do {
+        try await operation()
+        Issue.record("Expected CharacterRepositoryError.notFound")
+    } catch let error as CharacterRepositoryError {
+        #expect(error == .notFound)
+    } catch {
+        Issue.record("Expected CharacterRepositoryError.notFound, got \(error)")
     }
 }
 

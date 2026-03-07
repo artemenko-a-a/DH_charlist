@@ -85,6 +85,15 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func saveEquipment(characterID: UUID, equipment: EquipmentState) async {
+        do {
+            let updated = try await useCases.updateEquipment(characterID: characterID, equipment: equipment)
+            replaceInMemory(updated)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func deleteCharacter(id: UUID) async {
         do {
             try await useCases.deleteCharacter(id: id)
@@ -216,6 +225,9 @@ struct CharacterDetailScreen: View {
                     }
                     NavigationLink("Notes") {
                         NotesScreen(characterID: characterID, viewModel: viewModel)
+                    }
+                    NavigationLink("Equipment") {
+                        EquipmentScreen(characterID: characterID, viewModel: viewModel)
                     }
                 }
             }

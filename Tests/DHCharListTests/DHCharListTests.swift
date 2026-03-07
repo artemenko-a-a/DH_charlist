@@ -317,6 +317,162 @@ import Testing
     #expect(secondPersisted?.notes.notes.isEmpty == true)
 }
 
+@Test func addEditDeleteWeaponPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("equipment-weapons-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Equipment Weapons"))
+    let added = Weapon(
+        name: "Laspistol",
+        type: "Pistol",
+        range: "30m",
+        damage: "1d10+2 E",
+        penetration: "0",
+        clip: "30",
+        reload: "Half",
+        traits: "Reliable"
+    )
+
+    _ = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(weapons: [added])
+    )
+
+    var edited = added
+    edited.name = "Accatran Laspistol"
+    edited.penetration = "1"
+    edited.traits = "Reliable, Accurate"
+
+    let afterEdit = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(weapons: [edited])
+    )
+
+    let afterDelete = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(weapons: [])
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(afterEdit.equipment.weapons == [edited])
+    #expect(afterDelete.equipment.weapons.isEmpty)
+    #expect(persisted?.equipment.weapons.isEmpty == true)
+}
+
+@Test func addEditDeleteArmourPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("equipment-armour-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Equipment Armour"))
+    let added = Armour(location: "Body", armourPoints: 4)
+
+    _ = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(armour: [added])
+    )
+
+    var edited = added
+    edited.location = "Head"
+    edited.armourPoints = 5
+
+    let afterEdit = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(armour: [edited])
+    )
+
+    let afterDelete = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(armour: [])
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(afterEdit.equipment.armour == [edited])
+    #expect(afterDelete.equipment.armour.isEmpty)
+    #expect(persisted?.equipment.armour.isEmpty == true)
+}
+
+@Test func movementEditsPersistCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("equipment-movement")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Equipment Movement"))
+    let movement = MovementProfile(halfMove: 4, fullMove: 8, charge: 12, run: 24)
+
+    let updated = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(movement: movement)
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.equipment.movement == movement)
+    #expect(persisted?.equipment.movement == movement)
+}
+
+@Test func addEditDeleteInventoryItemPersistsCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("equipment-inventory-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Equipment Inventory"))
+    let added = InventoryItem(name: "Frag Grenade", quantity: 2, weight: 0.5)
+
+    _ = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(inventory: [added])
+    )
+
+    var edited = added
+    edited.name = "Krak Grenade"
+    edited.quantity = 1
+    edited.weight = 0.6
+
+    let afterEdit = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(inventory: [edited])
+    )
+
+    let afterDelete = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(inventory: [])
+    )
+
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(afterEdit.equipment.inventory == [edited])
+    #expect(afterDelete.equipment.inventory.isEmpty)
+    #expect(persisted?.equipment.inventory.isEmpty == true)
+}
+
+@Test func equipmentEditsRemainScopedToSelectedCharacter() async throws {
+    let fileURL = uniqueTestFileURL("equipment-scoping")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let first = try await useCases.createCharacter(profile: Profile(name: "First Equipment"))
+    let second = try await useCases.createCharacter(profile: Profile(name: "Second Equipment"))
+
+    let firstEquipment = EquipmentState(
+        weapons: [Weapon(name: "Autogun", type: "Basic", range: "100m", damage: "1d10+3 I", penetration: "0", clip: "30", reload: "Half", traits: "")],
+        armour: [Armour(location: "Body", armourPoints: 5)],
+        movement: MovementProfile(halfMove: 3, fullMove: 6, charge: 9, run: 18),
+        inventory: [InventoryItem(name: "Lho-sticks", quantity: 1, weight: 0.1)]
+    )
+
+    _ = try await useCases.updateEquipment(characterID: first.id, equipment: firstEquipment)
+
+    let firstPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: first.id)
+    let secondPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: second.id)
+
+    #expect(firstPersisted?.equipment == firstEquipment)
+    #expect(secondPersisted?.equipment == EquipmentState())
+}
+
 @Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
     let fileURL = uniqueTestFileURL("duplicate")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)

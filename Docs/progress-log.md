@@ -75,7 +75,10 @@
 - **blockers:** none.
 
 ### Batch 9 — Equipment UI depth
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** integrated Equipment into the accepted character detail flow with `characterID` + shared observable state; implemented editable sections for weapons/armour/movement/inventory; weapons/armour/inventory now support add/edit/delete with editor sheets and movement fields are fully editable; edits persist through `CharacterUseCases.updateEquipment` into the validated JSON-backed repository path; added persistence tests for weapons/armour/inventory CRUD, movement edits, and character-scoped equipment updates while preserving Batch 5–8 test coverage.
+- **blockers:** none.
 
 ### Batch 10 — Session mode UI depth
 - **status:** planned

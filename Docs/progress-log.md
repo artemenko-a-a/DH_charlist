@@ -111,3 +111,9 @@
 - **Batch 5 results:** character lifecycle slice remains valid on current branch (list load, create, open details, profile autosave edit path, duplicate, delete, and overview/state persistence behavior) with existing tests passing and no regression fix required.
 - **Batch 5 blockers:** none.
 
+### Batch 13 — Minimal iOS host-app readiness (package-to-simulator bridge)
+- **status:** partial (manual Xcode target creation pending)
+- **checks run:** repository structure inspection via Xcode project navigator tools, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** confirmed no runnable committed iOS app target/`.xcodeproj` exists; confirmed accepted package host entry path already exists and is public (`DHCharListAppShell(container: .live())` via `DHCharListIOSAppHost`); updated `README.md` with exact minimal simulator launch setup steps for a new host target.
+- **blockers:** creating/committing a new Xcode app target/project was not completed in this environment; one manual Xcode target creation step remains.
+

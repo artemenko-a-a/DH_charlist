@@ -46,3 +46,8 @@
    - **Reason:** `xcodebuild -list` is not a meaningful gate for a package-only repo and produced environment/tooling noise rather than package validation signal.
    - **Type:** Fact.
    - **Impact:** Validation remains focused on `swift test`/`swift build` outcomes and avoids irrelevant package-host mismatch checks.
+
+10. **Decision:** Keep the accepted package composition root and app shell as the host entry source (`DHCharListAppShell(container: .live())` / `DHCharListIOSAppHost`) and defer only iOS app-target creation to a manual Xcode step.
+   - **Reason:** Repository has no committed runnable iOS target/project; adding/committing a safe `.xcodeproj` target setup was not completed in this environment.
+   - **Type:** Fact.
+   - **Impact:** No feature behavior change; simulator launch becomes available immediately after creating one minimal iOS host target wired to the existing package entry path.

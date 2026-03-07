@@ -30,6 +30,30 @@ swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlis
 swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
 ```
 
+## Run on iOS simulator
+The package already exposes a host-compatible SwiftUI entry type: `DHCharListIOSAppHost`.
+It launches the accepted shell using the same composition root path (`DHCharListAppShell(container: .live())`).
+
+Minimal manual Xcode step still required (package-only repo has no committed app target):
+1. In Xcode, create an iOS App target/project and add local package dependency `DH_charlist` (`/Users/an.artemenko/repos/DH_charlist`).
+2. In the app target entry file, use the package host app:
+
+```swift
+import SwiftUI
+import DHCharList
+
+@main
+struct DHCharListHostApp: App {
+    var body: some Scene {
+        WindowGroup {
+            DHCharListAppShell(container: .live())
+        }
+    }
+}
+```
+
+After this step, run that app scheme on an iOS Simulator.
+
 ## Runtime blockers
 - SwiftData runtime validation is blocked in this environment.
 - Full simulator/UI runtime smoke execution is not validated in this environment.

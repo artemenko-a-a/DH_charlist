@@ -53,6 +53,63 @@ import Testing
     #expect(persisted?.profile == edited)
 }
 
+@Test func characteristicUpdatePersistsAndBonusReflectsEditedValues() async throws {
+    let fileURL = uniqueTestFileURL("characteristics-update")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Stats"))
+    let edited = CharacteristicSet(
+        weaponSkill: 47,
+        ballisticSkill: 31,
+        strength: 39,
+        toughness: 42,
+        agility: 28,
+        intelligence: 50,
+        perception: 33,
+        willpower: 44,
+        fellowship: 25
+    )
+
+    let updated = try await useCases.updateCharacteristics(characterID: created.id, characteristics: edited)
+    let reloadedRepository = JSONFileCharacterRepository(fileURL: fileURL)
+    let persisted = try await reloadedRepository.fetch(id: created.id)
+
+    #expect(updated.characteristics == edited)
+    #expect(updated.characteristics.bonus.weaponSkill == 4)
+    #expect(updated.characteristics.bonus.intelligence == 5)
+    #expect(updated.characteristics.bonus.fellowship == 2)
+    #expect(persisted?.characteristics == edited)
+}
+
+@Test func resourceUpdatePersistsAndExperienceAvailableReflectsEditedValues() async throws {
+    let fileURL = uniqueTestFileURL("resources-update")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Resources"))
+    let edited = ResourceState(
+        currentWounds: 9,
+        maxWounds: 13,
+        fatigue: 2,
+        corruption: 1,
+        insanity: 4,
+        currentFate: 2,
+        maxFate: 3,
+        experienceSpent: 650,
+        experienceTotal: 1000
+    )
+
+    let updated = try await useCases.updateResources(characterID: created.id, resources: edited)
+    let reloadedRepository = JSONFileCharacterRepository(fileURL: fileURL)
+    let persisted = try await reloadedRepository.fetch(id: created.id)
+
+    #expect(updated.resources == edited)
+    #expect(updated.resources.experienceAvailable == 350)
+    #expect(persisted?.resources == edited)
+    #expect(persisted?.resources.experienceAvailable == 350)
+}
+
 @Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
     let fileURL = uniqueTestFileURL("duplicate")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)

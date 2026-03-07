@@ -7,7 +7,11 @@ import SwiftUI
 public struct DHCharListIOSAppHost: App {
     private let container: AppContainer
 
-    public init(container: AppContainer = .live()) {
+    public init() {
+        self.container = .live()
+    }
+
+    public init(container: AppContainer) {
         self.container = container
     }
 

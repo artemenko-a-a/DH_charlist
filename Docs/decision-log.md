@@ -41,3 +41,8 @@
    - **Reason:** Actor re-entrancy across awaits can resume older tasks after a newer save has been registered.
    - **Type:** Fact.
    - **Impact:** Prevents newer pending saves from being dropped while preserving debounce/coalescing semantics.
+
+9. **Decision:** For this repository (Swift Package without `.xcodeproj`/`.xcworkspace`), validation for this batch uses SwiftPM commands with explicit writable build path and does not require `xcodebuild -list`.
+   - **Reason:** `xcodebuild -list` is not a meaningful gate for a package-only repo and produced environment/tooling noise rather than package validation signal.
+   - **Type:** Fact.
+   - **Impact:** Validation remains focused on `swift test`/`swift build` outcomes and avoids irrelevant package-host mismatch checks.

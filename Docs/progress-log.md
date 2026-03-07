@@ -45,13 +45,16 @@
 - **blockers:** iOS simulator/runtime validation blocked here (`xcodebuild` unavailable).
 
 ### Batch 5 corrective micro-pass — Fix autosave tracking race
-- **status:** blocked
-- **checks run:** `swift test`, `swift build`, `xcodebuild -list`
-- **results:** autosave cleanup is token-guarded; new tests cover pending tracking and per-character isolation.
-- **blockers:** `swift test`/`swift build` cannot write `.build` under sandbox; `xcodebuild -list` fails because the repo is a Swift package without an Xcode project/workspace, plus CoreSimulator/log access is blocked.
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** restored `SwiftUI.App` conformance by adding explicit `public init()` to `DHCharListIOSAppHost` while keeping container injection initializer; both required validation commands pass and autosave-focused tests pass.
+- **blockers:** none.
 
 ### Batch 6 — Characteristics/resources UI depth
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** implemented editable characteristics + resources screen in the accepted character detail flow using `characterID` + shared observable state; derived characteristic bonuses and `experienceAvailable` now render from live edited values; edits persist via use cases into the validated JSON-backed repository path; added tests covering characteristic/resource persistence and derived values.
+- **blockers:** none.
 
 ### Batch 7 — Skills UI depth
 - **status:** planned

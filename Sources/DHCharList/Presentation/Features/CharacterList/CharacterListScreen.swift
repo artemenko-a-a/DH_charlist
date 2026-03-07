@@ -49,6 +49,24 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func saveCharacteristics(characterID: UUID, characteristics: CharacteristicSet) async {
+        do {
+            let updated = try await useCases.updateCharacteristics(characterID: characterID, characteristics: characteristics)
+            replaceInMemory(updated)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func saveResources(characterID: UUID, resources: ResourceState) async {
+        do {
+            let updated = try await useCases.updateResources(characterID: characterID, resources: resources)
+            replaceInMemory(updated)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func deleteCharacter(id: UUID) async {
         do {
             try await useCases.deleteCharacter(id: id)
@@ -171,6 +189,9 @@ struct CharacterDetailScreen: View {
                 Section("Edit") {
                     NavigationLink("Edit Profile") {
                         ProfileScreen(characterID: characterID, viewModel: viewModel)
+                    }
+                    NavigationLink("Characteristics & Resources") {
+                        CharacteristicsScreen(characterID: characterID, viewModel: viewModel)
                     }
                 }
             }

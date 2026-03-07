@@ -21,25 +21,46 @@
 - **blockers:** none.
 
 ### Batch 3 — SwiftData persistence adapter
-- **status:** validated
+- **status:** blocked
 - **checks run:** `swift test`
-- **results:** availability-gated SwiftData adapter placeholder added; JSON file repository fully tested.
-- **blockers:** SwiftData runtime unavailable in this environment.
+- **results:** availability-gated SwiftData adapter placeholder exists; JSON file repository remains the validated local persistence path.
+- **blockers:** SwiftData runtime validation is not executable in this environment.
 
-### Batch 4 — App shell + navigation
+### Batch 4 — App shell + navigation foundation
 - **status:** validated
 - **checks run:** `swift test`
-- **results:** SwiftUI-gated tab shell and feature navigation stubs implemented.
+- **results:** SwiftUI-gated tab shell/navigation foundation exists and compiles in package context.
 - **blockers:** iOS simulator/UI runtime unavailable here.
 
-### Batches 5-11 — MVP feature surfaces
+### Batch 5 — Character vertical slice (list/create/open/edit/delete/duplicate)
 - **status:** validated
 - **checks run:** `swift test`
-- **results:** profile, characteristics/resources, skills, notes, equipment, session mode, import/export service contracts and screens are present in MVP shape.
-- **blockers:** detailed visual/UI acceptance requires Xcode + simulator/manual run.
+- **results:** end-to-end flow implemented on JSON repository: list load, create, open details, profile autosave edit, duplicate, delete.
+- **blockers:** iOS simulator/runtime validation blocked here (`xcodebuild` unavailable).
+
+### Batch 5 corrective pass — Architecture/state/autosave hardening
+- **status:** validated
+- **checks run:** `swift test`, `swift build`, `xcodebuild -list`
+- **results:** presentation no longer constructs infrastructure directly; detail/profile now use `characterID` + shared state source; autosave is debounced/coalesced; targeted tests pass.
+- **blockers:** iOS simulator/runtime validation blocked here (`xcodebuild` unavailable).
+
+### Batch 6 — Characteristics/resources UI depth
+- **status:** planned
+
+### Batch 7 — Skills UI depth
+- **status:** planned
+
+### Batch 8 — Notes/Talents/Traits UI depth
+- **status:** planned
+
+### Batch 9 — Equipment UI depth
+- **status:** planned
+
+### Batch 10 — Session mode UI depth
+- **status:** planned
+
+### Batch 11 — Import/export user-facing UI flow
+- **status:** planned
 
 ### Batch 12 — Hardening + accessibility + regressions + docs
-- **status:** validated
-- **checks run:** `swift test`
-- **results:** regression tests for derived values, CRUD, JSON roundtrip and schema failure completed; docs/checklist added.
-- **blockers:** accessibility audit requires runtime UI inspection.
+- **status:** planned

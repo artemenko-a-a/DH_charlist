@@ -4,14 +4,32 @@ import Foundation
 import SwiftUI
 
 @available(iOS 17, macOS 14, *)
+public struct DHCharListIOSAppHost: App {
+    private let container: AppContainer
+
+    public init(container: AppContainer = .live()) {
+        self.container = container
+    }
+
+    public var body: some Scene {
+        WindowGroup {
+            DHCharListAppShell(container: container)
+        }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
 public struct DHCharListAppShell: View {
     @State private var selectedTab: Int = 0
+    private let container: AppContainer
 
-    public init() {}
+    public init(container: AppContainer = .live()) {
+        self.container = container
+    }
 
     public var body: some View {
         TabView(selection: $selectedTab) {
-            CharacterListScreen()
+            CharacterListScreen(useCases: container.characterUseCases)
                 .tabItem { Label("Characters", systemImage: "person.3") }
                 .tag(0)
             SessionModeScreen()

@@ -1,15 +1,25 @@
 # DH_charlist
 
-MVP local-first foundation for a Dark Heresy II character manager (iPhone/iPad scope).
+Bootstrap/foundation repository for a Dark Heresy II character manager (iPhone/iPad-first scope).
 
-## Implemented in this iteration
-- Pure domain models for character sheet sections.
+> Current state: this is **not a completed MVP**. It now includes one validated vertical slice for character lifecycle on top of local JSON persistence.
+
+## Delivered so far
+- Pure domain models for character sheet sections (domain independent from SwiftUI/SwiftData).
 - Repository and import/export contracts.
-- Local JSON persistence adapter.
-- SwiftData adapter placeholder (availability-gated).
-- SwiftUI app shell/navigation stubs for MVP feature areas.
-- Tests for derived values, repository CRUD, JSON roundtrip, and schema mismatch.
-- Delivery docs: decision log, progress log, manual smoke checklist.
+- Local JSON persistence adapter (`JSONFileCharacterRepository`) as the validated local path.
+- SwiftData adapter placeholder (availability-gated; runtime validation blocked in this environment).
+- SwiftUI app-facing shell + composition root (`AppContainer`) + character vertical slice screens:
+  - character list with real repository loading;
+  - create character;
+  - open character details;
+  - edit profile with debounced/coalesced autosave;
+  - duplicate and delete actions;
+  - overview fields: name, home world, background, role, updatedAt.
+- Tests for derived values, import/export schema behavior, and character lifecycle persistence flows.
+
+## Not delivered yet
+- Full MVP feature depth across skills/combat/session/import-export UI and runtime accessibility validation.
 
 ## Run tests
 ```bash

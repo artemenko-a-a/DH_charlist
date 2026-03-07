@@ -1,71 +1,76 @@
 # DH_charlist
 
-Dark Heresy II character manager (iPhone/iPad-first scope) implemented as a Swift Package.
+Dark Heresy II character manager for iPhone/iPad.
 
-## Current validated state (through Batch 14)
-- Domain layer and use-cases are implemented and tested (domain remains independent of SwiftUI/SwiftData).
-- JSON-backed local persistence path is implemented and validated:
-  - `JSONFileCharacterRepository`
-  - `CharacterJSONImportExportService`
-- SwiftData local persistence adapter is implemented and runtime-validated in this environment:
-  - `SwiftDataCharacterRepository` supports `fetchAll`, `fetch(id:)`, `save(_)`, `delete(id:)`
-  - composition selects backend via `AppContainer.live(persistence:)`
-  - JSON remains the default backend; SwiftData is opt-in
-- App composition root is preserved (`AppContainer`) and presentation does not construct infrastructure directly.
-- Accepted user flows implemented on the JSON path:
-  - character lifecycle (list/create/open/edit profile autosave/duplicate/delete)
-  - characteristics/resources editing
-  - skills CRUD + derived target display
-  - notes sections CRUD + freeform notes
-  - equipment CRUD (weapons/armour/inventory) + movement edits
-  - session mode toggle + pinned checks + temporary modifiers
-  - import/export UI flow with repository replacement semantics on import
-- Batch 12 hardening completed:
-  - regression-focused coverage added for missing gaps
-  - accessibility labels/hints and VoiceOver row summaries added on major UI surfaces
-  - docs updated to match implemented and validated truth
-- Batch 13 runtime polish completed on accepted JSON-backed flow:
-  - safer error lifecycle in list/import/export/editing flow (stale error cleared after successful operations)
-  - character-detail missing-state now includes explicit return action to avoid dead-end navigation
-  - manual smoke checklist expanded for accessibility/dynamic-type/runtime coherence verification
+> Current state: the project is implemented and validated on two local persistence paths:
+> - JSON-backed path — validated and kept as the default/fallback path
+> - SwiftData path — validated and selectable through composition/bootstrap
 
-## Validation commands used
+## Implemented and validated
+
+The project currently includes:
+
+- character lifecycle flow:
+  - list characters
+  - create
+  - open details
+  - edit profile with autosave
+  - duplicate
+  - delete
+- characteristics and resources editing
+- skills editing
+- notes / talents / traits / mutations / disorders / psychic powers / special abilities editing
+- equipment editing:
+  - weapons
+  - armour
+  - movement
+  - inventory
+- session mode editing
+- user-facing JSON import/export
+- runtime host app bridge for simulator launch via `DHCharListHost`
+- two validated local persistence paths:
+  - JSON repository
+  - SwiftData repository
+
+## Persistence modes
+
+### Default / fallback
+The default local persistence path is JSON-backed.
+
+### SwiftData
+SwiftData is also implemented and validated and can be selected through composition:
+
+- `AppContainer.live(persistence: .swiftData)`
+
+The JSON-backed path remains available as the conservative fallback.
+
+## How to run tests
+
 ```bash
 swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
+```
+How to build the package
+```bash
 swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
 ```
+How to run in simulator
 
-## Run on iOS simulator
-The package already exposes a host-compatible SwiftUI entry type: `DHCharListIOSAppHost`.
-It launches the accepted shell using the same composition root path (`DHCharListAppShell(container: .live())`).
+Open DHCharListHost.xcodeproj in Xcode, choose the DHCharListHost scheme, select an iOS simulator, and run the app.
 
-Minimal manual Xcode step still required (package-only repo has no committed app target):
-1. In Xcode, create an iOS App target/project and add local package dependency `DH_charlist` (`/Users/an.artemenko/repos/DH_charlist`).
-2. In the app target entry file, use the package host app:
+The host app launches the accepted package UI and is the intended simulator/runtime entry point.
 
-```swift
-import SwiftUI
-import DHCharList
+Current architectural state
+    •    Domain remains independent from SwiftUI and SwiftData.
+    •    Presentation does not construct infrastructure directly.
+    •    Composition/bootstrap chooses the persistence implementation.
+    •    JSON-backed path is the default validated runtime-safe path.
+    •    SwiftData path is implemented as a validated alternative.
 
-@main
-struct DHCharListHostApp: App {
-    var body: some Scene {
-        WindowGroup {
-            DHCharListAppShell(container: .live())
-        }
-    }
-}
-```
+Notes
 
-After this step, run that app scheme on an iOS Simulator.
+This repository was delivered in controlled batches with validation and recovery passes.
+Historical delivery details and batch-by-batch status are tracked in:
+    •    Docs/progress-log.md
+    •    Docs/decision-log.md
+    •    Docs/manual-smoke-checklist.md
 
-To opt into SwiftData backend for host validation, switch composition to:
-
-```swift
-DHCharListAppShell(container: .live(persistence: .swiftData))
-```
-
-## Runtime blockers
-- Full simulator/UI runtime smoke execution is not validated in this environment.
-
-See [Docs/manual-smoke-checklist.md](/Users/an.artemenko/repos/DH_charlist/Docs/manual-smoke-checklist.md) for the exact human-run simulator checks.

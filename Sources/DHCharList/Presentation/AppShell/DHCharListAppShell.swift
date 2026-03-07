@@ -33,7 +33,10 @@ public struct DHCharListAppShell: View {
 
     public var body: some View {
         TabView(selection: $selectedTab) {
-            CharacterListScreen(useCases: container.characterUseCases)
+            CharacterListScreen(
+                useCases: container.characterUseCases,
+                importExportService: container.importExportService
+            )
                 .tabItem { Label("Characters", systemImage: "person.3") }
                 .tag(0)
             SessionModeScreen()

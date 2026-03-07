@@ -33,6 +33,83 @@ import Testing
     }
 }
 
+@Test func useCasesExportProducesValidJSONEnvelope() async throws {
+    let fileURL = uniqueTestFileURL("batch11-export")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Exporter"))
+    let data = try await useCases.exportCharacters(using: service)
+    let envelope = try JSONDecoder.iso8601.decode(CharacterExportEnvelope.self, from: data)
+
+    #expect(envelope.schemaVersion == CharacterJSONImportExportService.supportedSchema)
+    #expect(envelope.characters.count == 1)
+    #expect(envelope.characters.first?.profile.name == "Exporter")
+}
+
+@Test func useCasesImportRestoresCharacterDataCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("batch11-import")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+
+    let importedCharacter = Character(profile: Profile(name: "Imported Acolyte"))
+    let payload = try service.exportCharacters([importedCharacter])
+
+    let importedCount = try await useCases.importCharacters(from: payload, using: service)
+    let persisted = try await repository.fetchAll()
+
+    #expect(importedCount == 1)
+    #expect(persisted.count == 1)
+    #expect(persisted.first?.id == importedCharacter.id)
+    #expect(persisted.first?.profile.name == "Imported Acolyte")
+}
+
+@Test func useCasesImportRejectsUnsupportedSchemaVersion() async throws {
+    let fileURL = uniqueTestFileURL("batch11-schema")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let envelope = CharacterExportEnvelope(schemaVersion: 99, exportedAt: .now, characters: [])
+    let data = try JSONEncoder.iso8601.encode(envelope)
+    let service = CharacterJSONImportExportService()
+
+    do {
+        _ = try await useCases.importCharacters(from: data, using: service)
+        Issue.record("Expected import to throw for unsupported schema version")
+    } catch let error as CharacterRepositoryError {
+        switch error {
+        case .invalidData(let message):
+            #expect(message.contains("Unsupported schema version"))
+        default:
+            Issue.record("Expected invalidData error, got \(error)")
+        }
+    }
+}
+
+#if canImport(SwiftUI)
+@Test @MainActor func importRefreshesCharacterListViewModelSourceOfTruth() async throws {
+    let fileURL = uniqueTestFileURL("batch11-viewmodel-refresh")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Old Character"))
+    await viewModel.load()
+    #expect(viewModel.characters.map(\.profile.name) == ["Old Character"])
+
+    let replacement = Character(profile: Profile(name: "Imported Character"))
+    let payload = try service.exportCharacters([replacement])
+    await viewModel.importPayload(payload)
+
+    #expect(viewModel.characters.count == 1)
+    #expect(viewModel.characters.first?.profile.name == "Imported Character")
+    #expect(viewModel.characters.first?.id == replacement.id)
+}
+#endif
+
 @Test func profileUpdatePersistsDataAndUpdatesTimestamp() async throws {
     let fileURL = uniqueTestFileURL("update-roundtrip")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -816,6 +893,22 @@ private actor CompletionProbe {
 
     func isComplete() -> Bool {
         completed
+    }
+}
+
+private extension JSONEncoder {
+    static var iso8601: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+}
+
+private extension JSONDecoder {
+    static var iso8601: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
 }
 

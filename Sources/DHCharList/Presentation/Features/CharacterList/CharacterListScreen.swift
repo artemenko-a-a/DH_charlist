@@ -2,6 +2,29 @@ import Foundation
 
 #if canImport(SwiftUI)
 import SwiftUI
+import UniformTypeIdentifiers
+
+@available(iOS 17, macOS 14, *)
+private struct CharacterExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+
+    let data: Data
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CharacterRepositoryError.invalidData("Missing JSON file contents")
+        }
+        self.data = data
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
+    }
+}
 
 @available(iOS 17, macOS 14, *)
 @MainActor
@@ -12,12 +35,15 @@ final class CharacterListViewModel: ObservableObject {
 
     let autosaveCoordinator: ProfileAutosaveCoordinator
     private let useCases: CharacterUseCases
+    private let importExportService: any CharacterImportExportService
 
     init(
         useCases: CharacterUseCases,
+        importExportService: any CharacterImportExportService,
         autosaveCoordinator: ProfileAutosaveCoordinator = .init()
     ) {
         self.useCases = useCases
+        self.importExportService = importExportService
         self.autosaveCoordinator = autosaveCoordinator
     }
 
@@ -122,6 +148,24 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func exportPayload() async -> Data? {
+        do {
+            return try await useCases.exportCharacters(using: importExportService)
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    func importPayload(_ data: Data) async {
+        do {
+            _ = try await useCases.importCharacters(from: data, using: importExportService)
+            await load()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func character(by id: UUID) -> Character? {
         characters.first(where: { $0.id == id })
     }
@@ -139,9 +183,18 @@ final class CharacterListViewModel: ObservableObject {
 @available(iOS 17, macOS 14, *)
 public struct CharacterListScreen: View {
     @StateObject private var viewModel: CharacterListViewModel
+    @State private var isShowingImportPicker = false
+    @State private var isShowingExportPicker = false
+    @State private var exportDocument: CharacterExportDocument?
+    @State private var exportFileName = "dh_characters"
 
-    public init(useCases: CharacterUseCases) {
-        _viewModel = StateObject(wrappedValue: CharacterListViewModel(useCases: useCases))
+    public init(useCases: CharacterUseCases, importExportService: any CharacterImportExportService) {
+        _viewModel = StateObject(
+            wrappedValue: CharacterListViewModel(
+                useCases: useCases,
+                importExportService: importExportService
+            )
+        )
     }
 
     public var body: some View {
@@ -168,6 +221,23 @@ public struct CharacterListScreen: View {
             }
             .navigationTitle("Characters")
             .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Menu("Import/Export", systemImage: "arrow.up.arrow.down.circle") {
+                        Button("Import JSON", systemImage: "square.and.arrow.down") {
+                            isShowingImportPicker = true
+                        }
+
+                        Button("Export JSON", systemImage: "square.and.arrow.up") {
+                            Task {
+                                guard let data = await viewModel.exportPayload() else { return }
+                                exportDocument = CharacterExportDocument(data: data)
+                                exportFileName = exportFilename()
+                                isShowingExportPicker = true
+                            }
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         Task { await viewModel.createCharacter() }
@@ -182,12 +252,54 @@ public struct CharacterListScreen: View {
             .task {
                 await viewModel.load()
             }
+            .fileImporter(
+                isPresented: $isShowingImportPicker,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let sourceURL = urls.first else { return }
+                    let hadAccess = sourceURL.startAccessingSecurityScopedResource()
+                    defer {
+                        if hadAccess {
+                            sourceURL.stopAccessingSecurityScopedResource()
+                        }
+                    }
+
+                    do {
+                        let data = try Data(contentsOf: sourceURL)
+                        Task { await viewModel.importPayload(data) }
+                    } catch {
+                        viewModel.errorMessage = error.localizedDescription
+                    }
+                case .failure(let error):
+                    viewModel.errorMessage = error.localizedDescription
+                }
+            }
+            .fileExporter(
+                isPresented: $isShowingExportPicker,
+                document: exportDocument,
+                contentType: .json,
+                defaultFilename: exportFileName
+            ) { result in
+                if case .failure(let error) = result {
+                    viewModel.errorMessage = error.localizedDescription
+                }
+            }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil), actions: {
                 Button("OK") { viewModel.errorMessage = nil }
             }, message: {
                 Text(viewModel.errorMessage ?? "")
             })
         }
+    }
+
+    private func exportFilename() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let stamp = formatter.string(from: .now)
+        return "dh_characters_\(stamp)"
     }
 }
 

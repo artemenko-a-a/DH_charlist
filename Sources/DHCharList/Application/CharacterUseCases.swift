@@ -107,6 +107,28 @@ public struct CharacterUseCases: Sendable {
         try await repository.save(character)
         return character
     }
+
+    public func exportCharacters(using service: any CharacterImportExportService) async throws -> Data {
+        let characters = try await repository.fetchAll()
+        return try service.exportCharacters(characters)
+    }
+
+    @discardableResult
+    public func importCharacters(from data: Data, using service: any CharacterImportExportService) async throws -> Int {
+        let imported = try service.import(data)
+        let existing = try await repository.fetchAll()
+        let importedIDs = Set(imported.map(\.id))
+
+        for character in imported {
+            try await repository.save(character)
+        }
+
+        for character in existing where !importedIDs.contains(character.id) {
+            try await repository.delete(id: character.id)
+        }
+
+        return imported.count
+    }
 }
 
 public enum DerivedValueCalculator {

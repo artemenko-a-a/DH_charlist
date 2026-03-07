@@ -87,7 +87,10 @@
 - **blockers:** none.
 
 ### Batch 11 — Import/export user-facing UI flow
-- **status:** planned
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+- **results:** integrated user-facing Import/Export actions into the accepted character list flow via toolbar entry points; export now emits JSON payloads through `CharacterUseCases.exportCharacters(using:)` and the validated `CharacterJSONImportExportService`, surfaced with a platform file exporter; import now accepts JSON via platform file importer, validates schema through existing contracts, replaces persisted repository contents through `CharacterUseCases.importCharacters(from:using:)`, and refreshes shared visible list state in `CharacterListViewModel`; added tests for export envelope validity through use-cases, import restoration, unsupported schema rejection, and view-model source-of-truth refresh after import while preserving Batch 5–10 test coverage.
+- **blockers:** none.
 
 ### Batch 12 — Hardening + accessibility + regressions + docs
 - **status:** planned

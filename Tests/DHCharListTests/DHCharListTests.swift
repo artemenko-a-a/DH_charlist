@@ -33,18 +33,110 @@ import Testing
     }
 }
 
-@Test func jsonRepositoryCRUD() async throws {
-    let fileURL = URL(filePath: NSTemporaryDirectory()).appending(path: "dh_charlist_tests.json")
-    try? FileManager.default.removeItem(at: fileURL)
-
+@Test func profileUpdatePersistsDataAndUpdatesTimestamp() async throws {
+    let fileURL = uniqueTestFileURL("update-roundtrip")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
-    let character = Character(profile: Profile(name: "Acolyte"))
+    let useCases = CharacterUseCases(repository: repository)
 
-    try await repository.save(character)
-    let listed = try await repository.fetchAll()
-    #expect(listed.count == 1)
+    let created = try await useCases.createCharacter(profile: Profile(name: "Before"))
+    let originalUpdatedAt = created.updatedAt
+    try? await Task.sleep(nanoseconds: 5_000_000)
 
-    try await repository.delete(id: character.id)
-    let deleted = try await repository.fetchAll()
-    #expect(deleted.isEmpty)
+    let edited = Profile(name: "After", homeWorld: "Hive", background: "Adeptus", role: "Sage", aptitudes: ["Knowledge"], description: "Edited profile")
+    let updated = try await useCases.updateProfile(characterID: created.id, profile: edited)
+
+    let reloadedRepository = JSONFileCharacterRepository(fileURL: fileURL)
+    let persisted = try await reloadedRepository.fetch(id: created.id)
+
+    #expect(updated.profile == edited)
+    #expect(updated.updatedAt > originalUpdatedAt)
+    #expect(persisted?.profile == edited)
+    }
+
+@Test func duplicateKeepsOriginalIntactAndCreatesDistinctID() async throws {
+    let fileURL = uniqueTestFileURL("duplicate")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let originalProfile = Profile(name: "Original", homeWorld: "Void", background: "Outcast", role: "Assassin")
+    let created = try await useCases.createCharacter(profile: originalProfile)
+    let duplicated = try await useCases.duplicateCharacter(id: created.id)
+
+    let all = try await repository.fetchAll()
+    let originalStored = all.first(where: { $0.id == created.id })
+
+    #expect(all.count == 2)
+    #expect(duplicated.id != created.id)
+    #expect(duplicated.profile.name == "Original Copy")
+    #expect(originalStored?.profile == originalProfile)
+}
+
+@Test func deleteCharacterUseCaseRemovesRecord() async throws {
+    let fileURL = uniqueTestFileURL("delete")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Disposable"))
+    try await useCases.deleteCharacter(id: created.id)
+
+    let all = try await repository.fetchAll()
+    #expect(all.isEmpty)
+}
+
+@Test func profileAutosaveCoordinatorCoalescesPendingEdits() async throws {
+    let coordinator = ProfileAutosaveCoordinator(debounceNanoseconds: 50_000_000)
+    let characterID = UUID()
+    let recorder = SaveRecorder()
+
+    await coordinator.scheduleSave(characterID: characterID, profile: Profile(name: "A")) { id, profile in
+        await recorder.record(id: id, profile: profile)
+    }
+    try await Task.sleep(nanoseconds: 10_000_000)
+
+    await coordinator.scheduleSave(characterID: characterID, profile: Profile(name: "B")) { id, profile in
+        await recorder.record(id: id, profile: profile)
+    }
+
+    try await Task.sleep(nanoseconds: 120_000_000)
+
+    let saves = await recorder.saves()
+    #expect(saves.count == 1)
+    #expect(saves.first?.1.name == "B")
+}
+
+@Test func profileAutosaveCoordinatorKeepsIndependentCharacters() async throws {
+    let coordinator = ProfileAutosaveCoordinator(debounceNanoseconds: 30_000_000)
+    let recorder = SaveRecorder()
+    let firstID = UUID()
+    let secondID = UUID()
+
+    await coordinator.scheduleSave(characterID: firstID, profile: Profile(name: "First")) { id, profile in
+        await recorder.record(id: id, profile: profile)
+    }
+    await coordinator.scheduleSave(characterID: secondID, profile: Profile(name: "Second")) { id, profile in
+        await recorder.record(id: id, profile: profile)
+    }
+
+    try await Task.sleep(nanoseconds: 100_000_000)
+
+    let saves = await recorder.saves()
+    let ids = Set(saves.map { $0.0 })
+    #expect(ids == Set([firstID, secondID]))
+}
+
+private actor SaveRecorder {
+    private var stored: [(UUID, Profile)] = []
+
+    func record(id: UUID, profile: Profile) {
+        stored.append((id, profile))
+    }
+
+    func saves() -> [(UUID, Profile)] {
+        stored
+    }
+}
+
+private func uniqueTestFileURL(_ suffix: String) -> URL {
+    URL(filePath: NSTemporaryDirectory())
+        .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
 }

@@ -32,7 +32,7 @@ struct CharacteristicsScreen: View {
                 characteristicRow("Willpower", value: $characteristics.willpower, bonus: characteristics.bonus.willpower)
                 characteristicRow("Fellowship", value: $characteristics.fellowship, bonus: characteristics.bonus.fellowship)
             } header: {
-                Text("Characteristics")
+                CogitatorSectionHeader("Characteristics", subtitle: "Primary Aptitude Matrix")
             } footer: {
                 Text("Bonuses are derived from characteristic tens digits.")
             }
@@ -47,17 +47,27 @@ struct CharacteristicsScreen: View {
                 intRow("Max Fate", value: $resources.maxFate)
                 intRow("Experience Spent", value: $resources.experienceSpent)
                 intRow("Experience Total", value: $resources.experienceTotal)
-                LabeledContent("Experience Available", value: String(resources.experienceAvailable))
+                HStack {
+                    Text("Experience Available")
+                    Spacer()
+                    CogitatorStatusChip(
+                        String(resources.experienceAvailable),
+                        level: experienceStatusLevel
+                    )
+                }
+                .accessibilityElement(children: .combine)
                     .accessibilityLabel("Experience Available")
                     .accessibilityValue(String(resources.experienceAvailable))
+                    .cogitatorPanelRow()
             } header: {
-                Text("Resources")
+                CogitatorSectionHeader("Resources", subtitle: "Survival and Advancement Ledger")
             } footer: {
                 Text("Experience Available updates from total minus spent.")
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorScreenChrome()
         .navigationTitle("Characteristics")
         .onAppear {
             if let character = viewModel.character(by: characterID) {
@@ -90,12 +100,10 @@ struct CharacteristicsScreen: View {
 #if os(iOS)
                 .keyboardType(.numberPad)
 #endif
-            Text("B: \(bonus)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(width: 40, alignment: .trailing)
+            CogitatorStatusChip("B: \(bonus)", level: .nominal)
                 .accessibilityHidden(true)
         }
+        .cogitatorPanelRow()
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title), bonus \(bonus)")
     }
@@ -114,6 +122,20 @@ struct CharacteristicsScreen: View {
                 .keyboardType(.numberPad)
 #endif
         }
+        .cogitatorPanelRow()
+    }
+
+    private var experienceStatusLevel: CogitatorStatusLevel {
+        if resources.experienceAvailable < 0 {
+            return .critical
+        }
+        if resources.experienceAvailable == 0 {
+            return .warning
+        }
+        if resources.experienceAvailable <= 100 {
+            return .caution
+        }
+        return .nominal
     }
 }
 #endif

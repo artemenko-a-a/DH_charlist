@@ -257,6 +257,7 @@ public struct CharacterListScreen: View {
             }
             .formContentWidth()
             .platformInsetGroupedListStyle()
+            .cogitatorScreenChrome()
             .navigationTitle("Characters")
             .searchable(text: $searchText, prompt: "Search name, world, background, role")
             .toolbar {
@@ -379,7 +380,7 @@ struct CharacterRowView: View {
                 .font(.headline)
             Text(summaryLine)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CogitatorPalette.amber)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -416,12 +417,19 @@ struct CharacterDetailScreen: View {
     var body: some View {
         if let character = viewModel.character(by: characterID) {
             List {
-                Section("Overview") {
+                Section {
                     LabeledContent("Name", value: character.profile.name.isEmpty ? "—" : character.profile.name)
+                        .cogitatorPanelRow()
                     LabeledContent("Home world", value: character.profile.homeWorld.isEmpty ? "—" : character.profile.homeWorld)
+                        .cogitatorPanelRow()
                     LabeledContent("Background", value: character.profile.background.isEmpty ? "—" : character.profile.background)
+                        .cogitatorPanelRow()
                     LabeledContent("Role", value: character.profile.role.isEmpty ? "—" : character.profile.role)
+                        .cogitatorPanelRow()
                     LabeledContent("Updated", value: character.updatedAt.formatted(date: .abbreviated, time: .shortened))
+                        .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Overview", subtitle: "Dossier Snapshot")
                 }
 
                 Section {
@@ -434,6 +442,7 @@ struct CharacterDetailScreen: View {
                             systemImage: "person.text.rectangle"
                         )
                     }
+                    .cogitatorPanelRow()
                     NavigationLink {
                         CharacteristicsScreen(characterID: characterID, viewModel: viewModel)
                     } label: {
@@ -443,6 +452,7 @@ struct CharacterDetailScreen: View {
                             systemImage: "chart.bar.doc.horizontal"
                         )
                     }
+                    .cogitatorPanelRow()
                     NavigationLink {
                         SkillsScreen(characterID: characterID, viewModel: viewModel)
                     } label: {
@@ -452,6 +462,7 @@ struct CharacterDetailScreen: View {
                             systemImage: "list.bullet.rectangle"
                         )
                     }
+                    .cogitatorPanelRow()
                     NavigationLink {
                         NotesScreen(characterID: characterID, viewModel: viewModel)
                     } label: {
@@ -461,6 +472,7 @@ struct CharacterDetailScreen: View {
                             systemImage: "note.text"
                         )
                     }
+                    .cogitatorPanelRow()
                     NavigationLink {
                         EquipmentScreen(characterID: characterID, viewModel: viewModel)
                     } label: {
@@ -470,6 +482,7 @@ struct CharacterDetailScreen: View {
                             systemImage: "shippingbox"
                         )
                     }
+                    .cogitatorPanelRow()
                     NavigationLink {
                         SessionModeScreen(characterID: characterID, viewModel: viewModel)
                     } label: {
@@ -479,14 +492,16 @@ struct CharacterDetailScreen: View {
                             systemImage: "bolt.fill"
                         )
                     }
+                    .cogitatorPanelRow()
                 } header: {
-                    Text("Edit")
+                    CogitatorSectionHeader("Edit", subtitle: "Subsystem Access")
                 } footer: {
                     Text("Open each section to edit and save values automatically.")
                 }
             }
             .formContentWidth()
             .platformInsetGroupedListStyle()
+            .cogitatorScreenChrome()
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
         } else {
             ContentUnavailableView(
@@ -494,6 +509,7 @@ struct CharacterDetailScreen: View {
                 systemImage: "person.crop.circle.badge.exclamationmark",
                 description: Text("This character is no longer available.")
             )
+            .cogitatorScreenChrome()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Back to Characters") {
@@ -560,10 +576,11 @@ private struct CharacterSectionLinkRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: systemImage)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CogitatorPalette.brass)
                 .frame(width: 20)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
+                    .foregroundStyle(CogitatorPalette.textPrimary)
                 Text(summary)
                     .font(.caption)
                     .foregroundStyle(.secondary)

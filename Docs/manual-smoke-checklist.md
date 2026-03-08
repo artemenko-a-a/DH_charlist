@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted runtime-polished implementation through Batch 19.
+This checklist tracks the currently accepted runtime-polished implementation through Batch 20.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -61,6 +61,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
     - run the same major flows on an iPad-size simulator/device and verify forms/lists are centered with readable width
     - verify editor sheets (skills/notes/equipment/session) support cancel/save and feel stable on larger width
     - verify long row values wrap rather than clipping on notes/equipment/session rows
+19. Batch 20 visual theme sanity (Adeptus Mechanicus-inspired foundation):
+    - verify high-visibility screens (`Character` detail overview, `Characteristics & Resources`, `Equipment`, `Session Mode`) use the same palette and panel styling
+    - verify section headers are readable and consistent (technical/dossier tone without obscuring plain language)
+    - verify status chips (bonuses, AP, XP available, temporary modifiers) remain legible in Light/Dark appearance and at larger Dynamic Type sizes
+    - verify row background styling does not reduce swipe/edit affordances and does not obscure list separators/context
+    - verify editor sheets (equipment/session) retain clear data-entry readability with themed background/chrome
 
 Latest local validation status (2026-03-08):
 - Host app compiles successfully in Xcode (`BuildProject`).

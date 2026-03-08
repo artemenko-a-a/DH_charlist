@@ -29,6 +29,7 @@ struct EquipmentScreen: View {
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorScreenChrome()
         .navigationTitle("Equipment")
         .searchable(text: $searchText, prompt: "Search weapons, armour, inventory")
         .toolbar {
@@ -96,9 +97,11 @@ struct EquipmentScreen: View {
             if equipment.weapons.isEmpty {
                 Text("No weapons yet")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else if filteredWeapons.isEmpty {
                 Text("No matching weapons")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else {
                 ForEach(filteredWeapons) { weapon in
                     Button {
@@ -107,6 +110,7 @@ struct EquipmentScreen: View {
                         WeaponRowView(weapon: weapon)
                     }
                     .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                 }
                 .onDelete(perform: deleteFilteredWeapons)
             }
@@ -116,9 +120,10 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Weapon", systemImage: "plus")
             }
+            .cogitatorPanelRow()
             .accessibilityLabel("Add Weapon")
         } header: {
-            Text(weaponsSectionTitle)
+            CogitatorSectionHeader(weaponsSectionTitle, subtitle: "Ordnance Registry")
         } footer: {
             Text("Tap a weapon to edit it. Swipe left to delete.")
         }
@@ -130,9 +135,11 @@ struct EquipmentScreen: View {
             if equipment.armour.isEmpty {
                 Text("No armour entries yet")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else if filteredArmour.isEmpty {
                 Text("No matching armour")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else {
                 ForEach(filteredArmour) { armour in
                     Button {
@@ -141,11 +148,11 @@ struct EquipmentScreen: View {
                         HStack {
                             Text(armour.location.isEmpty ? "Unnamed Location" : armour.location)
                             Spacer()
-                            Text("AP \(armour.armourPoints)")
-                                .foregroundStyle(.secondary)
+                            CogitatorStatusChip("AP \(armour.armourPoints)", level: .caution)
                         }
                     }
                     .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                     .accessibilityLabel("\(armour.location.isEmpty ? "Unnamed Location" : armour.location), armour points \(armour.armourPoints)")
                     .accessibilityHint("Double tap to edit armour.")
                 }
@@ -157,9 +164,10 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Armour", systemImage: "plus")
             }
+            .cogitatorPanelRow()
             .accessibilityLabel("Add Armour")
         } header: {
-            Text(armourSectionTitle)
+            CogitatorSectionHeader(armourSectionTitle, subtitle: "Protection Matrix")
         } footer: {
             Text("Use one entry per body location.")
         }
@@ -173,7 +181,7 @@ struct EquipmentScreen: View {
             intRow("Charge", value: $equipment.movement.charge)
             intRow("Run", value: $equipment.movement.run)
         } header: {
-            Text("Movement")
+            CogitatorSectionHeader("Movement", subtitle: "Locomotion Profile")
         } footer: {
             Text("Movement values are used during session checks and combat.")
         }
@@ -185,9 +193,11 @@ struct EquipmentScreen: View {
             if equipment.inventory.isEmpty {
                 Text("No inventory items yet")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else if filteredInventory.isEmpty {
                 Text("No matching inventory items")
                     .foregroundStyle(.secondary)
+                    .cogitatorPanelRow()
             } else {
                 ForEach(filteredInventory) { item in
                     Button {
@@ -198,15 +208,15 @@ struct EquipmentScreen: View {
                                 Text(item.name.isEmpty ? "Unnamed Item" : item.name)
                                 Text("Weight \(item.weight.formatted(.number.precision(.fractionLength(0...2))))")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(CogitatorPalette.amber)
                                     .lineLimit(1)
                             }
                             Spacer()
-                            Text("x\(item.quantity)")
-                                .foregroundStyle(.secondary)
+                            CogitatorStatusChip("x\(item.quantity)", level: .nominal)
                         }
                     }
                     .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(item.name.isEmpty ? "Unnamed Item" : item.name), quantity \(item.quantity), weight \(item.weight.formatted(.number.precision(.fractionLength(0...2))))")
                     .accessibilityHint("Double tap to edit inventory item.")
@@ -219,9 +229,10 @@ struct EquipmentScreen: View {
             } label: {
                 Label("Add Item", systemImage: "plus")
             }
+            .cogitatorPanelRow()
             .accessibilityLabel("Add Item")
         } header: {
-            Text(inventorySectionTitle)
+            CogitatorSectionHeader(inventorySectionTitle, subtitle: "Field Inventory Ledger")
         } footer: {
             Text("Tap an item to edit quantity/weight. Swipe left to delete.")
         }
@@ -241,6 +252,7 @@ struct EquipmentScreen: View {
                 .keyboardType(.numberPad)
 #endif
         }
+        .cogitatorPanelRow()
     }
 
     private func refreshFromSharedState() {
@@ -350,7 +362,7 @@ private struct WeaponRowView: View {
             if !detail.isEmpty {
                 Text(detail.joined(separator: " • "))
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.amber)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -405,22 +417,31 @@ private struct WeaponEditorView: View {
             Form {
                 TextField("Name", text: $draft.name)
                     .accessibilityLabel("Weapon Name")
+                    .cogitatorPanelRow()
                 TextField("Type", text: $draft.type)
                     .accessibilityLabel("Weapon Type")
+                    .cogitatorPanelRow()
                 TextField("Range", text: $draft.range)
                     .accessibilityLabel("Weapon Range")
+                    .cogitatorPanelRow()
                 TextField("Damage", text: $draft.damage)
                     .accessibilityLabel("Weapon Damage")
+                    .cogitatorPanelRow()
                 TextField("Penetration", text: $draft.penetration)
                     .accessibilityLabel("Weapon Penetration")
+                    .cogitatorPanelRow()
                 TextField("Clip", text: $draft.clip)
                     .accessibilityLabel("Weapon Clip")
+                    .cogitatorPanelRow()
                 TextField("Reload", text: $draft.reload)
                     .accessibilityLabel("Weapon Reload")
+                    .cogitatorPanelRow()
                 TextField("Traits", text: $draft.traits, axis: .vertical)
                     .lineLimit(2...4)
                     .accessibilityLabel("Weapon Traits")
+                    .cogitatorPanelRow()
             }
+            .cogitatorScreenChrome()
             .navigationTitle(draft.isNew ? "Add Weapon" : "Edit Weapon")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -506,12 +527,15 @@ private struct ArmourEditorView: View {
             Form {
                 TextField("Location", text: $draft.location)
                     .accessibilityLabel("Armour Location")
+                    .cogitatorPanelRow()
                 TextField("Armour Points", value: $draft.armourPoints, format: .number)
                     .accessibilityLabel("Armour Points")
+                    .cogitatorPanelRow()
 #if os(iOS)
                     .keyboardType(.numberPad)
 #endif
             }
+            .cogitatorScreenChrome()
             .navigationTitle(draft.isNew ? "Add Armour" : "Edit Armour")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -577,17 +601,21 @@ private struct InventoryItemEditorView: View {
             Form {
                 TextField("Name", text: $draft.name)
                     .accessibilityLabel("Item Name")
+                    .cogitatorPanelRow()
                 TextField("Quantity", value: $draft.quantity, format: .number)
                     .accessibilityLabel("Item Quantity")
+                    .cogitatorPanelRow()
 #if os(iOS)
                     .keyboardType(.numberPad)
 #endif
                 TextField("Weight", value: $draft.weight, format: .number)
                     .accessibilityLabel("Item Weight")
+                    .cogitatorPanelRow()
 #if os(iOS)
                     .keyboardType(.decimalPad)
 #endif
             }
+            .cogitatorScreenChrome()
             .navigationTitle(draft.isNew ? "Add Item" : "Edit Item")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

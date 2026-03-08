@@ -43,6 +43,7 @@ public struct DHCharListAppShell: View {
                 .tabItem { Label("Session", systemImage: "bolt.fill") }
                 .tag(1)
         }
+        .tint(CogitatorPalette.marsRed)
     }
 }
 #endif

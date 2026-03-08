@@ -35,6 +35,7 @@ public struct SessionModeScreen: View {
                     systemImage: "person.crop.circle.badge.exclamationmark",
                     description: Text("Open Session Mode from a character detail screen to edit pinned checks and temporary modifiers.")
                 )
+                .cogitatorScreenChrome()
             case .character:
                 sessionForm
             }
@@ -73,16 +74,20 @@ public struct SessionModeScreen: View {
     @ViewBuilder
     private var sessionForm: some View {
         Form {
-            Section("Session") {
+            Section {
                 Toggle("Session Mode Enabled", isOn: $session.modeEnabled)
                     .accessibilityLabel("Session Mode Enabled")
                     .accessibilityHint("Enable quick session-focused modifiers and checks.")
+                    .cogitatorPanelRow()
+            } header: {
+                CogitatorSectionHeader("Session", subtitle: "Liturgical Operations State")
             }
 
             Section {
                 if session.pinnedChecks.isEmpty {
                     Text("No pinned checks yet")
                         .foregroundStyle(.secondary)
+                        .cogitatorPanelRow()
                 } else {
                     ForEach(Array(session.pinnedChecks.enumerated()), id: \.offset) { index, check in
                         Button {
@@ -91,6 +96,7 @@ public struct SessionModeScreen: View {
                             Text(check)
                         }
                         .buttonStyle(.plain)
+                        .cogitatorPanelRow()
                         .accessibilityLabel("Pinned Check: \(check)")
                         .accessibilityHint("Double tap to edit pinned check.")
                     }
@@ -102,9 +108,10 @@ public struct SessionModeScreen: View {
                 } label: {
                     Label("Add Pinned Check", systemImage: "plus")
                 }
+                .cogitatorPanelRow()
                 .accessibilityLabel("Add Pinned Check")
             } header: {
-                Text("Pinned Checks")
+                CogitatorSectionHeader("Pinned Checks", subtitle: "Rapid Invocation References")
             } footer: {
                 Text("Tap a row to edit. Swipe left to remove.")
             }
@@ -113,6 +120,7 @@ public struct SessionModeScreen: View {
                 if sortedTemporaryModifiers.isEmpty {
                     Text("No temporary modifiers yet")
                         .foregroundStyle(.secondary)
+                        .cogitatorPanelRow()
                 } else {
                     ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
                         Button {
@@ -123,11 +131,14 @@ public struct SessionModeScreen: View {
                                     .lineLimit(2)
                                     .fixedSize(horizontal: false, vertical: true)
                                 Spacer()
-                                Text(value >= 0 ? "+\(value)" : "\(value)")
-                                    .foregroundStyle(.secondary)
+                                CogitatorStatusChip(
+                                    value >= 0 ? "+\(value)" : "\(value)",
+                                    level: modifierStatusLevel(value)
+                                )
                             }
                         }
                         .buttonStyle(.plain)
+                        .cogitatorPanelRow()
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("Temporary Modifier: \(key), \(value >= 0 ? "+" : "")\(value)")
                         .accessibilityHint("Double tap to edit temporary modifier.")
@@ -140,15 +151,17 @@ public struct SessionModeScreen: View {
                 } label: {
                     Label("Add Temporary Modifier", systemImage: "plus")
                 }
+                .cogitatorPanelRow()
                 .accessibilityLabel("Add Temporary Modifier")
             } header: {
-                Text("Temporary Modifiers")
+                CogitatorSectionHeader("Temporary Modifiers", subtitle: "Active Battlefield Conditions")
             } footer: {
                 Text("Use signed numbers such as +10 or -20.")
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorScreenChrome()
     }
 
     private var sortedTemporaryModifiers: [(String, Int)] {
@@ -206,6 +219,19 @@ public struct SessionModeScreen: View {
         }
         session.temporaryModifiers[cleanedKey] = value
     }
+
+    private func modifierStatusLevel(_ value: Int) -> CogitatorStatusLevel {
+        if value <= -30 {
+            return .critical
+        }
+        if value < 0 {
+            return .warning
+        }
+        if value == 0 {
+            return .caution
+        }
+        return .nominal
+    }
 }
 
 @available(iOS 17, macOS 14, *)
@@ -229,7 +255,9 @@ private struct PinnedCheckEditorView: View {
             Form {
                 TextField("Pinned Check", text: $draft.value)
                     .accessibilityLabel("Pinned Check")
+                    .cogitatorPanelRow()
             }
+            .cogitatorScreenChrome()
             .navigationTitle(draft.isNew ? "Add Check" : "Edit Check")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -287,12 +315,15 @@ private struct TemporaryModifierEditorView: View {
             Form {
                 TextField("Label", text: $draft.key)
                     .accessibilityLabel("Modifier Label")
+                    .cogitatorPanelRow()
                 TextField("Modifier", text: $draft.valueText)
                     .accessibilityLabel("Modifier Value")
+                    .cogitatorPanelRow()
 #if os(iOS)
                     .keyboardType(.numbersAndPunctuation)
 #endif
             }
+            .cogitatorScreenChrome()
             .navigationTitle(draft.isNew ? "Add Modifier" : "Edit Modifier")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-package:
+    name: SwiftPM build & test
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift build
+      - run: swift test
+
+  xcode-hostapp:
+    name: Xcode build & analyze (DHCharListHost)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode build
+        run: |
+          xcodebuild \
+            -project DHCharListHost/DHCharListHost.xcodeproj \
+            -scheme DHCharListHost \
+            -destination "generic/platform=iOS Simulator" \
+            -configuration Debug \
+            build
+      - name: Xcode analyze
+        run: |
+          xcodebuild \
+            -project DHCharListHost/DHCharListHost.xcodeproj \
+            -scheme DHCharListHost \
+            -destination "generic/platform=iOS Simulator" \
+            -configuration Debug \
+            analyze
+
+  ios-tests:
+    name: iOS simulator tests (DHCharListHost)
+    runs-on: macos-14
+    needs: xcode-hostapp
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode test
+        run: |
+          xcodebuild \
+            -project DHCharListHost/DHCharListHost.xcodeproj \
+            -scheme DHCharListHost \
+            -testPlan DHCharListHost \
+            -destination "platform=iOS Simulator,name=iPhone 15" \
+            -configuration Debug \
+            test

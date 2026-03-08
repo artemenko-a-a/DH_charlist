@@ -101,3 +101,14 @@ Latest local validation status (2026-03-08):
 - Host app compiles successfully in Xcode (`BuildProject`).
 - SwiftPM regression/build validation passes (`swift test`, `swift build`).
 - Simulator interaction could not be executed in this environment because `CoreSimulatorService` was unavailable; manual runtime execution should be recorded per run (pass/fail + notes).
+
+23. Batch 24 UI automation companion (not a replacement for manual acceptance):
+    - run canonical UI smoke suite: `./scripts/run_ui_smoke.sh`
+    - run canonical screenshot capture/export: `./scripts/run_ui_screenshots.sh`
+    - launch hooks used by automation:
+      - `-dh-uitesting`
+      - `-dh-ui-reset-data`
+      - `-dh-ui-seed-smoke`
+      - `-dh-ui-persistence-json` or `-dh-ui-persistence-swiftdata`
+    - expected screenshot export location: `DHCharListHost/artifacts/ui-screenshots/<timestamp>/attachments`
+    - continue to perform final visual/manual review using this checklist; automated screenshots are only a fast regression aid.

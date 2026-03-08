@@ -19,12 +19,20 @@
 			remoteGlobalIDString = 014343C32F5C68DC00553EFC;
 			remoteInfo = DHCharListHost;
 		};
+		B24000092F5E000100553EFC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 014343BC2F5C68DC00553EFC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 014343C32F5C68DC00553EFC;
+			remoteInfo = DHCharListHost;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		014343C42F5C68DC00553EFC /* DHCharListHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DHCharListHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		01B383642F5D6E3D0011018B /* DHCharListHost.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = DHCharListHost.xctestplan; sourceTree = "<group>"; };
+		01B383642F5D6E3D0011018B /* DHCharListHost.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = DHCharListHost.xctestplan; sourceTree = "<group>"; };
 		A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DHCharListHostTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B24000012F5E000100553EFC /* DHCharListHostUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DHCharListHostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -36,6 +44,11 @@
 		A14343E12F5D000100553EFC /* DHCharListHostTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DHCharListHostTests;
+			sourceTree = "<group>";
+		};
+		B24000022F5E000100553EFC /* DHCharListHostUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DHCharListHostUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -57,6 +70,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B24000062F5E000100553EFC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -66,6 +86,7 @@
 				01B383642F5D6E3D0011018B /* DHCharListHost.xctestplan */,
 				014343C62F5C68DC00553EFC /* DHCharListHost */,
 				A14343E12F5D000100553EFC /* DHCharListHostTests */,
+				B24000022F5E000100553EFC /* DHCharListHostUITests */,
 				014343C52F5C68DC00553EFC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,6 +96,7 @@
 			children = (
 				014343C42F5C68DC00553EFC /* DHCharListHost.app */,
 				A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */,
+				B24000012F5E000100553EFC /* DHCharListHostUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -129,6 +151,29 @@
 			productReference = A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		B24000032F5E000100553EFC /* DHCharListHostUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B24000042F5E000100553EFC /* Build configuration list for PBXNativeTarget "DHCharListHostUITests" */;
+			buildPhases = (
+				B24000052F5E000100553EFC /* Sources */,
+				B24000062F5E000100553EFC /* Frameworks */,
+				B24000072F5E000100553EFC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B24000082F5E000100553EFC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B24000022F5E000100553EFC /* DHCharListHostUITests */,
+			);
+			name = DHCharListHostUITests;
+			packageProductDependencies = (
+			);
+			productName = DHCharListHostUITests;
+			productReference = B24000012F5E000100553EFC /* DHCharListHostUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -141,6 +186,10 @@
 				TargetAttributes = {
 					014343C32F5C68DC00553EFC = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					B24000032F5E000100553EFC = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = 014343C32F5C68DC00553EFC;
 					};
 				};
 			};
@@ -163,6 +212,7 @@
 			targets = (
 				014343C32F5C68DC00553EFC /* DHCharListHost */,
 				A14343E92F5D000100553EFC /* DHCharListHostTests */,
+				B24000032F5E000100553EFC /* DHCharListHostUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -176,6 +226,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A14343E62F5D000100553EFC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B24000072F5E000100553EFC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -199,6 +256,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B24000052F5E000100553EFC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -206,6 +270,11 @@
 			isa = PBXTargetDependency;
 			target = 014343C32F5C68DC00553EFC /* DHCharListHost */;
 			targetProxy = A14343E82F5D000100553EFC /* PBXContainerItemProxy */;
+		};
+		B24000082F5E000100553EFC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 014343C32F5C68DC00553EFC /* DHCharListHost */;
+			targetProxy = B24000092F5E000100553EFC /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -338,6 +407,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "DH CharList";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -349,7 +419,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				INFOPLIST_KEY_CFBundleDisplayName = "DH CharList";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.DHCharListHost;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -371,6 +440,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "DH CharList";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,7 +452,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				INFOPLIST_KEY_CFBundleDisplayName = "DH CharList";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.DHCharListHost;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -449,6 +518,58 @@
 			};
 			name = Release;
 		};
+		B240000A2F5E000100553EFC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DHCharListHostUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DHCharListHost;
+			};
+			name = Debug;
+		};
+		B240000B2F5E000100553EFC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DHCharListHostUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DHCharListHost;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -475,6 +596,15 @@
 			buildConfigurations = (
 				A14343EB2F5D000100553EFC /* Debug */,
 				A14343EC2F5D000100553EFC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B24000042F5E000100553EFC /* Build configuration list for PBXNativeTarget "DHCharListHostUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B240000A2F5E000100553EFC /* Debug */,
+				B240000B2F5E000100553EFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

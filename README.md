@@ -202,3 +202,48 @@ Assets baseline:
 - Replace placeholder AppIcon assets with final branded assets meeting Apple requirements.
 - Create/configure App Store Connect app record, certificates/profiles/capabilities for your account.
 - Perform real device archive/export validation under your signing identity, then upload through Organizer.
+
+## UI smoke + screenshot workflow (Batch 24)
+
+Purpose:
+- fast regression signal on key accepted flows
+- reproducible screenshot capture from a deterministic seeded launch state
+- not a replacement for final manual visual acceptance
+
+Canonical UI smoke command:
+```bash
+./scripts/run_ui_smoke.sh
+```
+
+Canonical screenshot command:
+```bash
+./scripts/run_ui_screenshots.sh
+```
+
+Both commands:
+- run host-scheme tests against `DHCharListHost`
+- use deterministic launch flags (`-dh-uitesting -dh-ui-reset-data -dh-ui-seed-smoke -dh-ui-persistence-json`)
+- write result bundles under `DHCharListHost/artifacts/`
+
+Screenshot command additionally:
+- exports attachments from the generated `.xcresult` bundle via `xcresulttool`
+- writes images to `DHCharListHost/artifacts/ui-screenshots/<timestamp>/attachments`
+
+Destination override (for either script):
+```bash
+UI_DESTINATION="id=99E2D143-E43E-4CE7-9F72-D05AE2A7A51C" ./scripts/run_ui_smoke.sh
+UI_DESTINATION="id=99E2D143-E43E-4CE7-9F72-D05AE2A7A51C" ./scripts/run_ui_screenshots.sh
+```
+
+What UI smoke currently covers:
+- app launch + character list visibility
+- create blank character
+- open character detail
+- low-risk profile edit confirmation
+- navigation entry-point coverage for characteristics/resources, skills, notes, equipment, session mode, campaign log/history
+- templates manager entry point
+- import/export menu entry-point visibility
+
+What this does not guarantee:
+- exhaustive branch-level feature correctness
+- final visual/polish acceptance (manual checklist remains required)

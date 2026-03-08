@@ -23,6 +23,13 @@
         "identifier" : "A14343E92F5D000100553EFC",
         "name" : "DHCharListHostTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:DHCharListHost.xcodeproj",
+        "identifier" : "B24000032F5E000100553EFC",
+        "name" : "DHCharListHostUITests"
+      }
     }
   ],
   "version" : 1

@@ -35,6 +35,7 @@ struct CharacteristicsScreen: View {
                 CogitatorSectionHeader("Characteristics", subtitle: "Primary Aptitude Matrix")
             } footer: {
                 Text("Bonuses are derived from characteristic tens digits.")
+                    .foregroundStyle(CogitatorPalette.textSecondary)
             }
 
             Section {
@@ -63,6 +64,7 @@ struct CharacteristicsScreen: View {
                 CogitatorSectionHeader("Resources", subtitle: "Survival and Advancement Ledger")
             } footer: {
                 Text("Experience Available updates from total minus spent.")
+                    .foregroundStyle(CogitatorPalette.textSecondary)
             }
         }
         .formContentWidth()
@@ -91,10 +93,12 @@ struct CharacteristicsScreen: View {
     private func characteristicRow(_ title: String, value: Binding<Int>, bonus: Int) -> some View {
         HStack {
             Text(title)
+                .foregroundStyle(CogitatorPalette.textPrimary)
             Spacer()
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .foregroundStyle(CogitatorPalette.textPrimary)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
 #if os(iOS)
@@ -112,10 +116,12 @@ struct CharacteristicsScreen: View {
     private func intRow(_ title: String, value: Binding<Int>) -> some View {
         HStack {
             Text(title)
+                .foregroundStyle(CogitatorPalette.textPrimary)
             Spacer()
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .foregroundStyle(CogitatorPalette.textPrimary)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
 #if os(iOS)

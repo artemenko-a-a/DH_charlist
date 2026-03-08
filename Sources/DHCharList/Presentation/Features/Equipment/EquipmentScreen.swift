@@ -96,11 +96,11 @@ struct EquipmentScreen: View {
         Section {
             if equipment.weapons.isEmpty {
                 Text("No weapons yet")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else if filteredWeapons.isEmpty {
                 Text("No matching weapons")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else {
                 ForEach(filteredWeapons) { weapon in
@@ -126,6 +126,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(weaponsSectionTitle, subtitle: "Ordnance Registry")
         } footer: {
             Text("Tap a weapon to edit it. Swipe left to delete.")
+                .foregroundStyle(CogitatorPalette.textSecondary)
         }
     }
 
@@ -134,11 +135,11 @@ struct EquipmentScreen: View {
         Section {
             if equipment.armour.isEmpty {
                 Text("No armour entries yet")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else if filteredArmour.isEmpty {
                 Text("No matching armour")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else {
                 ForEach(filteredArmour) { armour in
@@ -170,6 +171,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(armourSectionTitle, subtitle: "Protection Matrix")
         } footer: {
             Text("Use one entry per body location.")
+                .foregroundStyle(CogitatorPalette.textSecondary)
         }
     }
 
@@ -184,6 +186,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader("Movement", subtitle: "Locomotion Profile")
         } footer: {
             Text("Movement values are used during session checks and combat.")
+                .foregroundStyle(CogitatorPalette.textSecondary)
         }
     }
 
@@ -192,11 +195,11 @@ struct EquipmentScreen: View {
         Section {
             if equipment.inventory.isEmpty {
                 Text("No inventory items yet")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else if filteredInventory.isEmpty {
                 Text("No matching inventory items")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .cogitatorPanelRow()
             } else {
                 ForEach(filteredInventory) { item in
@@ -235,6 +238,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(inventorySectionTitle, subtitle: "Field Inventory Ledger")
         } footer: {
             Text("Tap an item to edit quantity/weight. Swipe left to delete.")
+                .foregroundStyle(CogitatorPalette.textSecondary)
         }
     }
 
@@ -242,10 +246,12 @@ struct EquipmentScreen: View {
     private func intRow(_ title: String, value: Binding<Int>) -> some View {
         HStack {
             Text(title)
+                .foregroundStyle(CogitatorPalette.textPrimary)
             Spacer()
             TextField(title, value: value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 100)
+                .foregroundStyle(CogitatorPalette.textPrimary)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
 #if os(iOS)
@@ -349,6 +355,7 @@ private struct WeaponRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(weapon.name.isEmpty ? "Unnamed Weapon" : weapon.name)
                 .font(.headline)
+                .foregroundStyle(CogitatorPalette.textPrimary)
 
             let detail = [
                 weapon.type,
@@ -377,7 +384,7 @@ private struct WeaponRowView: View {
             if !extra.isEmpty {
                 Text(extra.joined(separator: " • "))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             }

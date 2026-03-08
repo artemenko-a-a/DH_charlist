@@ -35,6 +35,7 @@ public struct SessionModeScreen: View {
                     systemImage: "person.crop.circle.badge.exclamationmark",
                     description: Text("Open Session Mode from a character detail screen to edit pinned checks and temporary modifiers.")
                 )
+                .cogitatorEmptyStateStyle()
                 .cogitatorScreenChrome()
             case .character:
                 sessionForm
@@ -86,7 +87,7 @@ public struct SessionModeScreen: View {
             Section {
                 if session.pinnedChecks.isEmpty {
                     Text("No pinned checks yet")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CogitatorPalette.textSecondary)
                         .cogitatorPanelRow()
                 } else {
                     ForEach(Array(session.pinnedChecks.enumerated()), id: \.offset) { index, check in
@@ -114,12 +115,13 @@ public struct SessionModeScreen: View {
                 CogitatorSectionHeader("Pinned Checks", subtitle: "Rapid Invocation References")
             } footer: {
                 Text("Tap a row to edit. Swipe left to remove.")
+                    .foregroundStyle(CogitatorPalette.textSecondary)
             }
 
             Section {
                 if sortedTemporaryModifiers.isEmpty {
                     Text("No temporary modifiers yet")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CogitatorPalette.textSecondary)
                         .cogitatorPanelRow()
                 } else {
                     ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
@@ -157,6 +159,7 @@ public struct SessionModeScreen: View {
                 CogitatorSectionHeader("Temporary Modifiers", subtitle: "Active Battlefield Conditions")
             } footer: {
                 Text("Use signed numbers such as +10 or -20.")
+                    .foregroundStyle(CogitatorPalette.textSecondary)
             }
         }
         .formContentWidth()

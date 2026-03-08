@@ -223,13 +223,15 @@ public struct CharacterListScreen: View {
                             systemImage: "magnifyingglass",
                             description: Text("Try a different name, home world, background, or role.")
                         )
+                        .cogitatorEmptyStateStyle()
                     }
                 } else {
-                    Section(sectionTitle) {
+                    Section {
                         ForEach(filteredCharacters) { character in
                             NavigationLink(value: character.id) {
                                 CharacterRowView(character: character)
                             }
+                            .cogitatorPanelRow()
                             .swipeActions {
                                 Button("Duplicate") {
                                     Task { await viewModel.duplicateCharacter(id: character.id) }
@@ -243,6 +245,8 @@ public struct CharacterListScreen: View {
                             }
                             .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
                         }
+                    } header: {
+                        CogitatorSectionHeader(sectionTitle, subtitle: "Personnel Registry")
                     }
                 }
             }
@@ -253,6 +257,7 @@ public struct CharacterListScreen: View {
                         systemImage: "person.crop.circle.badge.plus",
                         description: Text("Create your first acolyte from the plus button, then open it to fill profile, skills, notes, equipment, and session data.")
                     )
+                    .cogitatorEmptyStateStyle()
                 }
             }
             .formContentWidth()
@@ -378,9 +383,10 @@ struct CharacterRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(character.profile.name.isEmpty ? "Unnamed" : character.profile.name)
                 .font(.headline)
+                .foregroundStyle(CogitatorPalette.textPrimary)
             Text(summaryLine)
                 .font(.subheadline)
-                .foregroundStyle(CogitatorPalette.amber)
+                .foregroundStyle(CogitatorPalette.textSecondary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -509,6 +515,7 @@ struct CharacterDetailScreen: View {
                 systemImage: "person.crop.circle.badge.exclamationmark",
                 description: Text("This character is no longer available.")
             )
+            .cogitatorEmptyStateStyle()
             .cogitatorScreenChrome()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -583,7 +590,7 @@ private struct CharacterSectionLinkRow: View {
                     .foregroundStyle(CogitatorPalette.textPrimary)
                 Text(summary)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }

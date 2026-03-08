@@ -1,0 +1,90 @@
+name: UI Tests (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_target:
+        description: "Which UI tests to run"
+        required: false
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - screenshots
+
+permissions:
+  contents: read
+
+jobs:
+  ui-tests:
+    name: UI ${{ github.event.inputs.test_target }} tests (DHCharListHost)
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select simulator destination
+        id: sim
+        run: |
+          DEST="$(xcrun simctl list devices available --json | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime in sorted(data.get('devices', {}).keys(), reverse=True):
+              if 'iOS' not in runtime:
+                  continue
+              for device in data['devices'][runtime]:
+                  if device.get('isAvailable') and 'iPhone' in device.get('name', ''):
+                      print('id=' + device['udid'])
+                      sys.exit(0)
+          print('platform=iOS Simulator,OS=latest')
+          " 2>/dev/null || echo "platform=iOS Simulator,OS=latest")"
+          echo "destination=$DEST" >> "$GITHUB_OUTPUT"
+          echo "Selected simulator destination: $DEST"
+
+      - name: Boot simulator
+        run: |
+          DEST="${{ steps.sim.outputs.destination }}"
+          if [[ "$DEST" == id=* ]]; then
+            UDID="${DEST#id=}"
+            xcrun simctl boot "$UDID" 2>/dev/null || true
+          fi
+
+      - name: Run UI smoke tests
+        if: github.event.inputs.test_target == 'smoke'
+        run: |
+          set -eo pipefail
+          DEST="${{ steps.sim.outputs.destination }}"
+          xcodebuild test \
+            -project DHCharListHost/DHCharListHost.xcodeproj \
+            -scheme DHCharListHost \
+            -destination "$DEST" \
+            -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testSmokeCoreFlowsAndEntryPoints \
+            -resultBundlePath /tmp/ui-smoke.xcresult 2>&1 | tee /tmp/ui-smoke.log
+
+      - name: Run UI screenshot tests
+        if: github.event.inputs.test_target == 'screenshots'
+        run: |
+          set -eo pipefail
+          DEST="${{ steps.sim.outputs.destination }}"
+          xcodebuild test \
+            -project DHCharListHost/DHCharListHost.xcodeproj \
+            -scheme DHCharListHost \
+            -destination "$DEST" \
+            -only-testing:DHCharListHostUITests/DHCharListHostScreenshotUITests/testCaptureSeededSmokeScreens \
+            -resultBundlePath /tmp/ui-screenshots.xcresult 2>&1 | tee /tmp/ui-screenshots.log
+
+      - name: Export screenshots
+        if: github.event.inputs.test_target == 'screenshots'
+        run: |
+          mkdir -p /tmp/screenshots
+          xcrun xcresulttool export attachments \
+            --path /tmp/ui-screenshots.xcresult \
+            --output-path /tmp/screenshots || true
+
+      - name: Upload screenshots
+        if: github.event.inputs.test_target == 'screenshots'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: /tmp/screenshots/
+          if-no-files-found: warn

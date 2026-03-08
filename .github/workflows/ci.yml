@@ -16,17 +16,24 @@ permissions:
 jobs:
   swift-package:
     name: SwiftPM build + test
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
-      - run: swift build
-      - run: swift test
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build (swift build)
+        run: swift build
+
+      - name: Test (swift test)
+        run: swift test
 
   xcode-hostapp:
     name: Xcode build + analyze (DHCharListHost)
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Xcode build
         run: |
           set -eo pipefail
@@ -36,6 +43,7 @@ jobs:
             -destination "generic/platform=iOS Simulator" \
             -configuration Debug \
             build
+
       - name: Xcode analyze
         run: |
           set -eo pipefail

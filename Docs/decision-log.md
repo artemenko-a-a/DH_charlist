@@ -71,3 +71,15 @@
    - **Reason:** Batch 17 requires practical CI-oriented protection against regression using validated local `.xcresult`/`xccov` artifacts, while current layer-level mapping is not yet robust enough for strict per-layer numeric gating.
    - **Type:** Fact.
    - **Impact:** Current gate now fails on meaningful regression (overall and tracked non-test target coverage drops) while keeping policy realistic and staged for later tightening when stronger layer-level signals are available.
+
+## 2026-03-08
+
+15. **Decision:** Remove committed personal signing team identifiers from `DHCharListHost` project settings and keep Automatic signing with neutral placeholder bundle identifiers (`com.example.*`).
+   - **Reason:** Batch 18 requires signing-readiness without hardcoding user/team-specific identities in repository state.
+   - **Type:** Fact.
+   - **Impact:** Project stays ready for local development and archive preparation, while real distribution signing remains an explicit per-developer/manual configuration step.
+
+16. **Decision:** Add temporary placeholder app icon assets (1024x1024 light/dark/tinted) in `AppIcon.appiconset` and document them as non-final branding.
+   - **Reason:** Final branded assets are not yet provided, but archive/distribution preparation should not be blocked by missing app icon files.
+   - **Type:** Fact.
+   - **Impact:** Asset catalog is structurally complete for current release-readiness work; final branding replacement remains a manual pre-distribution step.

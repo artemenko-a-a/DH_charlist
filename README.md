@@ -140,3 +140,52 @@ Historical delivery details and batch-by-batch status are tracked in:
     •    Docs/progress-log.md
     •    Docs/decision-log.md
     •    Docs/manual-smoke-checklist.md
+
+## Batch 18 release-readiness foundation
+
+### Host app build/archive workflow
+
+Host app project path:
+- `DHCharListHost/DHCharListHost.xcodeproj`
+
+Host app scheme:
+- `DHCharListHost` (shared)
+
+Build from Xcode:
+1. Open `DHCharListHost.xcodeproj`.
+2. Select scheme `DHCharListHost`.
+3. Choose an iOS simulator or a generic iOS device destination.
+4. Build with `Product > Build` (or run with `Product > Run` on simulator).
+
+Archive from Xcode:
+1. Select scheme `DHCharListHost`.
+2. Select destination `Any iOS Device (arm64)`.
+3. Run `Product > Archive`.
+4. Use Organizer to export/upload after signing is configured for your team.
+
+Current host metadata/signing baseline:
+- app bundle id: `com.example.DHCharListHost` (placeholder namespace)
+- test bundle id: `com.example.DHCharListHostTests`
+- display name: `DH CharList`
+- deployment target: iOS 17.6 (host + tests)
+- signing style: Automatic
+- no personal/team-specific `DEVELOPMENT_TEAM` is committed in project settings
+
+Assets baseline:
+- AppIcon catalog includes minimal placeholder 1024x1024 light/dark/tinted assets.
+- These are temporary release-readiness placeholders, not final branded assets.
+
+### What is ready now
+
+- Package build/test pipeline remains green.
+- `DHCharListHost` project and shared scheme build in Xcode.
+- Host app metadata, deployment settings, and signing structure are coherent for local development and future distribution configuration.
+- Placeholder app icon structure is present to avoid archive/distribution preparation blockers caused by missing icon assets.
+
+### What remains manual before TestFlight/App Store distribution
+
+- Set your real Apple Developer Team in Signing & Capabilities for `DHCharListHost`.
+- Replace placeholder bundle identifiers with your real production identifiers.
+- Replace placeholder AppIcon assets with final branded assets meeting Apple requirements.
+- Create/configure App Store Connect app record, certificates/profiles/capabilities for your account.
+- Perform real device archive/export validation under your signing identity, then upload through Organizer.

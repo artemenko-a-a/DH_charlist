@@ -177,3 +177,11 @@
 - SwiftData path is validated and available through composition/bootstrap selection.
 - Xcode-native code coverage execution is validated locally through the host scheme and `./scripts/run_xcode_coverage.sh`.
 - The remaining Codex/Xcode sandbox limitations are environment-specific and do not block local repository validation.
+
+## 2026-03-08
+
+### Batch 18 — Release-readiness foundation (host metadata/packaging/assets/signing/docs)
+- **status:** validated with documented manual distribution follow-up
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`, attempted `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Release -destination 'generic/platform=iOS' -archivePath /tmp/DHCharListHost-Batch18.xcarchive CODE_SIGNING_ALLOWED=NO archive`
+- **results:** host app metadata/settings were normalized for release-readiness without scope expansion: removed committed personal `DEVELOPMENT_TEAM` values, set coherent placeholder bundle identifiers (`com.example.DHCharListHost` / `com.example.DHCharListHostTests`), added generated display name (`DH CharList`), and kept deployment/signing defaults internally consistent; app icon catalog now includes minimal placeholder 1024x1024 light/dark/tinted assets plus mapped filenames for clean host target setup; scheme/build actions remain archive-capable and Xcode host build succeeds.
+- **blockers:** archive/distribution command-level validation is partially blocked in this environment by sandbox restrictions to Xcode/Simulator/DerivedData cache paths (CoreSimulatorService + cache/log write permissions), so real signed archive/export/TestFlight upload remains a manual step on a normal local Xcode environment.

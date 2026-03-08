@@ -29,6 +29,7 @@ struct EquipmentScreen: View {
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorFormRhythm()
         .cogitatorScreenChrome()
         .navigationTitle("Equipment")
         .searchable(text: $searchText, prompt: "Search weapons, armour, inventory")
@@ -126,7 +127,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(weaponsSectionTitle, subtitle: "Ordnance Registry")
         } footer: {
             Text("Tap a weapon to edit it. Swipe left to delete.")
-                .foregroundStyle(CogitatorPalette.textSecondary)
+                .cogitatorSupportingText()
         }
     }
 
@@ -171,7 +172,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(armourSectionTitle, subtitle: "Protection Matrix")
         } footer: {
             Text("Use one entry per body location.")
-                .foregroundStyle(CogitatorPalette.textSecondary)
+                .cogitatorSupportingText()
         }
     }
 
@@ -186,7 +187,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader("Movement", subtitle: "Locomotion Profile")
         } footer: {
             Text("Movement values are used during session checks and combat.")
-                .foregroundStyle(CogitatorPalette.textSecondary)
+                .cogitatorSupportingText()
         }
     }
 
@@ -238,7 +239,7 @@ struct EquipmentScreen: View {
             CogitatorSectionHeader(inventorySectionTitle, subtitle: "Field Inventory Ledger")
         } footer: {
             Text("Tap an item to edit quantity/weight. Swipe left to delete.")
-                .foregroundStyle(CogitatorPalette.textSecondary)
+                .cogitatorSupportingText()
         }
     }
 
@@ -449,6 +450,7 @@ private struct WeaponEditorView: View {
                     .cogitatorPanelRow()
             }
             .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Weapon" : "Edit Weapon")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -458,6 +460,8 @@ private struct WeaponEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                 }
             }
         }
@@ -543,6 +547,7 @@ private struct ArmourEditorView: View {
 #endif
             }
             .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Armour" : "Edit Armour")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -552,6 +557,8 @@ private struct ArmourEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                 }
             }
         }
@@ -623,6 +630,7 @@ private struct InventoryItemEditorView: View {
 #endif
             }
             .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Item" : "Edit Item")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -632,6 +640,8 @@ private struct InventoryItemEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                 }
             }
         }

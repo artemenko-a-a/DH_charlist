@@ -27,6 +27,8 @@ struct SkillsScreen: View {
         }
         .formContentWidth()
         .platformInsetGroupedListStyle()
+        .cogitatorFormRhythm()
+        .cogitatorScreenChrome()
         .navigationTitle("Skills")
         .searchable(text: $searchText, prompt: "Search skill, characteristic, training")
         .toolbar {
@@ -68,12 +70,14 @@ struct SkillsScreen: View {
                 systemImage: "list.bullet.rectangle",
                 description: Text("Add skills to track training level, specialisations, and derived targets.")
             )
+            .cogitatorEmptyStateStyle()
         } else if filteredSkills.isEmpty {
             ContentUnavailableView(
                 "No Matching Skills",
                 systemImage: "magnifyingglass",
                 description: Text("Try a different skill name, specialisation, characteristic, or training level.")
             )
+            .cogitatorEmptyStateStyle()
         } else {
             Section {
                 ForEach(filteredSkills) { skill in
@@ -83,12 +87,14 @@ struct SkillsScreen: View {
                         SkillRowView(skill: skill, target: target(for: skill))
                     }
                     .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                 }
                 .onDelete(perform: deleteFilteredSkills)
             } header: {
-                Text(skillsSectionTitle)
+                CogitatorSectionHeader(skillsSectionTitle, subtitle: "Training Registry")
             } footer: {
                 Text("Swipe left on a skill row to delete it.")
+                    .cogitatorSupportingText()
             }
         }
     }
@@ -144,19 +150,19 @@ private struct SkillRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(skill.name.isEmpty ? "Unnamed Skill" : skill.name)
-                    .font(.headline)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.textPrimary)
                 Spacer()
                 Text("Target \(target)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.amber)
             }
             Text(trainingSummary)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.callout)
+                .foregroundStyle(CogitatorPalette.textSecondary)
             if !skill.specialisations.isEmpty {
                 Text(skill.specialisations.joined(separator: ", "))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .cogitatorSupportingText()
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -199,33 +205,47 @@ private struct SkillEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Details") {
+                Section {
                     TextField("Skill name", text: $draft.name)
                         .accessibilityLabel("Skill Name")
+                        .cogitatorPanelRow()
                     Picker("Characteristic", selection: $draft.characteristic) {
                         ForEach(SkillCharacteristic.allCases, id: \.self) { characteristic in
                             Text(characteristic.label).tag(characteristic)
                         }
                     }
+                    .cogitatorPanelRow()
                     Picker("Training", selection: $draft.training) {
                         ForEach(SkillTrainingLevel.allCases, id: \.self) { training in
                             Text(training.label).tag(training)
                         }
                     }
+                    .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Details", subtitle: "Skill Identity and Training")
                 }
 
-                Section("Specialisations") {
+                Section {
                     TextField("Comma-separated", text: $draft.specialisationsText, axis: .vertical)
                         .lineLimit(2...4)
                         .accessibilityLabel("Specialisations")
                         .accessibilityHint("Separate items with commas, semicolons, or line breaks.")
+                        .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Specialisations", subtitle: "Optional Focus Areas")
                 }
 
-                Section("Derived") {
+                Section {
                     LabeledContent("Target", value: String(draft.target(with: characteristics)))
+                        .cogitatorPanelRow()
                     LabeledContent("Training Modifier", value: "\(draft.training.modifier >= 0 ? "+" : "")\(draft.training.modifier)")
+                        .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Derived", subtitle: "Computed Check Data")
                 }
             }
+            .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Skill" : "Edit Skill")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -235,6 +255,8 @@ private struct SkillEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }

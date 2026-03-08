@@ -80,21 +80,42 @@ public struct SessionModeScreen: View {
                     .accessibilityLabel("Session Mode Enabled")
                     .accessibilityHint("Enable quick session-focused modifiers and checks.")
                     .cogitatorPanelRow()
+                HStack {
+                    Text("Operational State")
+                    Spacer()
+                    CogitatorStatusChip(
+                        session.modeEnabled ? "ACTIVE" : "STANDBY",
+                        level: session.modeEnabled ? .nominal : .caution
+                    )
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Operational State")
+                .accessibilityValue(session.modeEnabled ? "Active" : "Standby")
+                .cogitatorPanelRow()
             } header: {
                 CogitatorSectionHeader("Session", subtitle: "Liturgical Operations State")
+            } footer: {
+                Text("Enable when running live checks and temporary combat/session adjustments.")
+                    .cogitatorSupportingText()
             }
 
             Section {
                 if session.pinnedChecks.isEmpty {
                     Text("No pinned checks yet")
-                        .foregroundStyle(CogitatorPalette.textSecondary)
+                        .cogitatorSupportingText()
                         .cogitatorPanelRow()
                 } else {
                     ForEach(Array(session.pinnedChecks.enumerated()), id: \.offset) { index, check in
                         Button {
                             pinnedCheckDraft = PinnedCheckDraft(index: index, value: check)
                         } label: {
-                            Text(check)
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: "pin.fill")
+                                    .foregroundStyle(CogitatorPalette.brass)
+                                    .frame(width: 14)
+                                Text(check)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                         }
                         .buttonStyle(.plain)
                         .cogitatorPanelRow()
@@ -115,13 +136,13 @@ public struct SessionModeScreen: View {
                 CogitatorSectionHeader("Pinned Checks", subtitle: "Rapid Invocation References")
             } footer: {
                 Text("Tap a row to edit. Swipe left to remove.")
-                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .cogitatorSupportingText()
             }
 
             Section {
                 if sortedTemporaryModifiers.isEmpty {
                     Text("No temporary modifiers yet")
-                        .foregroundStyle(CogitatorPalette.textSecondary)
+                        .cogitatorSupportingText()
                         .cogitatorPanelRow()
                 } else {
                     ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
@@ -159,12 +180,14 @@ public struct SessionModeScreen: View {
                 CogitatorSectionHeader("Temporary Modifiers", subtitle: "Active Battlefield Conditions")
             } footer: {
                 Text("Use signed numbers such as +10 or -20.")
-                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .cogitatorSupportingText()
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorFormRhythm()
         .cogitatorScreenChrome()
+        .animation(.easeInOut(duration: 0.18), value: session.modeEnabled)
     }
 
     private var sortedTemporaryModifiers: [(String, Int)] {
@@ -256,11 +279,17 @@ private struct PinnedCheckEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Pinned Check", text: $draft.value)
-                    .accessibilityLabel("Pinned Check")
-                    .cogitatorPanelRow()
+                Section {
+                    TextField("Pinned Check", text: $draft.value, axis: .vertical)
+                        .lineLimit(2...4)
+                        .accessibilityLabel("Pinned Check")
+                        .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Pinned Check", subtitle: "Quick Table Reference")
+                }
             }
             .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Check" : "Edit Check")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -270,6 +299,8 @@ private struct PinnedCheckEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
@@ -316,17 +347,25 @@ private struct TemporaryModifierEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Label", text: $draft.key)
-                    .accessibilityLabel("Modifier Label")
-                    .cogitatorPanelRow()
-                TextField("Modifier", text: $draft.valueText)
-                    .accessibilityLabel("Modifier Value")
-                    .cogitatorPanelRow()
+                Section {
+                    TextField("Label", text: $draft.key)
+                        .accessibilityLabel("Modifier Label")
+                        .cogitatorPanelRow()
+                    TextField("Modifier", text: $draft.valueText)
+                        .accessibilityLabel("Modifier Value")
+                        .cogitatorPanelRow()
 #if os(iOS)
-                    .keyboardType(.numbersAndPunctuation)
+                        .keyboardType(.numbersAndPunctuation)
 #endif
+                } header: {
+                    CogitatorSectionHeader("Temporary Modifier", subtitle: "Signed Numeric Adjustment")
+                } footer: {
+                    Text("Examples: +10, -20, 0")
+                        .cogitatorSupportingText()
+                }
             }
             .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add Modifier" : "Edit Modifier")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -336,6 +375,8 @@ private struct TemporaryModifierEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(!draft.isValid)
                 }
             }

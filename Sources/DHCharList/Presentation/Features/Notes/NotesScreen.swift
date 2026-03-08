@@ -32,14 +32,18 @@ struct NotesScreen: View {
                     .frame(minHeight: 140)
                     .accessibilityLabel("Freeform Notes")
                     .accessibilityHint("Use this area for longer unstructured session notes.")
+                    .cogitatorPanelRow()
             } header: {
-                Text("Freeform Notes")
+                CogitatorSectionHeader("Freeform Notes", subtitle: "Unstructured Field Record")
             } footer: {
                 Text("List sections are for short tagged entries. Use Freeform Notes for long text.")
+                    .cogitatorSupportingText()
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorFormRhythm()
+        .cogitatorScreenChrome()
         .navigationTitle("Notes")
         .searchable(text: $searchText, prompt: "Search list notes")
         .toolbar {
@@ -80,10 +84,12 @@ struct NotesScreen: View {
             let matches = NotesSearch.matches(notes: notes, section: section, query: searchText)
             if allEntries.isEmpty {
                 Text("No \(section.title.lowercased()) yet")
-                    .foregroundStyle(.secondary)
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
             } else if matches.isEmpty {
                 Text("No matching \(section.title.lowercased())")
-                    .foregroundStyle(.secondary)
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
             } else {
                 ForEach(matches, id: \.originalIndex) { match in
                     Button {
@@ -95,6 +101,7 @@ struct NotesScreen: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                     .accessibilityLabel("\(section.singularTitle): \(match.value)")
                     .accessibilityHint("Double tap to edit.")
                 }
@@ -108,11 +115,13 @@ struct NotesScreen: View {
             } label: {
                 Label("Add \(section.singularTitle)", systemImage: "plus")
             }
+            .cogitatorPanelRow()
             .accessibilityLabel("Add \(section.singularTitle)")
         } header: {
-            Text(sectionTitle(for: section))
+            CogitatorSectionHeader(sectionTitle(for: section), subtitle: "\(section.singularTitle) Entries")
         } footer: {
             Text("Tap an entry to edit it. Swipe left to delete.")
+                .cogitatorSupportingText()
         }
     }
 
@@ -204,7 +213,10 @@ private struct NoteEntryEditorView: View {
                     .lineLimit(2...4)
                     .accessibilityLabel(draft.section.singularTitle)
                     .accessibilityHint("Enter a short note for this section.")
+                    .cogitatorPanelRow()
             }
+            .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
             .navigationTitle(draft.isNew ? "Add \(draft.section.singularTitle)" : "Edit \(draft.section.singularTitle)")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -214,6 +226,8 @@ private struct NoteEntryEditorView: View {
                     Button("Save") {
                         onSave(draft)
                     }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(draft.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }

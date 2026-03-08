@@ -224,6 +224,7 @@ public struct CharacterListScreen: View {
                             description: Text("Try a different name, home world, background, or role.")
                         )
                         .cogitatorEmptyStateStyle()
+                        .cogitatorPanelRow()
                     }
                 } else {
                     Section {
@@ -262,6 +263,7 @@ public struct CharacterListScreen: View {
             }
             .formContentWidth()
             .platformInsetGroupedListStyle()
+            .cogitatorFormRhythm()
             .cogitatorScreenChrome()
             .navigationTitle("Characters")
             .searchable(text: $searchText, prompt: "Search name, world, background, role")
@@ -382,10 +384,10 @@ struct CharacterRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(character.profile.name.isEmpty ? "Unnamed" : character.profile.name)
-                .font(.headline)
+                .font(.body.weight(.semibold))
                 .foregroundStyle(CogitatorPalette.textPrimary)
             Text(summaryLine)
-                .font(.subheadline)
+                .font(.callout)
                 .foregroundStyle(CogitatorPalette.textSecondary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -503,10 +505,12 @@ struct CharacterDetailScreen: View {
                     CogitatorSectionHeader("Edit", subtitle: "Subsystem Access")
                 } footer: {
                     Text("Open each section to edit and save values automatically.")
+                        .cogitatorSupportingText()
                 }
             }
             .formContentWidth()
             .platformInsetGroupedListStyle()
+            .cogitatorFormRhythm()
             .cogitatorScreenChrome()
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
         } else {
@@ -587,10 +591,10 @@ private struct CharacterSectionLinkRow: View {
                 .frame(width: 20)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
+                    .font(.body.weight(.semibold))
                     .foregroundStyle(CogitatorPalette.textPrimary)
                 Text(summary)
-                    .font(.caption)
-                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .cogitatorSupportingText()
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }

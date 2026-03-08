@@ -35,7 +35,7 @@ struct CharacteristicsScreen: View {
                 CogitatorSectionHeader("Characteristics", subtitle: "Primary Aptitude Matrix")
             } footer: {
                 Text("Bonuses are derived from characteristic tens digits.")
-                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .cogitatorSupportingText()
             }
 
             Section {
@@ -64,11 +64,12 @@ struct CharacteristicsScreen: View {
                 CogitatorSectionHeader("Resources", subtitle: "Survival and Advancement Ledger")
             } footer: {
                 Text("Experience Available updates from total minus spent.")
-                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .cogitatorSupportingText()
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorFormRhythm()
         .cogitatorScreenChrome()
         .navigationTitle("Characteristics")
         .onAppear {

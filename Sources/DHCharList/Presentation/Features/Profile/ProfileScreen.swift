@@ -18,15 +18,21 @@ struct ProfileScreen: View {
 
     public var body: some View {
         Form {
-            Section("Identity") {
+            Section {
                 TextField("Name", text: $draft.name)
                     .accessibilityLabel("Character Name")
+                    .cogitatorPanelRow()
                 TextField("Home world", text: $draft.homeWorld)
                     .accessibilityLabel("Home World")
+                    .cogitatorPanelRow()
                 TextField("Background", text: $draft.background)
                     .accessibilityLabel("Background")
+                    .cogitatorPanelRow()
                 TextField("Role", text: $draft.role)
                     .accessibilityLabel("Role")
+                    .cogitatorPanelRow()
+            } header: {
+                CogitatorSectionHeader("Identity", subtitle: "Primary Dossier Fields")
             }
 
             Section {
@@ -34,14 +40,18 @@ struct ProfileScreen: View {
                     .lineLimit(3...6)
                     .accessibilityLabel("Description")
                     .accessibilityHint("Brief notes about origin, personality, and appearance.")
+                    .cogitatorPanelRow()
             } header: {
-                Text("Description")
+                CogitatorSectionHeader("Description", subtitle: "Narrative Notes")
             } footer: {
                 Text("Changes save automatically while you edit.")
+                    .cogitatorSupportingText()
             }
         }
         .formContentWidth()
         .formStyle(.grouped)
+        .cogitatorFormRhythm()
+        .cogitatorScreenChrome()
         .navigationTitle("Profile")
         .onAppear {
             if let latest = viewModel.character(by: characterID)?.profile {

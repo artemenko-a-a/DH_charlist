@@ -67,6 +67,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
     - verify status chips (bonuses, AP, XP available, temporary modifiers) remain legible in Light/Dark appearance and at larger Dynamic Type sizes
     - verify row background styling does not reduce swipe/edit affordances and does not obscure list separators/context
     - verify editor sheets (equipment/session) retain clear data-entry readability with themed background/chrome
+20. Batch 21 deep polish sanity (coherence pass):
+    - verify major screens (`Characters`, character detail, `Profile`, `Skills`, `Notes`, `Equipment`, `Session`) use consistent section rhythm and row density without clipped interactions
+    - verify helper/supporting text hierarchy is consistent and readable (section footers, summaries, empty rows) in Light/Dark and larger Dynamic Type
+    - verify existing editor sheets keep consistent Cancel/Save placement and that Save remains clearly primary when valid
+    - verify `Session` screen operational state readability (`ACTIVE`/`STANDBY`) and pinned/modifier editing clarity without behavior change
+    - verify iPad layout uses wider readable content width without creating narrow content islands or excessive line length
 
 Latest local validation status (2026-03-08):
 - Host app compiles successfully in Xcode (`BuildProject`).

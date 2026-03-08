@@ -1,0 +1,36 @@
+{
+  "status": "active",
+  "captured_at": "2026-03-08T16:10:00Z",
+  "source_scheme": "DHCharListHost",
+  "source_of_truth": "xcodebuild test result bundle + xcrun xccov",
+  "baseline": {
+    "overall_line_coverage_pct": 62.5,
+    "metrics_source": "DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
+    "targets": [
+      {
+        "name": "DHCharListHost.app",
+        "covered_lines": 8,
+        "executable_lines": 23,
+        "line_coverage_pct": 34.78
+      }
+    ]
+  },
+  "policy": {
+    "allowed_overall_drop_pp": 0.5,
+    "enforce_target_regression": true,
+    "allowed_target_drop_pp": 1.0,
+    "minimum_executable_lines_for_target_gate": 1,
+    "changed_code_expectation": "No new or modified Domain/Application/Infrastructure code should reduce line coverage for touched files unless explicitly justified in PR notes.",
+    "layer_expectations": {
+      "Domain": "Prefer strong meaningful coverage. New logic should include direct tests.",
+      "Application": "Prefer strong meaningful coverage for use-case and orchestration paths.",
+      "Infrastructure/Persistence": "Prefer strong coverage around repository behavior and serialization pathways.",
+      "Presentation/SwiftUI": "Coverage is tracked, but strict percentage gating is secondary to behavior-oriented tests and smoke checks."
+    }
+  },
+  "staged_adoption": [
+    "Stage 1: freeze measured baseline from real xccov artifacts.",
+    "Stage 2 (current): enforce overall non-regression (0.5pp budget) and conservative non-test target non-regression (1.0pp budget).",
+    "Stage 3: add robust per-layer policy after stable multi-run evidence and better layer-to-coverage mapping."
+  ]
+}

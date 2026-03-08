@@ -8,16 +8,34 @@
 
 /* Begin PBXBuildFile section */
 		014343D42F5C6A1D00553EFC /* DHCharList in Frameworks */ = {isa = PBXBuildFile; productRef = 014343D32F5C6A1D00553EFC /* DHCharList */; };
+		A14343E32F5D000100553EFC /* DHCharList in Frameworks */ = {isa = PBXBuildFile; productRef = 014343D32F5C6A1D00553EFC /* DHCharList */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A14343E82F5D000100553EFC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 014343BC2F5C68DC00553EFC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 014343C32F5C68DC00553EFC;
+			remoteInfo = DHCharListHost;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		014343C42F5C68DC00553EFC /* DHCharListHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DHCharListHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		01B383642F5D6E3D0011018B /* DHCharListHost.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = DHCharListHost.xctestplan; sourceTree = "<group>"; };
+		A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DHCharListHostTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		014343C62F5C68DC00553EFC /* DHCharListHost */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DHCharListHost;
+			sourceTree = "<group>";
+		};
+		A14343E12F5D000100553EFC /* DHCharListHostTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DHCharListHostTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,13 +49,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A14343E42F5D000100553EFC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A14343E32F5D000100553EFC /* DHCharList in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		014343BB2F5C68DC00553EFC = {
 			isa = PBXGroup;
 			children = (
+				01B383642F5D6E3D0011018B /* DHCharListHost.xctestplan */,
 				014343C62F5C68DC00553EFC /* DHCharListHost */,
+				A14343E12F5D000100553EFC /* DHCharListHostTests */,
 				014343C52F5C68DC00553EFC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				014343C42F5C68DC00553EFC /* DHCharListHost.app */,
+				A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -75,6 +104,30 @@
 			productName = DHCharListHost;
 			productReference = 014343C42F5C68DC00553EFC /* DHCharListHost.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A14343E92F5D000100553EFC /* DHCharListHostTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A14343EA2F5D000100553EFC /* Build configuration list for PBXNativeTarget "DHCharListHostTests" */;
+			buildPhases = (
+				A14343E52F5D000100553EFC /* Sources */,
+				A14343E42F5D000100553EFC /* Frameworks */,
+				A14343E62F5D000100553EFC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A14343E72F5D000100553EFC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A14343E12F5D000100553EFC /* DHCharListHostTests */,
+			);
+			name = DHCharListHostTests;
+			packageProductDependencies = (
+				014343D32F5C6A1D00553EFC /* DHCharList */,
+			);
+			productName = DHCharListHostTests;
+			productReference = A14343E22F5D000100553EFC /* DHCharListHostTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -109,12 +162,20 @@
 			projectRoot = "";
 			targets = (
 				014343C32F5C68DC00553EFC /* DHCharListHost */,
+				A14343E92F5D000100553EFC /* DHCharListHostTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		014343C22F5C68DC00553EFC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A14343E62F5D000100553EFC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -131,7 +192,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A14343E52F5D000100553EFC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A14343E72F5D000100553EFC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 014343C32F5C68DC00553EFC /* DHCharListHost */;
+			targetProxy = A14343E82F5D000100553EFC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		014343CD2F5C68DE00553EFC /* Debug */ = {
@@ -321,6 +397,62 @@
 			};
 			name = Release;
 		};
+		A14343EB2F5D000100553EFC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Y8QK9BKTCW;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = test.DHCharListHostTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DHCharListHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DHCharListHost";
+			};
+			name = Debug;
+		};
+		A14343EC2F5D000100553EFC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Y8QK9BKTCW;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = test.DHCharListHostTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DHCharListHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DHCharListHost";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -338,6 +470,15 @@
 			buildConfigurations = (
 				014343D02F5C68DE00553EFC /* Debug */,
 				014343D12F5C68DE00553EFC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A14343EA2F5D000100553EFC /* Build configuration list for PBXNativeTarget "DHCharListHostTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A14343EB2F5D000100553EFC /* Debug */,
+				A14343EC2F5D000100553EFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

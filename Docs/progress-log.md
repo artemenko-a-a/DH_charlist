@@ -96,7 +96,7 @@
 - **status:** validated
 - **checks run:** Xcode `XcodeRefreshCodeIssuesInFile` on edited screens/tests, Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
 - **results:** completed regression hardening across accepted JSON-backed flows by adding missing tests for not-found update failures, import replacement semantics, and post-import visible-state error handling in `CharacterListViewModel`; added accessibility labels/hints and VoiceOver-friendly combined summaries on major implemented UI surfaces (character list/detail, profile, characteristics/resources, skills, notes, equipment, session mode) without architecture or feature-scope expansion; refreshed `README.md` and `Docs/manual-smoke-checklist.md` to match current implemented/validated scope and runtime limits.
-- **blockers:** SwiftData runtime validation remains blocked in this environment; simulator/UI runtime smoke execution remains blocked here.
+- **blockers:** none for the historical Batch 12 code pass itself; at that time SwiftData runtime validation and simulator/UI runtime smoke had not yet been completed in this environment.
 ### Revalidation sweep — Batch 3 / Batch 4 / Batch 5 (post-Batch-12 state)
 - **Batch 3 status:** blocked
 - **Batch 3 checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
@@ -144,9 +144,31 @@
 - Batch 13 (host-app readiness) — validated
 - Batch 13 (runtime polish/accessibility) — validated
 - Batch 14 (real SwiftData adapter) — validated
+- Batch 15 (runtime UX polish + iPad refinement) — validated
+- Batch 16 (coverage pipeline, reporting, and policy) — validated
 
 ### Batch 15 — Runtime UX polish + iPad refinement
 - **status:** validated
 - **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, Xcode `BuildProject`, `xcrun simctl list devices available`
 - **results:** completed focused polish pass on existing accepted flows only: improved empty-state and inline guidance copy across character detail/features; added safer destructive confirmation for character delete; tightened row rendering for long/empty values; added practical accessibility hints/labels and Dynamic Type-friendly multiline behavior on major list/form/detail surfaces; standardized sheet presentation behavior for existing editors; applied iPad-oriented content width refinement to major list/form screens without changing navigation architecture; preserved accepted JSON-default + SwiftData-alternative behavior and current composition root patterns; added regression tests `exportSuccessClearsPreviousViewModelError` and `deleteSuccessClearsPreviousViewModelError`.
 - **blockers:** simulator runtime sanity execution was not available in this environment because `CoreSimulatorService` was unavailable (`Connection invalid/refused`), so manual runtime checklist execution remains required outside this run.
+
+### Batch 16 — Coverage pipeline, reporting, and policy
+- **status:** validated
+- **checks run:** Xcode `BuildProject`, `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, local `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=99E2D143-E43E-4CE7-9F72-D05AE2A7A51C' -enableCodeCoverage YES -resultBundlePath /tmp/DHCharListCoverage.xcresult`, `./scripts/run_xcode_coverage.sh`, `./scripts/check_coverage_policy.sh`
+- **results:** repository-local coverage pipeline is now validated end-to-end on the local machine: host-scheme Xcode test execution runs successfully with code coverage enabled, produces a real `.xcresult` bundle, and the repository scripts generate xccov text summary, JSON report, and machine metrics JSON artifacts. Coverage baseline/reporting workflow is now operational for local development.
+- **blockers:** none for the local development workflow; Codex/Xcode sandbox limitations remain environment-specific and do not block repository validation.
+
+# Current canonical blocker summary
+- There are no active product or coverage blockers in the current local development workflow.
+- The accepted app/runtime/persistence paths remain validated.
+- Coverage execution is validated locally through `DHCharListHost` and `./scripts/run_xcode_coverage.sh`.
+- Codex/Xcode sandbox limitations remain an environment-specific limitation, not a repository blocker.
+
+### Current canonical runtime / coverage summary
+- Host app bridge exists and launches in simulator via `DHCharListHost`.
+- JSON-backed path is validated and remains the default/fallback local persistence path.
+- SwiftData path is validated and available through composition/bootstrap selection.
+- Xcode-native code coverage execution is validated locally through the host scheme and `./scripts/run_xcode_coverage.sh`.
+- The remaining Codex/Xcode sandbox limitations are environment-specific and do not block local repository validation.
+

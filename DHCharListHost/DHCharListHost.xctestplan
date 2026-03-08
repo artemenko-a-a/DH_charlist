@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "31AE3C33-EB8F-4B90-92BE-10C6414A5810",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:DHCharListHost.xcodeproj",
+      "identifier" : "014343C32F5C68DC00553EFC",
+      "name" : "DHCharListHost"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:DHCharListHost.xcodeproj",
+        "identifier" : "A14343E92F5D000100553EFC",
+        "name" : "DHCharListHostTests"
+      }
+    }
+  ],
+  "version" : 1
+}

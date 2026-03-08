@@ -53,6 +53,51 @@ How to build the package
 ```bash
 swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
 ```
+## Coverage workflow (Batch 16)
+
+Coverage source of truth is Xcode result bundles plus `xccov` output.
+
+Canonical local coverage command:
+```bash
+./scripts/run_xcode_coverage.sh
+```
+
+What this command does:
+- runs `xcodebuild test` with code coverage enabled for the `DHCharListHost` scheme
+- writes a `.xcresult` bundle
+- exports human-readable coverage summary text via `xcrun xccov view --report`
+- exports machine-readable JSON coverage report via `xcrun xccov view --report --json`
+- writes normalized machine metrics JSON for automation
+
+Coverage artifact locations:
+- default per-run output: `DHCharListHost/artifacts/coverage/<timestamp>/`
+- latest run symlink: `DHCharListHost/artifacts/coverage/latest`
+- key files:
+  - `TestResults.xcresult`
+  - `xcodebuild-test.log`
+  - `xccov-summary.txt`
+  - `xccov-report.json`
+  - `coverage-metrics.json`
+- override output root when needed:
+```bash
+COVERAGE_OUTPUT_ROOT=/absolute/path ./scripts/run_xcode_coverage.sh
+```
+
+Policy + regression check:
+- baseline/policy file: `Docs/coverage-baseline.json`
+- check command:
+```bash
+./scripts/check_coverage_policy.sh
+```
+- current policy is baseline-first and non-vanity:
+  - freeze measured baseline first
+  - enforce no meaningful overall regression (default 0.5pp budget)
+  - prioritize stronger expectations on Domain/Application/Infrastructure logic than on SwiftUI layout-heavy code
+  - do not force high global vanity targets before stable baseline data exists
+
+Current environment note:
+- the active `DHCharListHost` scheme reports `0` attached tests in Xcode test-plan metadata, so coverage collection from that scheme requires test action coverage to be present in the selected scheme.
+
 How to run in simulator
 
 Open DHCharListHost.xcodeproj in Xcode, choose the DHCharListHost scheme, select an iOS simulator, and run the app.
@@ -73,4 +118,3 @@ Historical delivery details and batch-by-batch status are tracked in:
     •    Docs/progress-log.md
     •    Docs/decision-log.md
     •    Docs/manual-smoke-checklist.md
-

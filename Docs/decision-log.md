@@ -61,3 +61,8 @@
    - **Reason:** Preserve accepted JSON-backed behavior while enabling controlled SwiftData opt-in and safe fallback if SwiftData store initialization fails.
    - **Type:** Fact.
    - **Impact:** JSON path remains intact/validated; SwiftData path can be enabled for validation and rollout without forcing migration by default.
+
+13. **Decision:** Introduce a minimal Xcode unit-test target (`DHCharListHostTests`) and bind it to the shared `DHCharListHost` scheme test action to unblock host-scheme coverage execution.
+   - **Reason:** Batch 16 required host-scheme result-bundle-based coverage, but `DHCharListHost` previously had no attached tests and `xcodebuild test` exited with scheme test-action configuration errors.
+   - **Type:** Fact.
+   - **Impact:** Host scheme is now coverage-capable from a scheme/test-attachment perspective (`GetTestList` reports enabled tests), while existing SwiftPM/package tests remain intact and unchanged.

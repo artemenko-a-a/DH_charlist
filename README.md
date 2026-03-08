@@ -53,7 +53,7 @@ How to build the package
 ```bash
 swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
 ```
-## Coverage workflow (Batch 16)
+## Coverage workflow (Batch 17)
 
 Coverage source of truth is Xcode result bundles plus `xccov` output.
 
@@ -85,15 +85,37 @@ COVERAGE_OUTPUT_ROOT=/absolute/path ./scripts/run_xcode_coverage.sh
 
 Policy + regression check:
 - baseline/policy file: `Docs/coverage-baseline.json`
-- check command:
+- canonical local coverage gate command:
 ```bash
 ./scripts/check_coverage_policy.sh
 ```
-- current policy is baseline-first and non-vanity:
-  - freeze measured baseline first
-  - enforce no meaningful overall regression (default 0.5pp budget)
-  - prioritize stronger expectations on Domain/Application/Infrastructure logic than on SwiftUI layout-heavy code
-  - do not force high global vanity targets before stable baseline data exists
+- baseline refresh command (intentional/manual):
+```bash
+./scripts/refresh_coverage_baseline.sh
+```
+
+Current enforced policy (staged, non-vanity):
+- baseline-first from real `xccov` artifacts (`coverage-metrics.json`)
+- overall non-regression gate:
+  - baseline: `62.50%`
+  - allowed drop: `0.50pp`
+- conservative per-target non-regression gate (non-test targets captured in baseline):
+  - currently enforced target: `DHCharListHost.app`
+  - allowed drop: `1.00pp`
+- Domain/Application/Infrastructure still carry stronger testing expectations by policy intent, but strict per-layer numeric gating remains staged until layer mapping in coverage artifacts is robust.
+
+Coverage gate failure conditions:
+- `coverage-metrics.json` is missing
+- baseline file is missing or baseline overall is unset
+- current overall coverage drops below `baseline - allowed_overall_drop_pp`
+- any enforced non-test target drops below `target_baseline - allowed_target_drop_pp`
+- any enforced target disappears from current metrics or loses executable lines below policy floor
+
+How to intentionally refresh baseline:
+1. Run a new coverage capture with `./scripts/run_xcode_coverage.sh`.
+2. Review `DHCharListHost/artifacts/coverage/latest/coverage-metrics.json`.
+3. Run `./scripts/refresh_coverage_baseline.sh`.
+4. Re-run `./scripts/check_coverage_policy.sh` to confirm the updated baseline is internally consistent.
 
 Current environment note:
 - the active `DHCharListHost` scheme reports `0` attached tests in Xcode test-plan metadata, so coverage collection from that scheme requires test action coverage to be present in the selected scheme.

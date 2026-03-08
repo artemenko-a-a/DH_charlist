@@ -66,3 +66,8 @@
    - **Reason:** Batch 16 required host-scheme result-bundle-based coverage, but `DHCharListHost` previously had no attached tests and `xcodebuild test` exited with scheme test-action configuration errors.
    - **Type:** Fact.
    - **Impact:** Host scheme is now coverage-capable from a scheme/test-attachment perspective (`GetTestList` reports enabled tests), while existing SwiftPM/package tests remain intact and unchanged.
+
+14. **Decision:** Freeze an explicit measured coverage baseline and enforce staged non-regression gates via repository-local scripts (`check_coverage_policy.sh` + `refresh_coverage_baseline.sh`) instead of introducing vanity global thresholds.
+   - **Reason:** Batch 17 requires practical CI-oriented protection against regression using validated local `.xcresult`/`xccov` artifacts, while current layer-level mapping is not yet robust enough for strict per-layer numeric gating.
+   - **Type:** Fact.
+   - **Impact:** Current gate now fails on meaningful regression (overall and tracked non-test target coverage drops) while keeping policy realistic and staged for later tightening when stronger layer-level signals are available.

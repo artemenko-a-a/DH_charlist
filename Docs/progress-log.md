@@ -159,6 +159,12 @@
 - **results:** repository-local coverage pipeline is now validated end-to-end on the local machine: host-scheme Xcode test execution runs successfully with code coverage enabled, produces a real `.xcresult` bundle, and the repository scripts generate xccov text summary, JSON report, and machine metrics JSON artifacts. Coverage baseline/reporting workflow is now operational for local development.
 - **blockers:** none for the local development workflow; Codex/Xcode sandbox limitations remain environment-specific and do not block repository validation.
 
+### Batch 17 — CI-oriented coverage gate + baseline enforcement
+- **status:** validated
+- **checks run:** `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `./scripts/run_xcode_coverage.sh`, `./scripts/check_coverage_policy.sh`, `COVERAGE_POLICY_PATH=/tmp/coverage-baseline-batch17.json ./scripts/refresh_coverage_baseline.sh`
+- **results:** implemented practical baseline-first gate from validated local coverage artifacts: `check_coverage_policy.sh` now enforces overall non-regression (`0.5pp` budget from frozen baseline) plus conservative non-test target non-regression (`1.0pp` budget) for baseline-tracked targets; added explicit baseline refresh tooling via `scripts/refresh_coverage_baseline.sh`; froze measured baseline in `Docs/coverage-baseline.json` from the accepted local `latest/coverage-metrics.json`; updated documentation with canonical run/gate commands, artifact paths, fail conditions, and staged policy maturity.
+- **blockers:** no repository/product blockers; direct shell writes to repo-root docs can be sandbox-restricted in this Codex environment, so baseline-refresh validation used an alternate writable policy path in `/tmp` for command-level verification.
+
 # Current canonical blocker summary
 - There are no active product or coverage blockers in the current local development workflow.
 - The accepted app/runtime/persistence paths remain validated.
@@ -171,4 +177,3 @@
 - SwiftData path is validated and available through composition/bootstrap selection.
 - Xcode-native code coverage execution is validated locally through the host scheme and `./scripts/run_xcode_coverage.sh`.
 - The remaining Codex/Xcode sandbox limitations are environment-specific and do not block local repository validation.
-

@@ -576,6 +576,7 @@ private struct TemplateQuickStartSheet: View {
                             }
                         }
                     }
+                    .accessibilityIdentifier("quickstart.blank-character")
                     .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Quick Start", subtitle: "Creation Mode")

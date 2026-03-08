@@ -60,11 +60,12 @@ The JSON-backed path remains available as the conservative fallback.
 ## How to run tests
 
 ```bash
-swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
+swift test
 ```
-How to build the package
+
+How to build the package:
 ```bash
-swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
+swift build
 ```
 ## Coverage workflow (Batch 17)
 

@@ -35,6 +35,7 @@ public struct DHCharListAppShell: View {
         TabView(selection: $selectedTab) {
             CharacterListScreen(
                 useCases: container.characterUseCases,
+                templateUseCases: container.templateUseCases,
                 importExportService: container.importExportService
             )
                 .tabItem { Label("Characters", systemImage: "person.3") }

@@ -12,12 +12,22 @@ The project currently includes:
 
 - character lifecycle flow:
   - list characters
-  - create
+  - create (blank + template quick-start)
   - open details
   - edit profile with autosave
   - duplicate
   - delete
   - list-level search by visible profile fields (name/home world/background/role)
+- character templates (local-first):
+  - save any existing character as a reusable template
+  - create a new character from a saved template (always new character identity)
+  - template management UI: list, preview, rename, duplicate, delete
+- character campaign log/history (character-scoped):
+  - dedicated `Campaign Log` screen per character
+  - add/edit/delete log entries with entry type, title, body, tags, timestamp
+  - local filter by entry type and local search by title/body/tags
+  - quick-add session note from character detail flow
+  - duplicate/template-created characters start with empty history to avoid misleading carry-over
 - characteristics and resources editing
 - skills editing (with local in-screen search/filter)
 - notes / talents / traits / mutations / disorders / psychic powers / special abilities editing (with local list-section search/filter)
@@ -33,6 +43,7 @@ The project currently includes:
 - two validated local persistence paths:
   - JSON repository
   - SwiftData repository
+  - template persistence is supported on both paths
 
 ## Persistence modes
 

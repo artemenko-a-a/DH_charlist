@@ -83,3 +83,18 @@
    - **Reason:** Final branded assets are not yet provided, but archive/distribution preparation should not be blocked by missing app icon files.
    - **Type:** Fact.
    - **Impact:** Asset catalog is structurally complete for current release-readiness work; final branding replacement remains a manual pre-distribution step.
+
+17. **Decision:** Model templates as a separate local entity (`CharacterTemplate`) that reuses accepted character section shapes rather than introducing a new rules/preset domain model.
+   - **Reason:** Batch 22 scope is reusable starting state only; keeping template payload aligned with existing character structures minimizes migration/behavior risk.
+   - **Type:** Fact.
+   - **Impact:** Template creation/apply stays explicit, predictable, and detached from live character editing with no rules-engine expansion.
+
+18. **Decision:** Persist templates through parallel local repositories on both accepted persistence paths (`JSONFileCharacterTemplateRepository` + `SwiftDataCharacterTemplateRepository`) and compose both via `AppContainer`.
+   - **Reason:** Batch 22 requires template persistence without regressing accepted JSON-default and SwiftData-alternative behavior.
+   - **Type:** Fact.
+   - **Impact:** Template-enabled flows are available under both local backends while preserving existing character persistence contracts and fallback semantics.
+
+19. **Decision:** Keep campaign history explicitly character-scoped and do not carry history into duplicated characters or template-created characters.
+   - **Reason:** Batch 23 requires safe/reversible behavior and must avoid misleading implicit carry-over or shared-linkage semantics.
+   - **Type:** Fact.
+   - **Impact:** History remains local and unambiguous per character; duplicate/template flows preserve existing section data while starting with empty history.

@@ -10,10 +10,16 @@ public struct AppContainer: Sendable {
     }
 
     public let characterUseCases: CharacterUseCases
+    public let templateUseCases: CharacterTemplateUseCases
     public let importExportService: any CharacterImportExportService
 
-    public init(characterUseCases: CharacterUseCases, importExportService: any CharacterImportExportService) {
+    public init(
+        characterUseCases: CharacterUseCases,
+        templateUseCases: CharacterTemplateUseCases,
+        importExportService: any CharacterImportExportService
+    ) {
         self.characterUseCases = characterUseCases
+        self.templateUseCases = templateUseCases
         self.importExportService = importExportService
     }
 
@@ -21,28 +27,34 @@ public struct AppContainer: Sendable {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         let importExportService = CharacterJSONImportExportService()
-        let repository = makeRepository(
+        let repositories = makeRepositories(
             persistence: persistence,
             documentsDirectory: documentsDirectory,
             importExportService: importExportService
         )
 
         return AppContainer(
-            characterUseCases: CharacterUseCases(repository: repository),
+            characterUseCases: CharacterUseCases(repository: repositories.characterRepository),
+            templateUseCases: CharacterTemplateUseCases(
+                characterRepository: repositories.characterRepository,
+                templateRepository: repositories.templateRepository
+            ),
             importExportService: importExportService
         )
     }
 
-    private static func makeRepository(
+    private static func makeRepositories(
         persistence: PersistenceBackend,
         documentsDirectory: URL,
         importExportService: CharacterJSONImportExportService
-    ) -> any CharacterRepository {
-        let jsonFileURL = documentsDirectory.appending(path: "dh_characters.json")
-        let jsonRepository = JSONFileCharacterRepository(fileURL: jsonFileURL, importExport: importExportService)
+    ) -> (characterRepository: any CharacterRepository, templateRepository: any CharacterTemplateRepository) {
+        let jsonCharacterURL = documentsDirectory.appending(path: "dh_characters.json")
+        let jsonTemplateURL = documentsDirectory.appending(path: "dh_templates.json")
+        let jsonCharacterRepository = JSONFileCharacterRepository(fileURL: jsonCharacterURL, importExport: importExportService)
+        let jsonTemplateRepository = JSONFileCharacterTemplateRepository(fileURL: jsonTemplateURL)
 
         guard persistence == .swiftData else {
-            return jsonRepository
+            return (jsonCharacterRepository, jsonTemplateRepository)
         }
 
 #if canImport(SwiftData)
@@ -50,14 +62,21 @@ public struct AppContainer: Sendable {
             do {
                 let swiftDataURL = documentsDirectory.appending(path: "dh_characters.store")
                 let configuration = ModelConfiguration(url: swiftDataURL)
-                let modelContainer = try ModelContainer(for: SwiftDataCharacterRecord.self, configurations: configuration)
-                return SwiftDataCharacterRepository(modelContext: ModelContext(modelContainer))
+                let modelContainer = try ModelContainer(
+                    for: SwiftDataCharacterRecord.self,
+                    SwiftDataCharacterTemplateRecord.self,
+                    configurations: configuration
+                )
+                return (
+                    SwiftDataCharacterRepository(modelContext: ModelContext(modelContainer)),
+                    SwiftDataCharacterTemplateRepository(modelContext: ModelContext(modelContainer))
+                )
             } catch {
-                return jsonRepository
+                return (jsonCharacterRepository, jsonTemplateRepository)
             }
         }
 #endif
 
-        return jsonRepository
+        return (jsonCharacterRepository, jsonTemplateRepository)
     }
 }

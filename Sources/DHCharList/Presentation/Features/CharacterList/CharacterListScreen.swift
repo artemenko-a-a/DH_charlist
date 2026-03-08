@@ -30,19 +30,23 @@ private struct CharacterExportDocument: FileDocument {
 @MainActor
 final class CharacterListViewModel: ObservableObject {
     @Published private(set) var characters: [Character] = []
+    @Published private(set) var templates: [CharacterTemplate] = []
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
     let autosaveCoordinator: ProfileAutosaveCoordinator
     private let useCases: CharacterUseCases
+    private let templateUseCases: CharacterTemplateUseCases?
     private let importExportService: any CharacterImportExportService
 
     init(
         useCases: CharacterUseCases,
+        templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
         autosaveCoordinator: ProfileAutosaveCoordinator = .init()
     ) {
         self.useCases = useCases
+        self.templateUseCases = templateUseCases
         self.importExportService = importExportService
         self.autosaveCoordinator = autosaveCoordinator
     }
@@ -52,16 +56,96 @@ final class CharacterListViewModel: ObservableObject {
         defer { isLoading = false }
         do {
             characters = try await useCases.listCharacters()
+            if let templateUseCases {
+                templates = try await templateUseCases.listTemplates()
+            } else {
+                templates = []
+            }
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    func createCharacter() async {
+    func createBlankCharacter() async {
         do {
             _ = try await useCases.createCharacter(profile: Profile(name: "New Acolyte"))
             await load()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func createCharacter(fromTemplateID templateID: UUID) async {
+        guard let templateUseCases else {
+            errorMessage = "Template support is unavailable."
+            return
+        }
+
+        do {
+            _ = try await templateUseCases.createCharacterFromTemplate(templateID: templateID)
+            await load()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func saveCharacterAsTemplate(characterID: UUID, name: String? = nil) async {
+        guard let templateUseCases else {
+            errorMessage = "Template support is unavailable."
+            return
+        }
+
+        do {
+            let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: characterID, name: name)
+            replaceTemplateInMemory(saved)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func renameTemplate(id: UUID, name: String) async {
+        guard let templateUseCases else {
+            errorMessage = "Template support is unavailable."
+            return
+        }
+
+        do {
+            let updated = try await templateUseCases.renameTemplate(id: id, name: name)
+            replaceTemplateInMemory(updated)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func duplicateTemplate(id: UUID) async {
+        guard let templateUseCases else {
+            errorMessage = "Template support is unavailable."
+            return
+        }
+
+        do {
+            let duplicated = try await templateUseCases.duplicateTemplate(id: id)
+            templates.insert(duplicated, at: 0)
+            templates.sort { $0.updatedAt > $1.updatedAt }
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func deleteTemplate(id: UUID) async {
+        guard let templateUseCases else {
+            errorMessage = "Template support is unavailable."
+            return
+        }
+
+        do {
+            try await templateUseCases.deleteTemplate(id: id)
+            templates.removeAll { $0.id == id }
+            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -137,6 +221,52 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func addHistoryEntry(
+        characterID: UUID,
+        type: CharacterHistoryEntryType,
+        title: String,
+        body: String,
+        tags: [String]
+    ) async {
+        do {
+            _ = try await useCases.addHistoryEntry(characterID: characterID, type: type, title: title, body: body, tags: tags)
+            await loadCharacter(id: characterID)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func updateHistoryEntry(characterID: UUID, entry: CharacterHistoryEntry) async {
+        do {
+            _ = try await useCases.updateHistoryEntry(characterID: characterID, entry: entry)
+            await loadCharacter(id: characterID)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func deleteHistoryEntry(characterID: UUID, entryID: UUID) async {
+        do {
+            try await useCases.deleteHistoryEntry(characterID: characterID, entryID: entryID)
+            await loadCharacter(id: characterID)
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func quickAddHistoryEntry(characterID: UUID) async {
+        await addHistoryEntry(
+            characterID: characterID,
+            type: .sessionNote,
+            title: "Quick Note",
+            body: "",
+            tags: []
+        )
+    }
+
     func deleteCharacter(id: UUID) async {
         do {
             try await useCases.deleteCharacter(id: id)
@@ -191,6 +321,26 @@ final class CharacterListViewModel: ObservableObject {
         }
         characters.sort { $0.updatedAt > $1.updatedAt }
     }
+
+    private func replaceTemplateInMemory(_ updated: CharacterTemplate) {
+        if let index = templates.firstIndex(where: { $0.id == updated.id }) {
+            templates[index] = updated
+        } else {
+            templates.append(updated)
+        }
+        templates.sort { $0.updatedAt > $1.updatedAt }
+    }
+
+    private func loadCharacter(id: UUID) async {
+        do {
+            guard let character = try await useCases.fetchCharacter(id: id) else {
+                return
+            }
+            replaceInMemory(character)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }
 
 @available(iOS 17, macOS 14, *)
@@ -198,16 +348,23 @@ public struct CharacterListScreen: View {
     @StateObject private var viewModel: CharacterListViewModel
     @State private var isShowingImportPicker = false
     @State private var isShowingExportPicker = false
+    @State private var isShowingQuickStart = false
+    @State private var isShowingTemplateManager = false
     @State private var exportDocument: CharacterExportDocument?
     @State private var exportFileName = "dh_characters"
     @State private var pendingDeleteCharacterID: UUID?
     @State private var isShowingDeleteConfirmation = false
     @State private var searchText = ""
 
-    public init(useCases: CharacterUseCases, importExportService: any CharacterImportExportService) {
+    public init(
+        useCases: CharacterUseCases,
+        templateUseCases: CharacterTemplateUseCases? = nil,
+        importExportService: any CharacterImportExportService
+    ) {
         _viewModel = StateObject(
             wrappedValue: CharacterListViewModel(
                 useCases: useCases,
+                templateUseCases: templateUseCases,
                 importExportService: importExportService
             )
         )
@@ -256,7 +413,7 @@ public struct CharacterListScreen: View {
                     ContentUnavailableView(
                         "No Characters",
                         systemImage: "person.crop.circle.badge.plus",
-                        description: Text("Create your first acolyte from the plus button, then open it to fill profile, skills, notes, equipment, and session data.")
+                        description: Text("Use Create to start from a blank character or a saved template.")
                     )
                     .cogitatorEmptyStateStyle()
                 }
@@ -287,14 +444,24 @@ public struct CharacterListScreen: View {
                     .accessibilityHint("Import characters from JSON or export all characters to JSON.")
                 }
 
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        isShowingTemplateManager = true
+                    } label: {
+                        Label("Templates", systemImage: "bookmark")
+                    }
+                    .accessibilityLabel("Manage Templates")
+                    .accessibilityHint("Open the template manager to rename, duplicate, or delete templates.")
+                }
+
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        Task { await viewModel.createCharacter() }
+                        isShowingQuickStart = true
                     } label: {
                         Label("Create", systemImage: "plus")
                     }
                     .accessibilityLabel("Create Character")
-                    .accessibilityHint("Creates a new character.")
+                    .accessibilityHint("Choose blank character or start from template.")
                 }
             }
             .navigationDestination(for: UUID.self) { id in
@@ -302,6 +469,12 @@ public struct CharacterListScreen: View {
             }
             .task {
                 await viewModel.load()
+            }
+            .sheet(isPresented: $isShowingQuickStart) {
+                TemplateQuickStartSheet(viewModel: viewModel)
+            }
+            .sheet(isPresented: $isShowingTemplateManager) {
+                TemplateManagementScreen(viewModel: viewModel)
             }
             .fileImporter(
                 isPresented: $isShowingImportPicker,
@@ -374,6 +547,238 @@ public struct CharacterListScreen: View {
     private func characterName(for id: UUID) -> String {
         let name = viewModel.character(by: id)?.profile.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return name.isEmpty ? "this character" : name
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct TemplateQuickStartSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: CharacterListViewModel
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Button {
+                        Task { await viewModel.createBlankCharacter() }
+                        dismiss()
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .foregroundStyle(CogitatorPalette.brass)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Blank Character")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(CogitatorPalette.textPrimary)
+                                Text("Start with default empty sections.")
+                                    .cogitatorSupportingText()
+                            }
+                        }
+                    }
+                    .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Quick Start", subtitle: "Creation Mode")
+                }
+
+                Section {
+                    if viewModel.templates.isEmpty {
+                        Text("No templates yet. Open a character and use Save as Template.")
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    } else {
+                        ForEach(viewModel.templates) { template in
+                            Button {
+                                Task { await viewModel.createCharacter(fromTemplateID: template.id) }
+                                dismiss()
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(template.name)
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(CogitatorPalette.textPrimary)
+                                    Text(CharacterTemplateSummary.preview(for: template))
+                                        .cogitatorSupportingText()
+                                }
+                            }
+                            .cogitatorPanelRow()
+                        }
+                    }
+                } header: {
+                    CogitatorSectionHeader("Templates", subtitle: "Reusable Presets")
+                }
+            }
+            .formContentWidth()
+            .platformInsetGroupedListStyle()
+            .cogitatorFormRhythm()
+            .cogitatorScreenChrome()
+            .navigationTitle("Create Character")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct TemplateManagementScreen: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: CharacterListViewModel
+
+    @State private var pendingDeleteTemplateID: UUID?
+    @State private var isShowingDeleteConfirmation = false
+    @State private var renameDraft: TemplateRenameDraft?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if viewModel.templates.isEmpty {
+                    Section {
+                        ContentUnavailableView(
+                            "No Templates",
+                            systemImage: "bookmark",
+                            description: Text("Save a character as a template from its detail screen.")
+                        )
+                        .cogitatorEmptyStateStyle()
+                        .cogitatorPanelRow()
+                    }
+                } else {
+                    Section {
+                        ForEach(viewModel.templates) { template in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(template.name)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(CogitatorPalette.textPrimary)
+                                Text(CharacterTemplateSummary.preview(for: template))
+                                    .cogitatorSupportingText()
+                                Text("Updated \(template.updatedAt.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.caption)
+                                    .foregroundStyle(CogitatorPalette.textTertiary)
+                            }
+                            .cogitatorPanelRow()
+                            .swipeActions {
+                                Button("Rename") {
+                                    renameDraft = TemplateRenameDraft(id: template.id, name: template.name)
+                                }
+                                .tint(.blue)
+
+                                Button("Duplicate") {
+                                    Task { await viewModel.duplicateTemplate(id: template.id) }
+                                }
+                                .tint(.indigo)
+
+                                Button("Delete", role: .destructive) {
+                                    pendingDeleteTemplateID = template.id
+                                    isShowingDeleteConfirmation = true
+                                }
+                            }
+                        }
+                    } header: {
+                        CogitatorSectionHeader("Templates (\(viewModel.templates.count))", subtitle: "Local Presets")
+                    } footer: {
+                        Text("Swipe a template row to rename, duplicate, or delete it.")
+                            .cogitatorSupportingText()
+                    }
+                }
+            }
+            .formContentWidth()
+            .platformInsetGroupedListStyle()
+            .cogitatorFormRhythm()
+            .cogitatorScreenChrome()
+            .navigationTitle("Manage Templates")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+            .sheet(item: $renameDraft) { draft in
+                TemplateRenameSheet(
+                    currentName: draft.name,
+                    onSave: { newName in
+                        Task { await viewModel.renameTemplate(id: draft.id, name: newName) }
+                    }
+                )
+            }
+            .confirmationDialog(
+                "Delete Template?",
+                isPresented: $isShowingDeleteConfirmation,
+                titleVisibility: .visible,
+                presenting: pendingDeleteTemplateID
+            ) { templateID in
+                Button("Delete", role: .destructive) {
+                    Task { await viewModel.deleteTemplate(id: templateID) }
+                }
+            } message: { templateID in
+                Text("This permanently removes \(templateName(for: templateID)).")
+            }
+        }
+    }
+
+    private func templateName(for id: UUID) -> String {
+        let value = viewModel.templates.first(where: { $0.id == id })?.name.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return value.isEmpty ? "this template" : value
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct TemplateRenameSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var nameDraft: String
+    let onSave: (String) -> Void
+
+    init(currentName: String, onSave: @escaping (String) -> Void) {
+        _nameDraft = State(initialValue: currentName)
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Template Name", text: $nameDraft)
+                }
+            }
+            .formContentWidth()
+            .platformInsetGroupedListStyle()
+            .cogitatorFormRhythm()
+            .cogitatorScreenChrome()
+            .navigationTitle("Rename Template")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(nameDraft)
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+    }
+}
+
+private struct TemplateRenameDraft: Identifiable {
+    let id: UUID
+    let name: String
+}
+
+private enum CharacterTemplateSummary {
+    static func preview(for template: CharacterTemplate) -> String {
+        let profileParts = [
+            template.profile.homeWorld,
+            template.profile.background,
+            template.profile.role
+        ]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        let profileSummary = profileParts.isEmpty ? "Profile skeleton" : profileParts.joined(separator: " · ")
+        return "\(profileSummary) · Skills \(template.skills.count) · Items \(template.equipment.inventory.count)"
     }
 }
 
@@ -501,6 +906,27 @@ struct CharacterDetailScreen: View {
                         )
                     }
                     .cogitatorPanelRow()
+                    NavigationLink {
+                        CampaignHistoryScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Campaign Log & History",
+                            summary: "Session notes, injuries, advancements, and story events.",
+                            systemImage: "book.closed"
+                        )
+                    }
+                    .cogitatorPanelRow()
+                    Button {
+                        Task { await viewModel.quickAddHistoryEntry(characterID: characterID) }
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Quick Add Session Note",
+                            summary: "Adds a timestamped note you can refine later.",
+                            systemImage: "plus.bubble"
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Edit", subtitle: "Subsystem Access")
                 } footer: {
@@ -513,6 +939,15 @@ struct CharacterDetailScreen: View {
             .cogitatorFormRhythm()
             .cogitatorScreenChrome()
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        Task { await viewModel.saveCharacterAsTemplate(characterID: characterID) }
+                    } label: {
+                        Label("Save as Template", systemImage: "bookmark")
+                    }
+                }
+            }
         } else {
             ContentUnavailableView(
                 "Character Not Found",

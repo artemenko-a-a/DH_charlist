@@ -11,6 +11,10 @@ public struct CharacterUseCases: Sendable {
         try await repository.fetchAll().sorted { $0.updatedAt > $1.updatedAt }
     }
 
+    public func fetchCharacter(id: UUID) async throws -> Character? {
+        try await repository.fetch(id: id)
+    }
+
     public func upsertCharacter(_ character: Character) async throws {
         var mutable = character
         mutable.updatedAt = .now
@@ -93,6 +97,66 @@ public struct CharacterUseCases: Sendable {
         return character
     }
 
+    public func listHistory(characterID: UUID) async throws -> [CharacterHistoryEntry] {
+        guard let character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+        return character.history.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    public func addHistoryEntry(
+        characterID: UUID,
+        type: CharacterHistoryEntryType,
+        title: String,
+        body: String,
+        tags: [String] = []
+    ) async throws -> CharacterHistoryEntry {
+        guard var character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+
+        let entry = CharacterHistoryEntry(
+            characterID: characterID,
+            title: title,
+            type: type,
+            body: body,
+            tags: normalizedTags(tags)
+        )
+        character.history.append(entry)
+        character.updatedAt = .now
+        try await repository.save(character)
+        return entry
+    }
+
+    public func updateHistoryEntry(characterID: UUID, entry: CharacterHistoryEntry) async throws -> CharacterHistoryEntry {
+        guard var character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+        guard entry.characterID == characterID else {
+            throw CharacterRepositoryError.invalidData("History entry character mismatch")
+        }
+
+        guard let index = character.history.firstIndex(where: { $0.id == entry.id }) else {
+            throw CharacterRepositoryError.notFound
+        }
+
+        var updated = entry
+        updated.tags = normalizedTags(entry.tags)
+        character.history[index] = updated
+        character.updatedAt = .now
+        try await repository.save(character)
+        return updated
+    }
+
+    public func deleteHistoryEntry(characterID: UUID, entryID: UUID) async throws {
+        guard var character = try await repository.fetch(id: characterID) else {
+            throw CharacterRepositoryError.notFound
+        }
+        character.history.removeAll { $0.id == entryID }
+        character.updatedAt = .now
+        try await repository.save(character)
+    }
+
     public func deleteCharacter(id: UUID) async throws {
         try await repository.delete(id: id)
     }
@@ -102,6 +166,7 @@ public struct CharacterUseCases: Sendable {
             throw CharacterRepositoryError.notFound
         }
         character.id = UUID()
+        character.history = []
         character.updatedAt = .now
         character.profile.name = character.profile.name.isEmpty ? "Copy" : "\(character.profile.name) Copy"
         try await repository.save(character)
@@ -128,6 +193,12 @@ public struct CharacterUseCases: Sendable {
         }
 
         return imported.count
+    }
+
+    private func normalizedTags(_ tags: [String]) -> [String] {
+        tags
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
     }
 }
 

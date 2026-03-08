@@ -260,6 +260,36 @@ import SwiftData
     #expect(EquipmentSearch.filter(armour: armour, query: "4").map(\.location) == ["Body"])
     #expect(EquipmentSearch.filter(inventory: inventory, query: "med").map(\.name) == ["Medkit"])
 }
+
+@Test func historySearchFiltersByTypeAndText() {
+    let characterID = UUID()
+    let session = CharacterHistoryEntry(
+        characterID: characterID,
+        createdAt: Date(timeIntervalSince1970: 100),
+        title: "Session 12",
+        type: .sessionNote,
+        body: "Negotiated with hive contacts.",
+        tags: ["social"]
+    )
+    let injury = CharacterHistoryEntry(
+        characterID: characterID,
+        createdAt: Date(timeIntervalSince1970: 200),
+        title: "Broken Arm",
+        type: .injury,
+        body: "Took critical damage from stubber fire.",
+        tags: ["critical", "combat"]
+    )
+
+    let all = CharacterHistorySearch.filter(entries: [session, injury], query: "", type: nil)
+    let injuryOnly = CharacterHistorySearch.filter(entries: [session, injury], query: "", type: .injury)
+    let queryByBody = CharacterHistorySearch.filter(entries: [session, injury], query: "stubber", type: nil)
+    let queryByTag = CharacterHistorySearch.filter(entries: [session, injury], query: "social", type: nil)
+
+    #expect(all.count == 2)
+    #expect(injuryOnly.map(\.id) == [injury.id])
+    #expect(queryByBody.map(\.id) == [injury.id])
+    #expect(queryByTag.map(\.id) == [session.id])
+}
 #endif
 
 @Test func updateOperationsThrowNotFoundForMissingCharacter() async throws {
@@ -851,6 +881,86 @@ import SwiftData
     #expect(originalStored?.profile == originalProfile)
 }
 
+@Test func historyEntryAddEditDeletePersists() async throws {
+    let fileURL = uniqueTestFileURL("batch23-history-crud")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Historian"))
+    let added = try await useCases.addHistoryEntry(
+        characterID: created.id,
+        type: .advancement,
+        title: "Rank Increase",
+        body: "Spent XP on Ballistic Skill.",
+        tags: ["xp", "rank-up"]
+    )
+
+    var edited = added
+    edited.title = "Rank Increase Confirmed"
+    edited.body = "Spent XP on Ballistic Skill and Awareness."
+    edited.tags = ["xp", "awareness"]
+    _ = try await useCases.updateHistoryEntry(characterID: created.id, entry: edited)
+
+    let reloadedAfterEdit = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+    #expect(reloadedAfterEdit?.history.count == 1)
+    #expect(reloadedAfterEdit?.history.first?.title == "Rank Increase Confirmed")
+    #expect(reloadedAfterEdit?.history.first?.tags == ["xp", "awareness"])
+
+    try await useCases.deleteHistoryEntry(characterID: created.id, entryID: edited.id)
+    let reloadedAfterDelete = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+    #expect(reloadedAfterDelete?.history.isEmpty == true)
+}
+
+@Test func historyStaysCharacterScopedAndIsRemovedOnDelete() async throws {
+    let fileURL = uniqueTestFileURL("batch23-history-scoped")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let first = try await useCases.createCharacter(profile: Profile(name: "First"))
+    let second = try await useCases.createCharacter(profile: Profile(name: "Second"))
+
+    _ = try await useCases.addHistoryEntry(
+        characterID: first.id,
+        type: .sessionNote,
+        title: "First-only Note",
+        body: "Only belongs to First.",
+        tags: []
+    )
+
+    let firstHistory = try await useCases.listHistory(characterID: first.id)
+    let secondHistory = try await useCases.listHistory(characterID: second.id)
+    #expect(firstHistory.count == 1)
+    #expect(secondHistory.isEmpty)
+
+    try await useCases.deleteCharacter(id: first.id)
+    let all = try await repository.fetchAll()
+    #expect(all.count == 1)
+    #expect(all.first?.id == second.id)
+    #expect(all.first?.history.isEmpty == true)
+}
+
+@Test func duplicateCharacterDoesNotCarryHistoryEntries() async throws {
+    let fileURL = uniqueTestFileURL("batch23-history-duplicate")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Original"))
+    _ = try await useCases.addHistoryEntry(
+        characterID: created.id,
+        type: .injury,
+        title: "Arm Injury",
+        body: "Temporary penalty applied.",
+        tags: ["critical"]
+    )
+
+    let duplicated = try await useCases.duplicateCharacter(id: created.id)
+    let duplicatedStored = try await repository.fetch(id: duplicated.id)
+    let originalStored = try await repository.fetch(id: created.id)
+
+    #expect(originalStored?.history.count == 1)
+    #expect(duplicatedStored?.history.isEmpty == true)
+}
+
 @Test func deleteCharacterUseCaseRemovesRecord() async throws {
     let fileURL = uniqueTestFileURL("delete")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -861,6 +971,195 @@ import SwiftData
 
     let all = try await repository.fetchAll()
     #expect(all.isEmpty)
+}
+
+@Test func saveCharacterAsTemplatePersistsDetachedSnapshot() async throws {
+    let characterURL = uniqueTestFileURL("batch22-save-template-characters")
+    let templateURL = uniqueTestFileURL("batch22-save-template-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let created = try await characterUseCases.createCharacter(
+        profile: Profile(name: "Template Source", homeWorld: "Hive", background: "Adeptus Arbites", role: "Warrior")
+    )
+    _ = try await characterUseCases.updateSkills(
+        characterID: created.id,
+        skills: [Skill(name: "Awareness", characteristic: .perception, training: .trained)]
+    )
+
+    let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: created.id)
+    let reloadedTemplates = try await JSONFileCharacterTemplateRepository(fileURL: templateURL).fetchAll()
+
+    #expect(saved.name == "Template Source Template")
+    #expect(reloadedTemplates.count == 1)
+    #expect(reloadedTemplates.first?.profile.name == "Template Source")
+    #expect(reloadedTemplates.first?.skills.count == 1)
+}
+
+@Test func createCharacterFromTemplateProducesDistinctCharacterID() async throws {
+    let characterURL = uniqueTestFileURL("batch22-create-from-template-characters")
+    let templateURL = uniqueTestFileURL("batch22-create-from-template-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Template Base", background: "Navy"))
+    let savedTemplate = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id, name: "Navy Starter")
+    let created = try await templateUseCases.createCharacterFromTemplate(templateID: savedTemplate.id)
+
+    #expect(created.id != source.id)
+    #expect(created.profile.background == "Navy")
+    #expect(created.profile.name == "Template Base")
+    #expect(created.history.isEmpty)
+}
+
+@Test func saveTemplateAndCreateCharacterDoNotCreateHistoryLinkage() async throws {
+    let characterURL = uniqueTestFileURL("batch23-template-history-characters")
+    let templateURL = uniqueTestFileURL("batch23-template-history-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Source"))
+    _ = try await characterUseCases.addHistoryEntry(
+        characterID: source.id,
+        type: .storyNote,
+        title: "Origin Session",
+        body: "Joined the warband.",
+        tags: ["session-1"]
+    )
+
+    let template = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id, name: "No History Template")
+    let created = try await templateUseCases.createCharacterFromTemplate(templateID: template.id)
+    let persistedCreated = try await characterRepository.fetch(id: created.id)
+
+    #expect(persistedCreated?.history.isEmpty == true)
+}
+
+@Test func templateRenamePersists() async throws {
+    let characterURL = uniqueTestFileURL("batch22-template-rename-characters")
+    let templateURL = uniqueTestFileURL("batch22-template-rename-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Rename Source"))
+    let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id)
+    let renamed = try await templateUseCases.renameTemplate(id: saved.id, name: "Field Agent Starter")
+    let persisted = try await JSONFileCharacterTemplateRepository(fileURL: templateURL).fetch(id: saved.id)
+
+    #expect(renamed.name == "Field Agent Starter")
+    #expect(persisted?.name == "Field Agent Starter")
+}
+
+@Test func templateDuplicatePersistsDistinctIdentity() async throws {
+    let characterURL = uniqueTestFileURL("batch22-template-duplicate-characters")
+    let templateURL = uniqueTestFileURL("batch22-template-duplicate-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Duplicate Source", role: "Mystic"))
+    let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id, name: "Mystic Starter")
+    let duplicated = try await templateUseCases.duplicateTemplate(id: saved.id)
+    let all = try await JSONFileCharacterTemplateRepository(fileURL: templateURL).fetchAll()
+
+    #expect(duplicated.id != saved.id)
+    #expect(duplicated.name == "Mystic Starter Copy")
+    #expect(all.count == 2)
+}
+
+@Test func templateDeletePersists() async throws {
+    let characterURL = uniqueTestFileURL("batch22-template-delete-characters")
+    let templateURL = uniqueTestFileURL("batch22-template-delete-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Delete Source"))
+    let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id)
+    try await templateUseCases.deleteTemplate(id: saved.id)
+
+    let all = try await JSONFileCharacterTemplateRepository(fileURL: templateURL).fetchAll()
+    #expect(all.isEmpty)
+}
+
+@Test func applyingTemplateDoesNotCreateSharedMutableLinkage() async throws {
+    let characterURL = uniqueTestFileURL("batch22-template-detach-characters")
+    let templateURL = uniqueTestFileURL("batch22-template-detach-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let source = try await characterUseCases.createCharacter(profile: Profile(name: "Detach Source"))
+    _ = try await characterUseCases.updateNotes(
+        characterID: source.id,
+        notes: NotesState(talents: ["Rapid Reload"], notes: "Source Notes")
+    )
+
+    let saved = try await templateUseCases.saveCharacterAsTemplate(characterID: source.id, name: "Detach Template")
+    let created = try await templateUseCases.createCharacterFromTemplate(templateID: saved.id)
+    _ = try await characterUseCases.updateNotes(
+        characterID: created.id,
+        notes: NotesState(talents: ["Edited Talent"], notes: "Changed")
+    )
+
+    let persistedTemplate = try await JSONFileCharacterTemplateRepository(fileURL: templateURL).fetch(id: saved.id)
+    let persistedSource = try await JSONFileCharacterRepository(fileURL: characterURL).fetch(id: source.id)
+
+    #expect(persistedTemplate?.notes.talents == ["Rapid Reload"])
+    #expect(persistedTemplate?.notes.notes == "Source Notes")
+    #expect(persistedSource?.notes.talents == ["Rapid Reload"])
+}
+
+@Test func characterLifecycleRemainsStableWhenTemplateUseCasesAreEnabled() async throws {
+    let characterURL = uniqueTestFileURL("batch22-lifecycle-regression-characters")
+    let templateURL = uniqueTestFileURL("batch22-lifecycle-regression-templates")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterURL)
+    let templateRepository = JSONFileCharacterTemplateRepository(fileURL: templateURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let templateUseCases = CharacterTemplateUseCases(
+        characterRepository: characterRepository,
+        templateRepository: templateRepository
+    )
+
+    let created = try await characterUseCases.createCharacter(profile: Profile(name: "Lifecycle"))
+    let duplicated = try await characterUseCases.duplicateCharacter(id: created.id)
+    _ = try await templateUseCases.saveCharacterAsTemplate(characterID: created.id)
+    try await characterUseCases.deleteCharacter(id: duplicated.id)
+
+    let all = try await characterRepository.fetchAll()
+    #expect(all.count == 1)
+    #expect(all.first?.id == created.id)
 }
 
 @Test func profileAutosaveCoordinatorCoalescesPendingEdits() async throws {
@@ -1129,6 +1428,60 @@ import SwiftData
     #expect(swiftDataAll.count == 1)
     #expect(jsonAll.first == swiftDataAll.first)
 }
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataTemplateRepositorySaveRenameDuplicateDeleteFlow() async throws {
+    let templateRepository = try makeSwiftDataTemplateRepository(testName: "swiftdata-template-flow")
+    let sourceTemplate = CharacterTemplate(name: "SwiftData Template", source: sampleCharacter(name: "Template Source"))
+    try await templateRepository.save(sourceTemplate)
+
+    guard var renamed = try await templateRepository.fetch(id: sourceTemplate.id) else {
+        Issue.record("Expected saved template to be fetchable")
+        return
+    }
+    renamed.name = "SwiftData Template Renamed"
+    renamed.updatedAt = Date(timeIntervalSince1970: renamed.updatedAt.timeIntervalSince1970 + 120)
+    try await templateRepository.save(renamed)
+
+    var duplicate = renamed
+    duplicate.id = UUID()
+    duplicate.name = "SwiftData Template Copy"
+    duplicate.updatedAt = Date(timeIntervalSince1970: renamed.updatedAt.timeIntervalSince1970 + 240)
+    try await templateRepository.save(duplicate)
+    try await templateRepository.delete(id: renamed.id)
+
+    let remaining = try await templateRepository.fetchAll()
+    #expect(remaining.count == 1)
+    #expect(remaining.first?.id == duplicate.id)
+    #expect(remaining.first?.name == "SwiftData Template Copy")
+}
+
+@available(iOS 17, macOS 14, *)
+@Test func swiftDataTemplateAndJSONTemplateRepositoriesMatchForBasicFlow() async throws {
+    let jsonTemplateURL = uniqueTestFileURL("swiftdata-template-parity-json")
+    let jsonTemplateRepository = JSONFileCharacterTemplateRepository(fileURL: jsonTemplateURL)
+    let swiftDataTemplateRepository = try makeSwiftDataTemplateRepository(testName: "swiftdata-template-parity-store")
+
+    let source = CharacterTemplate(name: "Parity Template", source: sampleCharacter(name: "Parity Character"))
+    var renamed = source
+    renamed.name = "Parity Template Updated"
+    renamed.updatedAt = Date(timeIntervalSince1970: source.updatedAt.timeIntervalSince1970 + 60)
+
+    for repository in [jsonTemplateRepository as any CharacterTemplateRepository, swiftDataTemplateRepository as any CharacterTemplateRepository] {
+        try await repository.save(source)
+        try await repository.save(renamed)
+    }
+
+    let jsonFetched = try await jsonTemplateRepository.fetch(id: source.id)
+    let swiftDataFetched = try await swiftDataTemplateRepository.fetch(id: source.id)
+
+    #expect(jsonFetched?.id == renamed.id)
+    #expect(swiftDataFetched?.id == renamed.id)
+    #expect(jsonFetched?.name == renamed.name)
+    #expect(swiftDataFetched?.name == renamed.name)
+    #expect(jsonFetched?.profile == renamed.profile)
+    #expect(swiftDataFetched?.profile == renamed.profile)
+}
 #endif
 
 private actor SaveRecorder {
@@ -1234,6 +1587,15 @@ private func makeSwiftDataRepository(testName: String) throws -> SwiftDataCharac
     let configuration = ModelConfiguration(url: storeURL)
     let container = try ModelContainer(for: SwiftDataCharacterRecord.self, configurations: configuration)
     return SwiftDataCharacterRepository(modelContext: ModelContext(container))
+}
+
+@available(iOS 17, macOS 14, *)
+private func makeSwiftDataTemplateRepository(testName: String) throws -> SwiftDataCharacterTemplateRepository {
+    let storeURL = URL(filePath: NSTemporaryDirectory())
+        .appending(path: "dh_charlist_tests_\(testName)_\(UUID().uuidString).store")
+    let configuration = ModelConfiguration(url: storeURL)
+    let container = try ModelContainer(for: SwiftDataCharacterTemplateRecord.self, configurations: configuration)
+    return SwiftDataCharacterTemplateRepository(modelContext: ModelContext(container))
 }
 #endif
 

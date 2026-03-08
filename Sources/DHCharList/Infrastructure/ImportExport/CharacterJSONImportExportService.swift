@@ -21,6 +21,7 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
     public let notes: NotesState
     public let equipment: EquipmentState
     public let session: SessionState
+    public let history: [CharacterHistoryEntry]
     public let updatedAt: Date
 
     public init(character: Character) {
@@ -32,11 +33,50 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
         notes = character.notes
         equipment = character.equipment
         session = character.session
+        history = character.history
         updatedAt = character.updatedAt
     }
 
     public var domain: Character {
-        Character(id: id, profile: profile, characteristics: characteristics, resources: resources, skills: skills, notes: notes, equipment: equipment, session: session, updatedAt: updatedAt)
+        Character(
+            id: id,
+            profile: profile,
+            characteristics: characteristics,
+            resources: resources,
+            skills: skills,
+            notes: notes,
+            equipment: equipment,
+            session: session,
+            history: history,
+            updatedAt: updatedAt
+        )
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case profile
+        case characteristics
+        case resources
+        case skills
+        case notes
+        case equipment
+        case session
+        case history
+        case updatedAt
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        profile = try container.decode(Profile.self, forKey: .profile)
+        characteristics = try container.decode(CharacteristicSet.self, forKey: .characteristics)
+        resources = try container.decode(ResourceState.self, forKey: .resources)
+        skills = try container.decode([Skill].self, forKey: .skills)
+        notes = try container.decode(NotesState.self, forKey: .notes)
+        equipment = try container.decode(EquipmentState.self, forKey: .equipment)
+        session = try container.decode(SessionState.self, forKey: .session)
+        history = try container.decodeIfPresent([CharacterHistoryEntry].self, forKey: .history) ?? []
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
 }
 

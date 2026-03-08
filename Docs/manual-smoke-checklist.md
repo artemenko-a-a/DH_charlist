@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted runtime-polished implementation through Batch 20.
+This checklist tracks the currently accepted runtime-polished implementation through Batch 23.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -73,6 +73,29 @@ This checklist tracks the currently accepted runtime-polished implementation thr
     - verify existing editor sheets keep consistent Cancel/Save placement and that Save remains clearly primary when valid
     - verify `Session` screen operational state readability (`ACTIVE`/`STANDBY`) and pinned/modifier editing clarity without behavior change
     - verify iPad layout uses wider readable content width without creating narrow content islands or excessive line length
+21. Batch 22 template quick-start sanity:
+    - from `Characters`, open `Create` and verify quick-start supports:
+      - `Blank Character`
+      - at least one saved template (after creating one)
+    - open any existing character detail and trigger `Save as Template`
+    - open `Templates` manager from the character list toolbar and verify:
+      - template list/preview text is visible
+      - rename persists after closing/reopening manager
+      - duplicate creates a second template with distinct identity
+      - delete removes template after confirmation
+    - create a new character from a template and verify:
+      - a new character record is created
+      - profile/skills/notes/equipment/session defaults from template are copied
+      - editing the new character does not mutate the source template or original character
+22. Batch 23 campaign log/history sanity:
+    - open a character and navigate to `Campaign Log & History`
+    - add at least one history entry and verify it appears at the top (reverse chronological order)
+    - edit that entry and verify updated title/body/tags persist after closing/reopening the screen
+    - delete an entry and verify confirmation + removal
+    - verify search (title/body/tags) and entry-type filter both narrow results correctly
+    - from character detail, use `Quick Add Session Note` and verify a new entry appears in history
+    - duplicate a character and verify duplicate starts with empty history while original history remains intact
+    - create a character from a template and verify created character history starts empty
 
 Latest local validation status (2026-03-08):
 - Host app compiles successfully in Xcode (`BuildProject`).

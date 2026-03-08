@@ -9,6 +9,7 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
     public var notes: NotesState
     public var equipment: EquipmentState
     public var session: SessionState
+    public var history: [CharacterHistoryEntry]
     public var updatedAt: Date
 
     public init(
@@ -20,6 +21,7 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         notes: NotesState = .init(),
         equipment: EquipmentState = .init(),
         session: SessionState = .init(),
+        history: [CharacterHistoryEntry] = [],
         updatedAt: Date = .now
     ) {
         self.id = id
@@ -30,8 +32,88 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         self.notes = notes
         self.equipment = equipment
         self.session = session
+        self.history = history
         self.updatedAt = updatedAt
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case profile
+        case characteristics
+        case resources
+        case skills
+        case notes
+        case equipment
+        case session
+        case history
+        case updatedAt
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        profile = try container.decode(Profile.self, forKey: .profile)
+        characteristics = try container.decode(CharacteristicSet.self, forKey: .characteristics)
+        resources = try container.decode(ResourceState.self, forKey: .resources)
+        skills = try container.decode([Skill].self, forKey: .skills)
+        notes = try container.decode(NotesState.self, forKey: .notes)
+        equipment = try container.decode(EquipmentState.self, forKey: .equipment)
+        session = try container.decode(SessionState.self, forKey: .session)
+        history = try container.decodeIfPresent([CharacterHistoryEntry].self, forKey: .history) ?? []
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(profile, forKey: .profile)
+        try container.encode(characteristics, forKey: .characteristics)
+        try container.encode(resources, forKey: .resources)
+        try container.encode(skills, forKey: .skills)
+        try container.encode(notes, forKey: .notes)
+        try container.encode(equipment, forKey: .equipment)
+        try container.encode(session, forKey: .session)
+        try container.encode(history, forKey: .history)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+}
+
+public struct CharacterHistoryEntry: Identifiable, Codable, Equatable, Sendable {
+    public var id: UUID
+    public var characterID: UUID
+    public var createdAt: Date
+    public var title: String
+    public var type: CharacterHistoryEntryType
+    public var body: String
+    public var tags: [String]
+
+    public init(
+        id: UUID = UUID(),
+        characterID: UUID,
+        createdAt: Date = .now,
+        title: String,
+        type: CharacterHistoryEntryType,
+        body: String = "",
+        tags: [String] = []
+    ) {
+        self.id = id
+        self.characterID = characterID
+        self.createdAt = createdAt
+        self.title = title
+        self.type = type
+        self.body = body
+        self.tags = tags
+    }
+}
+
+public enum CharacterHistoryEntryType: String, Codable, CaseIterable, Sendable {
+    case sessionNote
+    case advancement
+    case injury
+    case corruptionOrInsanity
+    case equipmentChange
+    case storyNote
+    case custom
 }
 
 public struct Profile: Codable, Equatable, Sendable {

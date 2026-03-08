@@ -10,6 +10,7 @@ struct NotesScreen: View {
 
     @State private var notes: NotesState
     @State private var draft: NoteEntryDraft?
+    @State private var searchText = ""
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -40,6 +41,18 @@ struct NotesScreen: View {
         .formContentWidth()
         .formStyle(.grouped)
         .navigationTitle("Notes")
+        .searchable(text: $searchText, prompt: "Search list notes")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu("Quick Add", systemImage: "plus.circle") {
+                    ForEach(NotesListSection.allCases, id: \.self) { section in
+                        Button("Add \(section.singularTitle)") {
+                            draft = NoteEntryDraft(section: section)
+                        }
+                    }
+                }
+            }
+        }
         .onAppear(perform: refreshFromSharedState)
         .onChange(of: notes) { _, updated in
             Task {
@@ -63,26 +76,30 @@ struct NotesScreen: View {
     @ViewBuilder
     private func listSection(_ section: NotesListSection) -> some View {
         Section {
-            let entries = entries(for: section)
-            if entries.isEmpty {
+            let allEntries = entries(for: section)
+            let matches = NotesSearch.matches(notes: notes, section: section, query: searchText)
+            if allEntries.isEmpty {
                 Text("No \(section.title.lowercased()) yet")
                     .foregroundStyle(.secondary)
+            } else if matches.isEmpty {
+                Text("No matching \(section.title.lowercased())")
+                    .foregroundStyle(.secondary)
             } else {
-                ForEach(Array(entries.enumerated()), id: \.offset) { index, value in
+                ForEach(matches, id: \.originalIndex) { match in
                     Button {
-                        draft = NoteEntryDraft(section: section, index: index, value: value)
+                        draft = NoteEntryDraft(section: section, index: match.originalIndex, value: match.value)
                     } label: {
-                        Text(value)
+                        Text(match.value)
                             .lineLimit(3)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("\(section.singularTitle): \(value)")
+                    .accessibilityLabel("\(section.singularTitle): \(match.value)")
                     .accessibilityHint("Double tap to edit.")
                 }
                 .onDelete { offsets in
-                    deleteEntries(at: offsets, section: section)
+                    deleteMatches(at: offsets, from: matches, section: section)
                 }
             }
 
@@ -93,7 +110,7 @@ struct NotesScreen: View {
             }
             .accessibilityLabel("Add \(section.singularTitle)")
         } header: {
-            Text(section.title)
+            Text(sectionTitle(for: section))
         } footer: {
             Text("Tap an entry to edit it. Swipe left to delete.")
         }
@@ -126,9 +143,17 @@ struct NotesScreen: View {
         }
     }
 
-    private func deleteEntries(at offsets: IndexSet, section: NotesListSection) {
+    private func deleteMatches(at offsets: IndexSet, from matches: [NoteEntryMatch], section: NotesListSection) {
+        let originalOffsets = offsets
+            .compactMap { index in
+                matches.indices.contains(index) ? matches[index].originalIndex : nil
+            }
+            .sorted(by: >)
+
         var updated = entries(for: section)
-        updated.remove(atOffsets: offsets)
+        for index in originalOffsets where updated.indices.contains(index) {
+            updated.remove(at: index)
+        }
         setEntries(updated, for: section)
     }
 
@@ -143,6 +168,16 @@ struct NotesScreen: View {
         }
 
         setEntries(updated, for: draft.section)
+    }
+
+    private func sectionTitle(for section: NotesListSection) -> String {
+        let total = entries(for: section).count
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "\(section.title) (\(total))"
+        }
+
+        let matchCount = NotesSearch.matches(notes: notes, section: section, query: searchText).count
+        return "\(section.title) (\(matchCount) of \(total))"
     }
 }
 
@@ -186,7 +221,7 @@ private struct NoteEntryEditorView: View {
     }
 }
 
-private enum NotesListSection: CaseIterable {
+enum NotesListSection: CaseIterable {
     case talents
     case traits
     case mutations
@@ -214,6 +249,34 @@ private enum NotesListSection: CaseIterable {
         case .psychicPowers: "Psychic Power"
         case .specialAbilities: "Special Ability"
         }
+    }
+}
+
+struct NoteEntryMatch: Equatable {
+    let originalIndex: Int
+    let value: String
+}
+
+struct NotesSearch {
+    static func matches(notes: NotesState, section: NotesListSection, query: String) -> [NoteEntryMatch] {
+        let values: [String]
+        switch section {
+        case .talents: values = notes.talents
+        case .traits: values = notes.traits
+        case .mutations: values = notes.mutations
+        case .disorders: values = notes.disorders
+        case .psychicPowers: values = notes.psychicPowers
+        case .specialAbilities: values = notes.specialAbilities
+        }
+
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if normalized.isEmpty {
+            return Array(values.enumerated()).map { NoteEntryMatch(originalIndex: $0.offset, value: $0.element) }
+        }
+
+        return Array(values.enumerated())
+            .filter { $0.element.localizedCaseInsensitiveContains(normalized) }
+            .map { NoteEntryMatch(originalIndex: $0.offset, value: $0.element) }
     }
 }
 

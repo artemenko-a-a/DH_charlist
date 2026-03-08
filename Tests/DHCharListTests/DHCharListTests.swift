@@ -202,6 +202,64 @@ import SwiftData
     #expect(viewModel.errorMessage == nil)
     #expect(viewModel.characters.isEmpty)
 }
+
+@Test func characterListSearchMatchesVisibleProfileFields() {
+    let first = Character(profile: Profile(name: "Kara", homeWorld: "Hive Sibellus", background: "Adeptus Arbites", role: "Warrior"))
+    let second = Character(profile: Profile(name: "Morn", homeWorld: "Voidborn", background: "Navy", role: "Seeker"))
+    let source = [first, second]
+
+    #expect(CharacterListSearch.filter(characters: source, query: "").count == 2)
+    #expect(CharacterListSearch.filter(characters: source, query: "  arbites ").map(\.id) == [first.id])
+    #expect(CharacterListSearch.filter(characters: source, query: "seeker").map(\.id) == [second.id])
+}
+
+@Test func skillsSearchMatchesNameSpecialisationAndTraining() {
+    let first = Skill(name: "Stealth", characteristic: .agility, training: .trained, specialisations: ["Urban"])
+    let second = Skill(name: "Awareness", characteristic: .perception, training: .known, specialisations: ["Sound"])
+    let source = [first, second]
+
+    #expect(SkillsSearch.filter(skills: source, query: "").count == 2)
+    #expect(SkillsSearch.filter(skills: source, query: "urban").map(\.id) == [first.id])
+    #expect(SkillsSearch.filter(skills: source, query: "known").map(\.id) == [second.id])
+}
+
+@Test func notesSearchReturnsOriginalIndexesForFilteredMatches() {
+    let notes = NotesState(
+        talents: ["Rapid Reload", "Deadeye Shot", "Weapon-Tech"],
+        traits: [],
+        mutations: [],
+        disorders: [],
+        psychicPowers: [],
+        specialAbilities: [],
+        notes: ""
+    )
+
+    let filtered = NotesSearch.matches(notes: notes, section: .talents, query: "shot")
+    let all = NotesSearch.matches(notes: notes, section: .talents, query: "")
+
+    #expect(filtered == [NoteEntryMatch(originalIndex: 1, value: "Deadeye Shot")])
+    #expect(all.count == 3)
+    #expect(all.map(\.originalIndex) == [0, 1, 2])
+}
+
+@Test func equipmentSearchFiltersWeaponsArmourAndInventory() {
+    let weapons = [
+        Weapon(name: "Laspistol", type: "Pistol", range: "30m", damage: "1d10+2 E", penetration: "0", clip: "30", reload: "Half", traits: "Reliable"),
+        Weapon(name: "Chainsword", type: "Melee", range: "—", damage: "1d10+2 R", penetration: "2", clip: "", reload: "", traits: "Tearing")
+    ]
+    let armour = [
+        Armour(location: "Body", armourPoints: 4),
+        Armour(location: "Head", armourPoints: 3)
+    ]
+    let inventory = [
+        InventoryItem(name: "Data-slate", quantity: 1, weight: 0.8),
+        InventoryItem(name: "Medkit", quantity: 2, weight: 1.5)
+    ]
+
+    #expect(EquipmentSearch.filter(weapons: weapons, query: "tearing").map(\.name) == ["Chainsword"])
+    #expect(EquipmentSearch.filter(armour: armour, query: "4").map(\.location) == ["Body"])
+    #expect(EquipmentSearch.filter(inventory: inventory, query: "med").map(\.name) == ["Medkit"])
+}
 #endif
 
 @Test func updateOperationsThrowNotFoundForMissingCharacter() async throws {

@@ -11,6 +11,7 @@ struct SkillsScreen: View {
     @State private var skills: [Skill]
     @State private var characteristics: CharacteristicSet
     @State private var draft: SkillDraft?
+    @State private var searchText = ""
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -27,6 +28,7 @@ struct SkillsScreen: View {
         .formContentWidth()
         .platformInsetGroupedListStyle()
         .navigationTitle("Skills")
+        .searchable(text: $searchText, prompt: "Search skill, characteristic, training")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -66,9 +68,15 @@ struct SkillsScreen: View {
                 systemImage: "list.bullet.rectangle",
                 description: Text("Add skills to track training level, specialisations, and derived targets.")
             )
+        } else if filteredSkills.isEmpty {
+            ContentUnavailableView(
+                "No Matching Skills",
+                systemImage: "magnifyingglass",
+                description: Text("Try a different skill name, specialisation, characteristic, or training level.")
+            )
         } else {
             Section {
-                ForEach(skills) { skill in
+                ForEach(filteredSkills) { skill in
                     Button {
                         draft = SkillDraft(skill: skill)
                     } label: {
@@ -76,9 +84,9 @@ struct SkillsScreen: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .onDelete(perform: deleteSkills)
+                .onDelete(perform: deleteFilteredSkills)
             } header: {
-                Text("Skills")
+                Text(skillsSectionTitle)
             } footer: {
                 Text("Swipe left on a skill row to delete it.")
             }
@@ -91,8 +99,11 @@ struct SkillsScreen: View {
         characteristics = character.characteristics
     }
 
-    private func deleteSkills(at offsets: IndexSet) {
-        skills.remove(atOffsets: offsets)
+    private func deleteFilteredSkills(at offsets: IndexSet) {
+        let idsToDelete = offsets.compactMap { index in
+            filteredSkills.indices.contains(index) ? filteredSkills[index].id : nil
+        }
+        skills.removeAll { idsToDelete.contains($0.id) }
     }
 
     private func upsertSkill(from draft: SkillDraft) {
@@ -106,6 +117,18 @@ struct SkillsScreen: View {
 
     private func target(for skill: Skill) -> Int {
         DerivedValueCalculator.skillTarget(for: skill, characteristics: characteristics)
+    }
+
+    private var filteredSkills: [Skill] {
+        SkillsSearch.filter(skills: skills, query: searchText)
+    }
+
+    private var skillsSectionTitle: String {
+        let total = skills.count
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "Skills (\(total))"
+        }
+        return "Matches (\(filteredSkills.count) of \(total))"
     }
 }
 
@@ -289,6 +312,24 @@ private extension SkillTrainingLevel {
         case .trained: "Trained"
         case .veteran: "Veteran"
         }
+    }
+}
+
+struct SkillsSearch {
+    static func filter(skills: [Skill], query: String) -> [Skill] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return skills }
+        return skills.filter { matches($0, query: normalized) }
+    }
+
+    static func matches(_ skill: Skill, query: String) -> Bool {
+        let fields = [
+            skill.name,
+            skill.characteristic.label,
+            skill.training.label,
+            skill.specialisations.joined(separator: " ")
+        ]
+        return fields.contains { $0.localizedCaseInsensitiveContains(query) }
     }
 }
 #endif

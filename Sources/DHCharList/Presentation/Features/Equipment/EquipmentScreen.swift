@@ -12,6 +12,7 @@ struct EquipmentScreen: View {
     @State private var weaponDraft: WeaponDraft?
     @State private var armourDraft: ArmourDraft?
     @State private var inventoryDraft: InventoryItemDraft?
+    @State private var searchText = ""
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -29,6 +30,22 @@ struct EquipmentScreen: View {
         .formContentWidth()
         .formStyle(.grouped)
         .navigationTitle("Equipment")
+        .searchable(text: $searchText, prompt: "Search weapons, armour, inventory")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu("Quick Add", systemImage: "plus.circle") {
+                    Button("Add Weapon") {
+                        weaponDraft = WeaponDraft()
+                    }
+                    Button("Add Armour") {
+                        armourDraft = ArmourDraft()
+                    }
+                    Button("Add Item") {
+                        inventoryDraft = InventoryItemDraft()
+                    }
+                }
+            }
+        }
         .onAppear(perform: refreshFromSharedState)
         .onChange(of: equipment) { _, updated in
             Task {
@@ -79,8 +96,11 @@ struct EquipmentScreen: View {
             if equipment.weapons.isEmpty {
                 Text("No weapons yet")
                     .foregroundStyle(.secondary)
+            } else if filteredWeapons.isEmpty {
+                Text("No matching weapons")
+                    .foregroundStyle(.secondary)
             } else {
-                ForEach(equipment.weapons) { weapon in
+                ForEach(filteredWeapons) { weapon in
                     Button {
                         weaponDraft = WeaponDraft(weapon: weapon)
                     } label: {
@@ -88,7 +108,7 @@ struct EquipmentScreen: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .onDelete(perform: deleteWeapons)
+                .onDelete(perform: deleteFilteredWeapons)
             }
 
             Button {
@@ -98,7 +118,7 @@ struct EquipmentScreen: View {
             }
             .accessibilityLabel("Add Weapon")
         } header: {
-            Text("Weapons")
+            Text(weaponsSectionTitle)
         } footer: {
             Text("Tap a weapon to edit it. Swipe left to delete.")
         }
@@ -110,8 +130,11 @@ struct EquipmentScreen: View {
             if equipment.armour.isEmpty {
                 Text("No armour entries yet")
                     .foregroundStyle(.secondary)
+            } else if filteredArmour.isEmpty {
+                Text("No matching armour")
+                    .foregroundStyle(.secondary)
             } else {
-                ForEach(equipment.armour) { armour in
+                ForEach(filteredArmour) { armour in
                     Button {
                         armourDraft = ArmourDraft(armour: armour)
                     } label: {
@@ -126,7 +149,7 @@ struct EquipmentScreen: View {
                     .accessibilityLabel("\(armour.location.isEmpty ? "Unnamed Location" : armour.location), armour points \(armour.armourPoints)")
                     .accessibilityHint("Double tap to edit armour.")
                 }
-                .onDelete(perform: deleteArmourEntries)
+                .onDelete(perform: deleteFilteredArmourEntries)
             }
 
             Button {
@@ -136,7 +159,7 @@ struct EquipmentScreen: View {
             }
             .accessibilityLabel("Add Armour")
         } header: {
-            Text("Armour")
+            Text(armourSectionTitle)
         } footer: {
             Text("Use one entry per body location.")
         }
@@ -162,8 +185,11 @@ struct EquipmentScreen: View {
             if equipment.inventory.isEmpty {
                 Text("No inventory items yet")
                     .foregroundStyle(.secondary)
+            } else if filteredInventory.isEmpty {
+                Text("No matching inventory items")
+                    .foregroundStyle(.secondary)
             } else {
-                ForEach(equipment.inventory) { item in
+                ForEach(filteredInventory) { item in
                     Button {
                         inventoryDraft = InventoryItemDraft(item: item)
                     } label: {
@@ -185,7 +211,7 @@ struct EquipmentScreen: View {
                     .accessibilityLabel("\(item.name.isEmpty ? "Unnamed Item" : item.name), quantity \(item.quantity), weight \(item.weight.formatted(.number.precision(.fractionLength(0...2))))")
                     .accessibilityHint("Double tap to edit inventory item.")
                 }
-                .onDelete(perform: deleteInventoryItems)
+                .onDelete(perform: deleteFilteredInventoryItems)
             }
 
             Button {
@@ -195,7 +221,7 @@ struct EquipmentScreen: View {
             }
             .accessibilityLabel("Add Item")
         } header: {
-            Text("Inventory")
+            Text(inventorySectionTitle)
         } footer: {
             Text("Tap an item to edit quantity/weight. Swipe left to delete.")
         }
@@ -222,8 +248,11 @@ struct EquipmentScreen: View {
         equipment = character.equipment
     }
 
-    private func deleteWeapons(at offsets: IndexSet) {
-        equipment.weapons.remove(atOffsets: offsets)
+    private func deleteFilteredWeapons(at offsets: IndexSet) {
+        let idsToDelete = offsets.compactMap { index in
+            filteredWeapons.indices.contains(index) ? filteredWeapons[index].id : nil
+        }
+        equipment.weapons.removeAll { idsToDelete.contains($0.id) }
     }
 
     private func upsertWeapon(from draft: WeaponDraft) {
@@ -235,8 +264,11 @@ struct EquipmentScreen: View {
         }
     }
 
-    private func deleteArmourEntries(at offsets: IndexSet) {
-        equipment.armour.remove(atOffsets: offsets)
+    private func deleteFilteredArmourEntries(at offsets: IndexSet) {
+        let idsToDelete = offsets.compactMap { index in
+            filteredArmour.indices.contains(index) ? filteredArmour[index].id : nil
+        }
+        equipment.armour.removeAll { idsToDelete.contains($0.id) }
     }
 
     private func upsertArmour(from draft: ArmourDraft) {
@@ -248,8 +280,11 @@ struct EquipmentScreen: View {
         }
     }
 
-    private func deleteInventoryItems(at offsets: IndexSet) {
-        equipment.inventory.remove(atOffsets: offsets)
+    private func deleteFilteredInventoryItems(at offsets: IndexSet) {
+        let idsToDelete = offsets.compactMap { index in
+            filteredInventory.indices.contains(index) ? filteredInventory[index].id : nil
+        }
+        equipment.inventory.removeAll { idsToDelete.contains($0.id) }
     }
 
     private func upsertInventoryItem(from draft: InventoryItemDraft) {
@@ -259,6 +294,38 @@ struct EquipmentScreen: View {
         } else {
             equipment.inventory.append(updated)
         }
+    }
+
+    private var filteredWeapons: [Weapon] {
+        EquipmentSearch.filter(weapons: equipment.weapons, query: searchText)
+    }
+
+    private var filteredArmour: [Armour] {
+        EquipmentSearch.filter(armour: equipment.armour, query: searchText)
+    }
+
+    private var filteredInventory: [InventoryItem] {
+        EquipmentSearch.filter(inventory: equipment.inventory, query: searchText)
+    }
+
+    private var weaponsSectionTitle: String {
+        sectionTitle(base: "Weapons", matches: filteredWeapons.count, total: equipment.weapons.count)
+    }
+
+    private var armourSectionTitle: String {
+        sectionTitle(base: "Armour", matches: filteredArmour.count, total: equipment.armour.count)
+    }
+
+    private var inventorySectionTitle: String {
+        sectionTitle(base: "Inventory", matches: filteredInventory.count, total: equipment.inventory.count)
+    }
+
+    private func sectionTitle(base: String, matches: Int, total: Int) -> String {
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "\(base) (\(total))"
+        }
+
+        return "\(base) (\(matches) of \(total))"
     }
 }
 
@@ -568,4 +635,43 @@ private struct InventoryItemDraft: Identifiable {
         )
     }
 }
+
+struct EquipmentSearch {
+    static func filter(weapons: [Weapon], query: String) -> [Weapon] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return weapons }
+        return weapons.filter { weapon in
+            [
+                weapon.name,
+                weapon.type,
+                weapon.range,
+                weapon.damage,
+                weapon.penetration,
+                weapon.clip,
+                weapon.reload,
+                weapon.traits
+            ].contains { $0.localizedCaseInsensitiveContains(normalized) }
+        }
+    }
+
+    static func filter(armour: [Armour], query: String) -> [Armour] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return armour }
+        return armour.filter { armour in
+            armour.location.localizedCaseInsensitiveContains(normalized)
+                || String(armour.armourPoints).localizedCaseInsensitiveContains(normalized)
+        }
+    }
+
+    static func filter(inventory: [InventoryItem], query: String) -> [InventoryItem] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return inventory }
+        return inventory.filter { item in
+            item.name.localizedCaseInsensitiveContains(normalized)
+                || String(item.quantity).localizedCaseInsensitiveContains(normalized)
+                || item.weight.formatted(.number.precision(.fractionLength(0...2))).localizedCaseInsensitiveContains(normalized)
+        }
+    }
+}
+
 #endif

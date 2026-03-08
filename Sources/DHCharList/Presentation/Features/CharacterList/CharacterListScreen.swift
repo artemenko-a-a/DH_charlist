@@ -202,6 +202,7 @@ public struct CharacterListScreen: View {
     @State private var exportFileName = "dh_characters"
     @State private var pendingDeleteCharacterID: UUID?
     @State private var isShowingDeleteConfirmation = false
+    @State private var searchText = ""
 
     public init(useCases: CharacterUseCases, importExportService: any CharacterImportExportService) {
         _viewModel = StateObject(
@@ -215,23 +216,33 @@ public struct CharacterListScreen: View {
     public var body: some View {
         NavigationStack {
             List {
-                Section("All Characters") {
-                    ForEach(viewModel.characters) { character in
-                        NavigationLink(value: character.id) {
-                            CharacterRowView(character: character)
-                        }
-                        .swipeActions {
-                            Button("Duplicate") {
-                                Task { await viewModel.duplicateCharacter(id: character.id) }
+                if filteredCharacters.isEmpty, !viewModel.characters.isEmpty {
+                    Section {
+                        ContentUnavailableView(
+                            "No Matching Characters",
+                            systemImage: "magnifyingglass",
+                            description: Text("Try a different name, home world, background, or role.")
+                        )
+                    }
+                } else {
+                    Section(sectionTitle) {
+                        ForEach(filteredCharacters) { character in
+                            NavigationLink(value: character.id) {
+                                CharacterRowView(character: character)
                             }
-                            .tint(.blue)
+                            .swipeActions {
+                                Button("Duplicate") {
+                                    Task { await viewModel.duplicateCharacter(id: character.id) }
+                                }
+                                .tint(.blue)
 
-                            Button("Delete", role: .destructive) {
-                                pendingDeleteCharacterID = character.id
-                                isShowingDeleteConfirmation = true
+                                Button("Delete", role: .destructive) {
+                                    pendingDeleteCharacterID = character.id
+                                    isShowingDeleteConfirmation = true
+                                }
                             }
+                            .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
                         }
-                        .accessibilityHint("Opens character details. Swipe for duplicate or delete actions.")
                     }
                 }
             }
@@ -247,6 +258,7 @@ public struct CharacterListScreen: View {
             .formContentWidth()
             .platformInsetGroupedListStyle()
             .navigationTitle("Characters")
+            .searchable(text: $searchText, prompt: "Search name, world, background, role")
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Menu("Import/Export", systemImage: "arrow.up.arrow.down.circle") {
@@ -413,23 +425,59 @@ struct CharacterDetailScreen: View {
                 }
 
                 Section {
-                    NavigationLink("Edit Profile") {
+                    NavigationLink {
                         ProfileScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Edit Profile",
+                            summary: "Name, world, background, role, aptitudes, and description.",
+                            systemImage: "person.text.rectangle"
+                        )
                     }
-                    NavigationLink("Characteristics & Resources") {
+                    NavigationLink {
                         CharacteristicsScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Characteristics & Resources",
+                            summary: "Characteristics, wounds, fate, and experience.",
+                            systemImage: "chart.bar.doc.horizontal"
+                        )
                     }
-                    NavigationLink("Skills") {
+                    NavigationLink {
                         SkillsScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Skills",
+                            summary: "Track skill training, specialisations, and targets.",
+                            systemImage: "list.bullet.rectangle"
+                        )
                     }
-                    NavigationLink("Notes") {
+                    NavigationLink {
                         NotesScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Notes",
+                            summary: "Talents, traits, mutations, disorders, and powers.",
+                            systemImage: "note.text"
+                        )
                     }
-                    NavigationLink("Equipment") {
+                    NavigationLink {
                         EquipmentScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Equipment",
+                            summary: "Weapons, armour, movement, and inventory.",
+                            systemImage: "shippingbox"
+                        )
                     }
-                    NavigationLink("Session Mode") {
+                    NavigationLink {
                         SessionModeScreen(characterID: characterID, viewModel: viewModel)
+                    } label: {
+                        CharacterSectionLinkRow(
+                            title: "Session Mode",
+                            summary: "Track active session values and checks.",
+                            systemImage: "bolt.fill"
+                        )
                     }
                 } header: {
                     Text("Edit")
@@ -468,6 +516,61 @@ private extension CharacterListScreen {
                 }
             }
         )
+    }
+
+    var filteredCharacters: [Character] {
+        CharacterListSearch.filter(characters: viewModel.characters, query: searchText)
+    }
+
+    var sectionTitle: String {
+        let total = viewModel.characters.count
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return "All Characters (\(total))"
+        }
+
+        return "Matches (\(filteredCharacters.count) of \(total))"
+    }
+}
+
+struct CharacterListSearch {
+    static func filter(characters: [Character], query: String) -> [Character] {
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return characters }
+        return characters.filter { matches($0, query: normalized) }
+    }
+
+    static func matches(_ character: Character, query: String) -> Bool {
+        let fields = [
+            character.profile.name,
+            character.profile.homeWorld,
+            character.profile.background,
+            character.profile.role
+        ]
+
+        return fields.contains { $0.localizedCaseInsensitiveContains(query) }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CharacterSectionLinkRow: View {
+    let title: String
+    let summary: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: systemImage)
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 #endif

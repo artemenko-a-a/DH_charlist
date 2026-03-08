@@ -17,14 +17,16 @@ The project currently includes:
   - edit profile with autosave
   - duplicate
   - delete
+  - list-level search by visible profile fields (name/home world/background/role)
 - characteristics and resources editing
-- skills editing
-- notes / talents / traits / mutations / disorders / psychic powers / special abilities editing
+- skills editing (with local in-screen search/filter)
+- notes / talents / traits / mutations / disorders / psychic powers / special abilities editing (with local list-section search/filter)
 - equipment editing:
   - weapons
   - armour
   - movement
   - inventory
+  - local in-screen search/filter for weapons/armour/inventory
 - session mode editing
 - user-facing JSON import/export
 - runtime host app bridge for simulator launch via `DHCharListHost`

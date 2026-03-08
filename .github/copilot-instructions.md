@@ -44,7 +44,7 @@ xcodebuild \
 Override destination (optional):
 
 ```bash
-UI_DESTINATION="platform=iOS Simulator,OS=latest,name=iPhone 16" ./scripts/run_ui_smoke.sh
+UI_DESTINATION="platform=iOS Simulator,OS=latest" ./scripts/run_ui_smoke.sh
 ```
 
 ### Coverage (Xcode result bundle, local only)

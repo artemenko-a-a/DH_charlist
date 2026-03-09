@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -14,27 +12,28 @@ permissions:
   contents: read
 
 jobs:
-  swift-package:
-    name: SwiftPM build + test
+  fast-validation:
+    name: Fast validation (SwiftPM)
     runs-on: macos-15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build (swift build)
+      - name: SwiftPM build
         run: swift build
 
-      - name: Test (swift test)
+      - name: SwiftPM tests
         run: swift test
 
-  xcode-hostapp:
-    name: Xcode build + analyze (DHCharListHost)
+  xcode-validation:
+    name: Xcode host + coverage gate
     runs-on: macos-15
+    needs: fast-validation
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Xcode build
+      - name: Xcode host app build
         run: |
           set -eo pipefail
           xcodebuild \
@@ -44,12 +43,23 @@ jobs:
             -configuration Debug \
             build
 
-      - name: Xcode analyze
+      - name: Run coverage pipeline
         run: |
-          set -eo pipefail
-          xcodebuild \
-            -project DHCharListHost/DHCharListHost.xcodeproj \
-            -scheme DHCharListHost \
-            -destination "generic/platform=iOS Simulator" \
-            -configuration Debug \
-            analyze
+          ./scripts/run_xcode_coverage.sh
+
+      - name: Enforce coverage policy gate
+        run: |
+          ./scripts/check_coverage_policy.sh
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-artifacts
+          path: |
+            DHCharListHost/artifacts/coverage/latest/TestResults.xcresult
+            DHCharListHost/artifacts/coverage/latest/xcodebuild-test.log
+            DHCharListHost/artifacts/coverage/latest/xccov-summary.txt
+            DHCharListHost/artifacts/coverage/latest/xccov-report.json
+            DHCharListHost/artifacts/coverage/latest/coverage-metrics.json
+          if-no-files-found: warn

@@ -98,3 +98,8 @@
    - **Reason:** Batch 23 requires safe/reversible behavior and must avoid misleading implicit carry-over or shared-linkage semantics.
    - **Type:** Fact.
    - **Impact:** History remains local and unambiguous per character; duplicate/template flows preserve existing section data while starting with empty history.
+
+20. **Decision:** Keep UI smoke/screenshot automation in a separate manual workflow while making SwiftPM + host build + coverage gate required on push/PR.
+   - **Reason:** UI simulator tests are useful but heavier and more environment-sensitive; required CI should prioritize stable regression gates with clear failure signals.
+   - **Type:** Fact.
+   - **Impact:** Required CI now blocks merges on meaningful build/test/coverage regressions, while UI smoke/screenshots remain available on-demand with published artifacts.

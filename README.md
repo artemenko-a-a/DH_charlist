@@ -248,3 +248,45 @@ What UI smoke currently covers:
 What this does not guarantee:
 - exhaustive branch-level feature correctness
 - final visual/polish acceptance (manual checklist remains required)
+
+## CI workflow (Batch 25)
+
+Repository workflows:
+- `.github/workflows/ci.yml` (push + pull_request)
+- `.github/workflows/ui-tests.yml` (`workflow_dispatch`, manual)
+
+What runs on every push/PR (`ci.yml`):
+- `Fast validation (SwiftPM)`:
+  - `swift build`
+  - `swift test`
+- `Xcode host + coverage gate`:
+  - host app build (`xcodebuild ... build`)
+  - `./scripts/run_xcode_coverage.sh`
+  - `./scripts/check_coverage_policy.sh`
+
+What is optional/heavier:
+- `UI Tests (manual)` workflow:
+  - smoke path: `./scripts/run_ui_smoke.sh`
+  - screenshots path: `./scripts/run_ui_screenshots.sh`
+
+CI artifacts:
+- `coverage-artifacts` (from required `ci.yml` job):
+  - `TestResults.xcresult`
+  - `xcodebuild-test.log`
+  - `xccov-summary.txt`
+  - `xccov-report.json`
+  - `coverage-metrics.json`
+- `ui-smoke-artifacts` (manual workflow, smoke mode)
+- `ui-screenshot-artifacts` (manual workflow, screenshots mode; includes exported attachments)
+
+Local-to-CI command mapping:
+- local `swift build` -> CI `Fast validation (SwiftPM)`
+- local `swift test` -> CI `Fast validation (SwiftPM)`
+- local `./scripts/run_xcode_coverage.sh` -> CI `Xcode host + coverage gate`
+- local `./scripts/check_coverage_policy.sh` -> CI `Xcode host + coverage gate`
+- local `./scripts/run_ui_smoke.sh` -> manual `UI Tests (manual)` with `test_target=smoke`
+- local `./scripts/run_ui_screenshots.sh` -> manual `UI Tests (manual)` with `test_target=screenshots`
+
+Intentionally manual:
+- screenshot capture/review remains manual-triggered because it is heavier and artifact-oriented
+- final visual acceptance stays on the manual checklist (`Docs/manual-smoke-checklist.md`)

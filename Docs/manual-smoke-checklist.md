@@ -51,8 +51,13 @@ This checklist tracks the currently accepted runtime-polished implementation thr
 14. Confirm delete and verify the character is removed.
 15. Import/Export flow:
     - export JSON from toolbar menu
-    - import a valid JSON payload
-    - verify visible list refreshes to imported state
+    - import a valid JSON payload and verify the pre-confirmation step explicitly states:
+      - how many characters were detected in the payload
+      - the operation is replace-all, not merge
+      - characters missing from the imported file will be removed
+      - the action is destructive
+    - cancel the import and verify current local characters remain unchanged
+    - repeat with a valid JSON payload, confirm the destructive import, and verify the visible list refreshes to the imported state
     - import an invalid payload and verify error alert is shown
     - import a valid payload immediately after a failed import and verify stale error alert is cleared
 16. Accessibility sanity:

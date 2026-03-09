@@ -5,12 +5,14 @@ struct DHCharListHostLaunchConfiguration {
     static let uiTestingArgument = "-dh-uitesting"
     static let resetDataArgument = "-dh-ui-reset-data"
     static let seedSmokeDataArgument = "-dh-ui-seed-smoke"
+    static let stageImportPreviewArgument = "-dh-ui-stage-import-preview"
     static let persistenceJSONArgument = "-dh-ui-persistence-json"
     static let persistenceSwiftDataArgument = "-dh-ui-persistence-swiftdata"
 
     let isUITesting: Bool
     let shouldResetData: Bool
     let shouldSeedSmokeData: Bool
+    let shouldStageImportPreview: Bool
     let persistence: AppContainer.PersistenceBackend
 
     static func from(processInfo: ProcessInfo = .processInfo) -> DHCharListHostLaunchConfiguration {
@@ -23,6 +25,7 @@ struct DHCharListHostLaunchConfiguration {
         let isUITesting = argumentSet.contains(uiTestingArgument)
         let shouldResetData = argumentSet.contains(resetDataArgument)
         let shouldSeedSmokeData = argumentSet.contains(seedSmokeDataArgument)
+        let shouldStageImportPreview = argumentSet.contains(stageImportPreviewArgument)
 
         let persistence: AppContainer.PersistenceBackend
         if argumentSet.contains(persistenceSwiftDataArgument) {
@@ -35,6 +38,7 @@ struct DHCharListHostLaunchConfiguration {
             isUITesting: isUITesting,
             shouldResetData: shouldResetData,
             shouldSeedSmokeData: shouldSeedSmokeData,
+            shouldStageImportPreview: shouldStageImportPreview,
             persistence: persistence
         )
     }

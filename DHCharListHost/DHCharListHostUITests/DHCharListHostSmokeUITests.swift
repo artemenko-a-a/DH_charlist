@@ -1,6 +1,41 @@
 import XCTest
 
 final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
+    func testImportReplaceAllPreviewCanBeCancelledSafely() {
+        app.launchArguments += ["-dh-ui-stage-import-preview"]
+        launchForSmoke()
+
+        let replaceButton = app.buttons["Replace Local Characters"]
+        let cancelButton = button(containing: "Cancel")
+        XCTAssertTrue(replaceButton.waitForExistence(timeout: 8))
+        XCTAssertTrue(cancelButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "Imported file contains 1 character.").waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "does not merge").waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "will be removed").waitForExistence(timeout: 5))
+
+        cancelButton.tap()
+
+        XCTAssertTrue(labeledElement(containing: "Smoke Acolyte").waitForExistence(timeout: 8))
+        XCTAssertFalse(labeledElement(containing: "Imported Preview").exists)
+    }
+
+    func testImportReplaceAllPreviewCanBeConfirmedExplicitly() {
+        app.launchArguments += ["-dh-ui-stage-import-preview"]
+        launchForSmoke()
+
+        let replaceButton = app.buttons["Replace Local Characters"]
+        XCTAssertTrue(replaceButton.waitForExistence(timeout: 8))
+
+        replaceButton.tap()
+
+        let firstCharacterCell = app.cells.element(boundBy: 1)
+        XCTAssertTrue(firstCharacterCell.waitForExistence(timeout: 8))
+        firstCharacterCell.tap()
+
+        XCTAssertTrue(app.navigationBars["Imported Preview"].waitForExistence(timeout: 8))
+        XCTAssertFalse(labeledElement(containing: "Smoke Acolyte").exists)
+    }
+
     func testSmokeCoreFlowsAndEntryPoints() {
         launchForSmoke()
 
@@ -251,6 +286,18 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
             return textField
         }
         return app.textViews[identifier]
+    }
+
+    private func staticText(containing snippet: String) -> XCUIElement {
+        app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", snippet)).firstMatch
+    }
+
+    private func button(containing snippet: String) -> XCUIElement {
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", snippet)).firstMatch
+    }
+
+    private func labeledElement(containing snippet: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", snippet)).firstMatch
     }
 }
 

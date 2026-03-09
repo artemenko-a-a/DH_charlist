@@ -43,7 +43,7 @@ The project currently includes:
   - skill-based quick checks
   - standard modifiers (`+30` to `-30`) plus custom signed modifier entry
   - session-mode quick access with temporary modifier reuse
-- user-facing JSON import/export
+- user-facing JSON import/export with replace-all preview and destructive confirmation
 - runtime host app bridge for simulator launch via `DHCharListHost`
 - two validated local persistence paths:
   - JSON repository
@@ -85,6 +85,21 @@ Current helper behavior:
 - custom signed modifier input is supported
 - current Session Mode temporary modifiers can be reused directly in the helper when present
 - on compact sheet sizes, scroll within the helper to reach the full breakdown and final target rows
+
+## Import behavior (Batch 31)
+
+JSON import remains a roster-level replace-all operation.
+
+Before import is applied, the app now shows:
+- how many characters were detected in the imported payload
+- that the operation replaces the current local roster and does not merge
+- that characters missing from the imported file will be removed
+- that the action is destructive
+
+Current safety boundary:
+- cancel is the safe default
+- import is not currently undoable from the app
+- backup/snapshot before import is intentionally deferred for now
 
 ## Combat workspace (Batch 30)
 

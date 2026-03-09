@@ -1,21 +1,23 @@
-# Batch 30 State
+# Batch 31 State
 
 - status: validated
-- scope: combat workspace + encounter-speed helpers only
-- user-visible workspace additions:
-  - `Session Mode` now foregrounds current wounds, fatigue, and current fate for live adjustment
-  - active weapon can be selected from existing weapon entries and is summarized in the workspace
-  - movement values are visible alongside pinned checks, temporary modifiers, and quick mechanics shortcuts
-  - short combat condition notes can be added/edited/deleted in the same workspace
-- modeling boundaries:
-  - new combat-facing state stays in `SessionState` as explicit lightweight fields (`activeWeaponID`, `combatConditions`)
-  - uses existing equipment/weapon data; no combat engine, initiative tracker, or dice automation was added
-  - quick mechanics integration reuses the accepted Batch 29 helper and existing session temporary modifiers
+- scope: import safety only; no merge mode, backup workflow, or persistence redesign
+- user-visible import behavior:
+  - import now stages the payload before mutation and shows a lightweight preview summary
+  - the confirmation explicitly states the number of detected characters
+  - the confirmation explicitly states that import is replace-all, not merge
+  - the confirmation explicitly states that local characters missing from the file will be removed
+  - `Cancel` is the safe default path
+- architecture/runtime boundaries:
+  - accepted replace-all import path remains `CharacterUseCases.importCharacters(from:using:)`
+  - JSON-backed persistence remains the default/fallback runtime path
+  - SwiftData-backed persistence remains the validated alternative path
+  - backup/snapshot before import is intentionally deferred for this batch
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b30-combat-workspace.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
-  - `./scripts/run_ui_smoke.sh`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b31-import-safety-pair.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testImportReplaceAllPreviewCanBeCancelledSafely -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testImportReplaceAllPreviewCanBeConfirmedExplicitly`
 - focused runtime note:
-  - the combat workspace simulator sanity covered active-weapon selection, quick mechanics launch, combat condition entry, and pinned-check/modifier reuse from the same session flow
+  - simulator sanity now covers both safe cancel and explicit destructive confirm paths for import preview/confirmation
+  - a real dismissal-order bug was fixed so confirmation no longer clears staged import state before executing the accepted replace-all import

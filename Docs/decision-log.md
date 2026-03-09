@@ -125,3 +125,8 @@
    - **Reason:** The batch only needs faster in-session access to already accepted character/session data; a new combat model would expand scope, duplicate state, and increase migration risk without solving a proven problem.
    - **Type:** Fact.
    - **Impact:** Active weapon focus and short combat notes persist on the same local/session path as pinned checks and temporary modifiers, preserving JSON-default and SwiftData-alternative behavior while keeping combat state transparent and reversible.
+
+25. **Decision:** Keep JSON import semantics as explicit replace-all and add a lightweight preview + destructive confirmation layer instead of introducing merge, restore, or backup workflow in Batch 31.
+   - **Reason:** The high-severity risk was silent destructive replacement; making that behavior explicit is the minimal safe fix that preserves accepted import architecture and persistence behavior without implying undo/restore guarantees that are not actually implemented.
+   - **Type:** Fact.
+   - **Impact:** Import is now honest and safer at the UI boundary, while backup/snapshot and merge/conflict handling remain intentionally deferred.

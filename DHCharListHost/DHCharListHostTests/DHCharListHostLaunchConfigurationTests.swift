@@ -17,12 +17,14 @@ final class DHCharListHostLaunchConfigurationTests: XCTestCase {
             "DHCharListHost",
             DHCharListHostLaunchConfiguration.uiTestingArgument,
             DHCharListHostLaunchConfiguration.resetDataArgument,
-            DHCharListHostLaunchConfiguration.seedSmokeDataArgument
+            DHCharListHostLaunchConfiguration.seedSmokeDataArgument,
+            DHCharListHostLaunchConfiguration.stageImportPreviewArgument
         ])
 
         XCTAssertTrue(configuration.isUITesting)
         XCTAssertTrue(configuration.shouldResetData)
         XCTAssertTrue(configuration.shouldSeedSmokeData)
+        XCTAssertTrue(configuration.shouldStageImportPreview)
         XCTAssertEqual(configuration.persistence, .jsonFile)
     }
 

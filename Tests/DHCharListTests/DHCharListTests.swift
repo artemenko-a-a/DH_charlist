@@ -111,6 +111,20 @@ import SwiftData
 }
 
 #if canImport(SwiftUI)
+@Test func importPreviewSummaryMakesReplaceAllSemanticsExplicit() {
+    let summary = CharacterImportPreviewSummary(detectedCharacterCount: 2, existingCharacterCount: 3)
+
+    #expect(summary.detectedCharacterCount == 2)
+    #expect(summary.existingCharacterCount == 3)
+    #expect(summary.isReplaceAll == true)
+    #expect(summary.removesCharactersMissingFromImport == true)
+    #expect(summary.isDestructive == true)
+    #expect(summary.confirmationMessage.contains("Imported file contains 2 characters."))
+    #expect(summary.confirmationMessage.contains("does not merge"))
+    #expect(summary.confirmationMessage.contains("will be removed"))
+    #expect(summary.confirmationMessage.contains("destructive"))
+}
+
 @Test @MainActor func importRefreshesCharacterListViewModelSourceOfTruth() async throws {
     let fileURL = uniqueTestFileURL("batch11-viewmodel-refresh")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -124,11 +138,14 @@ import SwiftData
 
     let replacement = Character(profile: Profile(name: "Imported Character"))
     let payload = try service.exportCharacters([replacement])
-    await viewModel.importPayload(payload)
+    await viewModel.prepareImportPayload(payload)
+    #expect(viewModel.pendingImportSummary == CharacterImportPreviewSummary(detectedCharacterCount: 1, existingCharacterCount: 1))
+    await viewModel.confirmPendingImport()
 
     #expect(viewModel.characters.count == 1)
     #expect(viewModel.characters.first?.profile.name == "Imported Character")
     #expect(viewModel.characters.first?.id == replacement.id)
+    #expect(viewModel.pendingImportSummary == nil)
 }
 
 @Test @MainActor func importFailureSetsViewModelErrorAndKeepsCurrentVisibleState() async throws {
@@ -142,9 +159,10 @@ import SwiftData
     await viewModel.load()
     #expect(viewModel.characters.map(\.profile.name) == ["Visible Character"])
 
-    await viewModel.importPayload(Data("not json".utf8))
+    await viewModel.prepareImportPayload(Data("not json".utf8))
 
     #expect(viewModel.characters.map(\.profile.name) == ["Visible Character"])
+    #expect(viewModel.pendingImportSummary == nil)
     #expect(viewModel.errorMessage != nil)
 }
 
@@ -155,16 +173,66 @@ import SwiftData
     let service = CharacterJSONImportExportService()
     let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
 
-    await viewModel.importPayload(Data("not json".utf8))
+    await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
 
     let incoming = Character(profile: Profile(name: "Recovered Import"))
     let payload = try service.exportCharacters([incoming])
-    await viewModel.importPayload(payload)
+    await viewModel.prepareImportPayload(payload)
+    await viewModel.confirmPendingImport()
 
     #expect(viewModel.errorMessage == nil)
     #expect(viewModel.characters.count == 1)
     #expect(viewModel.characters.first?.profile.name == "Recovered Import")
+}
+
+@Test @MainActor func cancelPendingImportLeavesCurrentDataUnchanged() async throws {
+    let fileURL = uniqueTestFileURL("batch31-import-cancel")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Local Character"))
+    await viewModel.load()
+
+    let incoming = Character(profile: Profile(name: "Imported Character"))
+    let payload = try service.exportCharacters([incoming])
+    await viewModel.prepareImportPayload(payload)
+
+    #expect(viewModel.pendingImportSummary == CharacterImportPreviewSummary(detectedCharacterCount: 1, existingCharacterCount: 1))
+
+    viewModel.cancelPendingImport()
+
+    let persisted = try await repository.fetchAll()
+    #expect(viewModel.pendingImportSummary == nil)
+    #expect(viewModel.characters.map(\.profile.name) == ["Local Character"])
+    #expect(persisted.map(\.profile.name) == ["Local Character"])
+}
+
+@Test @MainActor func confirmedImportReplacesCurrentDataAsAdvertised() async throws {
+    let fileURL = uniqueTestFileURL("batch31-import-confirm")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+
+    _ = try await useCases.createCharacter(profile: Profile(name: "Old One"))
+    _ = try await useCases.createCharacter(profile: Profile(name: "Old Two"))
+    await viewModel.load()
+
+    let imported = Character(profile: Profile(name: "Imported Only"))
+    let payload = try service.exportCharacters([imported])
+    await viewModel.prepareImportPayload(payload)
+
+    #expect(viewModel.pendingImportSummary == CharacterImportPreviewSummary(detectedCharacterCount: 1, existingCharacterCount: 2))
+
+    await viewModel.confirmPendingImport()
+
+    let persisted = try await repository.fetchAll()
+    #expect(viewModel.pendingImportSummary == nil)
+    #expect(viewModel.characters.map(\.profile.name) == ["Imported Only"])
+    #expect(persisted.map(\.profile.name) == ["Imported Only"])
 }
 
 @Test @MainActor func exportSuccessClearsPreviousViewModelError() async throws {
@@ -174,7 +242,7 @@ import SwiftData
     let service = CharacterJSONImportExportService()
     let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
 
-    await viewModel.importPayload(Data("not json".utf8))
+    await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
 
     _ = try await useCases.createCharacter(profile: Profile(name: "Export Recovery"))
@@ -192,7 +260,7 @@ import SwiftData
     let service = CharacterJSONImportExportService()
     let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
 
-    await viewModel.importPayload(Data("not json".utf8))
+    await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
 
     let created = try await useCases.createCharacter(profile: Profile(name: "Delete Recovery"))

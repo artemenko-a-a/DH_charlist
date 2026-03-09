@@ -29,15 +29,22 @@ private struct CharacterExportDocument: FileDocument {
 @available(iOS 17, macOS 14, *)
 @MainActor
 final class CharacterListViewModel: ObservableObject {
+    private struct PendingImport: Sendable {
+        let payload: Data
+        let summary: CharacterImportPreviewSummary
+    }
+
     @Published private(set) var characters: [Character] = []
     @Published private(set) var templates: [CharacterTemplate] = []
     @Published private(set) var isLoading = false
+    @Published private(set) var pendingImportSummary: CharacterImportPreviewSummary?
     @Published var errorMessage: String?
 
     let autosaveCoordinator: ProfileAutosaveCoordinator
     private let useCases: CharacterUseCases
     private let templateUseCases: CharacterTemplateUseCases?
     private let importExportService: any CharacterImportExportService
+    private var pendingImport: PendingImport?
 
     init(
         useCases: CharacterUseCases,
@@ -299,14 +306,43 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
-    func importPayload(_ data: Data) async {
+    func prepareImportPayload(_ data: Data) async {
         do {
-            _ = try await useCases.importCharacters(from: data, using: importExportService)
-            await load()
+            let importedCharacters = try importExportService.import(data)
+            let existingCharacters = try await useCases.listCharacters()
+            let summary = CharacterImportPreviewSummary(
+                detectedCharacterCount: importedCharacters.count,
+                existingCharacterCount: existingCharacters.count
+            )
+            pendingImport = PendingImport(payload: data, summary: summary)
+            pendingImportSummary = summary
             errorMessage = nil
         } catch {
+            pendingImport = nil
+            pendingImportSummary = nil
             errorMessage = error.localizedDescription
         }
+    }
+
+    func confirmPendingImport() async {
+        guard let pendingImport else { return }
+
+        do {
+            _ = try await useCases.importCharacters(from: pendingImport.payload, using: importExportService)
+            await load()
+            self.pendingImport = nil
+            pendingImportSummary = nil
+            errorMessage = nil
+        } catch {
+            self.pendingImport = nil
+            pendingImportSummary = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelPendingImport() {
+        pendingImport = nil
+        pendingImportSummary = nil
     }
 
     func character(by id: UUID) -> Character? {
@@ -346,6 +382,7 @@ final class CharacterListViewModel: ObservableObject {
 @available(iOS 17, macOS 14, *)
 public struct CharacterListScreen: View {
     @StateObject private var viewModel: CharacterListViewModel
+    @State private var didPrepareInitialImport = false
     @State private var isShowingImportPicker = false
     @State private var isShowingExportPicker = false
     @State private var isShowingQuickStart = false
@@ -355,11 +392,13 @@ public struct CharacterListScreen: View {
     @State private var pendingDeleteCharacterID: UUID?
     @State private var isShowingDeleteConfirmation = false
     @State private var searchText = ""
+    private let initialImportPayload: Data?
 
     public init(
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
-        importExportService: any CharacterImportExportService
+        importExportService: any CharacterImportExportService,
+        initialImportPayload: Data? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: CharacterListViewModel(
@@ -368,6 +407,7 @@ public struct CharacterListScreen: View {
                 importExportService: importExportService
             )
         )
+        self.initialImportPayload = initialImportPayload
     }
 
     public var body: some View {
@@ -469,6 +509,9 @@ public struct CharacterListScreen: View {
             }
             .task {
                 await viewModel.load()
+                guard !didPrepareInitialImport, let initialImportPayload else { return }
+                didPrepareInitialImport = true
+                await viewModel.prepareImportPayload(initialImportPayload)
             }
             .sheet(isPresented: $isShowingQuickStart) {
                 TemplateQuickStartSheet(viewModel: viewModel)
@@ -493,7 +536,7 @@ public struct CharacterListScreen: View {
 
                     do {
                         let data = try Data(contentsOf: sourceURL)
-                        Task { await viewModel.importPayload(data) }
+                        Task { await viewModel.prepareImportPayload(data) }
                     } catch {
                         viewModel.errorMessage = error.localizedDescription
                     }
@@ -516,6 +559,20 @@ public struct CharacterListScreen: View {
                 case .failure(let error):
                     viewModel.errorMessage = error.localizedDescription
                 }
+            }
+            .alert(
+                "Replace Local Characters?",
+                isPresented: isShowingImportConfirmation,
+                presenting: viewModel.pendingImportSummary
+            ) { _ in
+                Button("Replace Local Characters", role: .destructive) {
+                    Task { await viewModel.confirmPendingImport() }
+                }
+                Button("Cancel", role: .cancel) {
+                    viewModel.cancelPendingImport()
+                }
+            } message: { summary in
+                Text(summary.confirmationMessage)
             }
             .confirmationDialog(
                 "Delete Character?",
@@ -542,6 +599,13 @@ public struct CharacterListScreen: View {
         formatter.dateFormat = "yyyy-MM-dd"
         let stamp = formatter.string(from: .now)
         return "dh_characters_\(stamp)"
+    }
+
+    private var isShowingImportConfirmation: Binding<Bool> {
+        Binding(
+            get: { viewModel.pendingImportSummary != nil },
+            set: { _ in }
+        )
     }
 
     private func characterName(for id: UUID) -> String {

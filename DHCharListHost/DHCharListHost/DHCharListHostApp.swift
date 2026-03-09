@@ -24,6 +24,7 @@ private struct HostBootstrapView: View {
 
     @State private var isReady = false
     @State private var container: AppContainer
+    @State private var stagedImportPayload: Data?
 
     init(launchConfiguration: DHCharListHostLaunchConfiguration) {
         self.launchConfiguration = launchConfiguration
@@ -33,7 +34,7 @@ private struct HostBootstrapView: View {
     var body: some View {
         Group {
             if isReady {
-                DHCharListAppShell(container: container)
+                DHCharListAppShell(container: container, initialImportPayload: stagedImportPayload)
                     .accessibilityIdentifier("host.app.shell")
             } else {
                 ProgressView("Preparing")
@@ -57,6 +58,10 @@ private struct HostBootstrapView: View {
 
         if launchConfiguration.shouldSeedSmokeData {
             await seedSmokeDataIfNeeded()
+        }
+
+        if launchConfiguration.shouldStageImportPreview {
+            await stageImportPreviewIfNeeded()
         }
     }
 
@@ -93,5 +98,19 @@ private struct HostBootstrapView: View {
         } catch {
             // Intentionally ignore seed failures; tests will fail visibly if data is missing.
         }
+    }
+
+    private func stageImportPreviewIfNeeded() async {
+        let stagedCharacter = Character(
+            profile: Profile(
+                name: "Imported Preview",
+                homeWorld: "Voidborn",
+                background: "Imperial Navy",
+                role: "Seeker",
+                aptitudes: ["Perception"],
+                description: "Staged replace-all preview payload"
+            )
+        )
+        stagedImportPayload = try? container.importExportService.exportCharacters([stagedCharacter])
     }
 }

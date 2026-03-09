@@ -1,21 +1,22 @@
-# Batch 28 State
+# Batch 29 State
 
-- status: validated as archive-ready / TestFlight-prepared
-- scope: distribution/TestFlight bring-up only
-- validated host build/archive commands:
+- status: validated
+- scope: rules-aware quick mechanics helpers only
+- user-visible helper entry points:
+  - `Characteristics & Resources` scope button on a characteristic row
+  - `Skills` quick-check button on a skill row
+  - `Session Mode` -> `Open Quick Mechanics`
+- helper boundaries:
+  - uses existing characteristic values and existing skill training modifiers
+  - supports preset modifiers `+30`, `+20`, `+10`, `+0`, `-10`, `-20`, `-30`
+  - supports custom signed modifier input
+  - can reuse current Session Mode temporary modifiers when present
+  - does not roll dice or persist results automatically
+- validated commands:
+  - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+  - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Release -destination 'generic/platform=iOS' build CODE_SIGNING_ALLOWED=NO`
-  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Release -destination 'generic/platform=iOS' archive -archivePath /tmp/DHCharListHost-Batch28.xcarchive CODE_SIGNING_ALLOWED=NO`
-- archive truth:
-  - `CFBundleIdentifier = com.example.DHCharListHost`
-  - `CFBundleShortVersionString = 1.0`
-  - `CFBundleVersion = 1`
-  - `SigningIdentity = ""`
-  - `Team = ""`
-- export probe:
-  - `xcodebuild -exportArchive ...` fails with `No Team Found in Archive`
-- remaining manual boundary:
-  - replace placeholder bundle identifier(s)
-  - select Apple Developer team / signing context locally
-  - create/configure App Store Connect app record
-  - perform signed archive/export/upload
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b29-quick-mechanics-rerun-3.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
+  - `./scripts/run_ui_smoke.sh`
+- focused runtime note:
+  - compact-sheet simulator sanity required scrolling within the helper to reach the breakdown/final target row

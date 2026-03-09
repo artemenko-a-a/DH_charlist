@@ -10,6 +10,7 @@ struct CharacteristicsScreen: View {
 
     @State private var characteristics: CharacteristicSet
     @State private var resources: ResourceState
+    @State private var quickCheckSelection: QuickMechanicsSelection?
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -22,19 +23,19 @@ struct CharacteristicsScreen: View {
     var body: some View {
         Form {
             Section {
-                characteristicRow("Weapon Skill", value: $characteristics.weaponSkill, bonus: characteristics.bonus.weaponSkill)
-                characteristicRow("Ballistic Skill", value: $characteristics.ballisticSkill, bonus: characteristics.bonus.ballisticSkill)
-                characteristicRow("Strength", value: $characteristics.strength, bonus: characteristics.bonus.strength)
-                characteristicRow("Toughness", value: $characteristics.toughness, bonus: characteristics.bonus.toughness)
-                characteristicRow("Agility", value: $characteristics.agility, bonus: characteristics.bonus.agility)
-                characteristicRow("Intelligence", value: $characteristics.intelligence, bonus: characteristics.bonus.intelligence)
-                characteristicRow("Perception", value: $characteristics.perception, bonus: characteristics.bonus.perception)
-                characteristicRow("Willpower", value: $characteristics.willpower, bonus: characteristics.bonus.willpower)
-                characteristicRow("Fellowship", value: $characteristics.fellowship, bonus: characteristics.bonus.fellowship)
+                characteristicRow("Weapon Skill", characteristic: .weaponSkill, value: $characteristics.weaponSkill, bonus: characteristics.bonus.weaponSkill)
+                characteristicRow("Ballistic Skill", characteristic: .ballisticSkill, value: $characteristics.ballisticSkill, bonus: characteristics.bonus.ballisticSkill)
+                characteristicRow("Strength", characteristic: .strength, value: $characteristics.strength, bonus: characteristics.bonus.strength)
+                characteristicRow("Toughness", characteristic: .toughness, value: $characteristics.toughness, bonus: characteristics.bonus.toughness)
+                characteristicRow("Agility", characteristic: .agility, value: $characteristics.agility, bonus: characteristics.bonus.agility)
+                characteristicRow("Intelligence", characteristic: .intelligence, value: $characteristics.intelligence, bonus: characteristics.bonus.intelligence)
+                characteristicRow("Perception", characteristic: .perception, value: $characteristics.perception, bonus: characteristics.bonus.perception)
+                characteristicRow("Willpower", characteristic: .willpower, value: $characteristics.willpower, bonus: characteristics.bonus.willpower)
+                characteristicRow("Fellowship", characteristic: .fellowship, value: $characteristics.fellowship, bonus: characteristics.bonus.fellowship)
             } header: {
                 CogitatorSectionHeader("Characteristics", subtitle: "Primary Aptitude Matrix")
             } footer: {
-                Text("Bonuses are derived from characteristic tens digits.")
+                Text("Bonuses are derived from characteristic tens digits. Use the scope button on a row to open a quick check builder.")
                     .cogitatorSupportingText()
             }
 
@@ -88,10 +89,24 @@ struct CharacteristicsScreen: View {
                 await viewModel.saveResources(characterID: characterID, resources: updated)
             }
         }
+        .sheet(item: $quickCheckSelection) { selection in
+            QuickMechanicsHelperView(
+                characteristics: characteristics,
+                skills: viewModel.character(by: characterID)?.skills ?? [],
+                initialSelection: selection
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     @ViewBuilder
-    private func characteristicRow(_ title: String, value: Binding<Int>, bonus: Int) -> some View {
+    private func characteristicRow(
+        _ title: String,
+        characteristic: SkillCharacteristic,
+        value: Binding<Int>,
+        bonus: Int
+    ) -> some View {
         HStack {
             Text(title)
                 .foregroundStyle(CogitatorPalette.textPrimary)
@@ -107,10 +122,18 @@ struct CharacteristicsScreen: View {
 #endif
             CogitatorStatusChip("B: \(bonus)", level: .nominal)
                 .accessibilityHidden(true)
+            Button {
+                quickCheckSelection = .characteristic(characteristic)
+            } label: {
+                Image(systemName: "scope")
+                    .foregroundStyle(CogitatorPalette.amber)
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Quick Check \(title)")
+            .accessibilityHint("Open a quick characteristic-based check builder.")
+            .accessibilityIdentifier("quick-check.characteristic.\(characteristic.rawValue)")
         }
         .cogitatorPanelRow()
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title), bonus \(bonus)")
     }
 
     @ViewBuilder

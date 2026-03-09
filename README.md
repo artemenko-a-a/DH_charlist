@@ -38,6 +38,11 @@ The project currently includes:
   - inventory
   - local in-screen search/filter for weapons/armour/inventory
 - session mode editing
+- quick mechanics helpers:
+  - characteristic-based quick checks
+  - skill-based quick checks
+  - standard modifiers (`+30` to `-30`) plus custom signed modifier entry
+  - session-mode quick access with temporary modifier reuse
 - user-facing JSON import/export
 - runtime host app bridge for simulator launch via `DHCharListHost`
 - two validated local persistence paths:
@@ -56,6 +61,30 @@ SwiftData is also implemented and validated and can be selected through composit
 - `AppContainer.live(persistence: .swiftData)`
 
 The JSON-backed path remains available as the conservative fallback.
+
+## Quick mechanics helpers (Batch 29)
+
+Quick mechanics is a transparent in-session target builder. It uses existing character data plus explicit modifiers only; it does not roll dice and does not persist results automatically.
+
+Where to open it:
+- `Characteristics & Resources` via the scope button on a characteristic row
+- `Skills` via the quick-check button on a skill row
+- `Session Mode` via `Open Quick Mechanics`
+
+What it shows:
+- check name
+- source characteristic or skill
+- base value
+- derived bonus
+- skill training contribution when relevant
+- applied modifier
+- final target
+
+Current helper behavior:
+- standard presets: `+30`, `+20`, `+10`, `+0`, `-10`, `-20`, `-30`
+- custom signed modifier input is supported
+- current Session Mode temporary modifiers can be reused directly in the helper when present
+- on compact sheet sizes, scroll within the helper to reach the full breakdown and final target rows
 
 ## How to run tests
 

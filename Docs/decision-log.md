@@ -113,3 +113,10 @@
    - **Reason:** A real unsigned archive now succeeds, and the first export probe fails specifically with `No Team Found in Archive`; the remaining work is Apple-account-controlled and cannot be completed safely from repo-only configuration without introducing personal/team-specific values.
    - **Type:** Fact.
    - **Impact:** The repository now documents an exact manual finish line for TestFlight (real bundle ID, Apple team/signing, App Store Connect record, signed export/upload) while preserving accepted runtime behavior and avoiding unsafe committed signing data.
+
+## 2026-03-09
+
+23. **Decision:** Model quick mechanics as a transparent target builder over existing characteristics, skill training modifiers, and explicit user-selected modifiers, without adding dice rolling or automatic history persistence.
+   - **Reason:** Batch 29 requires practical in-session help for common checks, but expanding into a rules engine or hidden automation would exceed scope and introduce avoidable behavior risk.
+   - **Type:** Fact.
+   - **Impact:** Users can assemble common characteristic/skill checks quickly from accepted character data, while runtime/persistence behavior stays stable and the helper remains inspectable and reversible.

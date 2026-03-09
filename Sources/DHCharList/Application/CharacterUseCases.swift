@@ -203,18 +203,19 @@ public struct CharacterUseCases: Sendable {
 }
 
 public enum DerivedValueCalculator {
+    public static func characteristicTarget(
+        for characteristic: SkillCharacteristic,
+        characteristics: CharacteristicSet,
+        modifiers: Int = 0
+    ) -> Int {
+        QuickMechanicsCheckBuilder
+            .characteristicCheck(for: characteristic, characteristics: characteristics, modifier: modifiers)
+            .finalTarget
+    }
+
     public static func skillTarget(for skill: Skill, characteristics: CharacteristicSet, modifiers: Int = 0) -> Int {
-        let base = switch skill.characteristic {
-        case .weaponSkill: characteristics.weaponSkill
-        case .ballisticSkill: characteristics.ballisticSkill
-        case .strength: characteristics.strength
-        case .toughness: characteristics.toughness
-        case .agility: characteristics.agility
-        case .intelligence: characteristics.intelligence
-        case .perception: characteristics.perception
-        case .willpower: characteristics.willpower
-        case .fellowship: characteristics.fellowship
-        }
-        return base + skill.training.modifier + modifiers
+        QuickMechanicsCheckBuilder
+            .skillCheck(for: skill, characteristics: characteristics, modifier: modifiers)
+            .finalTarget
     }
 }

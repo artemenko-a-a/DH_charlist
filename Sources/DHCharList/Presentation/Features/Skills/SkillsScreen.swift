@@ -11,6 +11,7 @@ struct SkillsScreen: View {
     @State private var skills: [Skill]
     @State private var characteristics: CharacteristicSet
     @State private var draft: SkillDraft?
+    @State private var quickCheckSelection: QuickMechanicsSelection?
     @State private var searchText = ""
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
@@ -60,6 +61,15 @@ struct SkillsScreen: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(item: $quickCheckSelection) { selection in
+            QuickMechanicsHelperView(
+                characteristics: characteristics,
+                skills: skills,
+                initialSelection: selection
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     @ViewBuilder
@@ -81,12 +91,27 @@ struct SkillsScreen: View {
         } else {
             Section {
                 ForEach(filteredSkills) { skill in
-                    Button {
-                        draft = SkillDraft(skill: skill)
-                    } label: {
-                        SkillRowView(skill: skill, target: target(for: skill))
+                    HStack(spacing: 12) {
+                        Button {
+                            draft = SkillDraft(skill: skill)
+                        } label: {
+                            SkillRowView(skill: skill, target: target(for: skill))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .buttonStyle(.plain)
+
+                        Button {
+                            quickCheckSelection = .skill(skill.id)
+                        } label: {
+                            Image(systemName: "scope")
+                                .foregroundStyle(CogitatorPalette.amber)
+                                .frame(width: 24, height: 24)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Quick Check \(skill.displayName)")
+                        .accessibilityHint("Open a quick skill-based check builder.")
+                        .accessibilityIdentifier("quick-check.skill.\(skill.id.uuidString)")
                     }
-                    .buttonStyle(.plain)
                     .cogitatorPanelRow()
                 }
                 .onDelete(perform: deleteFilteredSkills)
@@ -145,11 +170,11 @@ private struct SkillRowView: View {
 
     var body: some View {
         let trainingModifier = skill.training.modifier
-        let trainingSummary = "\(skill.characteristic.label) · \(skill.training.label) (\(trainingModifier >= 0 ? "+" : "")\(trainingModifier))"
+        let trainingSummary = "\(skill.characteristic.label) · \(skill.training.label) (\(trainingModifier.signedValueLabel))"
 
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(skill.name.isEmpty ? "Unnamed Skill" : skill.name)
+                Text(skill.displayName)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(CogitatorPalette.textPrimary)
                 Spacer()
@@ -173,7 +198,7 @@ private struct SkillRowView: View {
     }
 
     private var accessibilitySummary: String {
-        let name = skill.name.isEmpty ? "Unnamed Skill" : skill.name
+        let name = skill.displayName
         let characteristic = skill.characteristic.label
         let training = skill.training.label
         if skill.specialisations.isEmpty {
@@ -307,33 +332,6 @@ private struct SkillDraft: Identifiable {
 
     func target(with characteristics: CharacteristicSet) -> Int {
         DerivedValueCalculator.skillTarget(for: asSkill(), characteristics: characteristics)
-    }
-}
-
-private extension SkillCharacteristic {
-    var label: String {
-        switch self {
-        case .weaponSkill: "Weapon Skill"
-        case .ballisticSkill: "Ballistic Skill"
-        case .strength: "Strength"
-        case .toughness: "Toughness"
-        case .agility: "Agility"
-        case .intelligence: "Intelligence"
-        case .perception: "Perception"
-        case .willpower: "Willpower"
-        case .fellowship: "Fellowship"
-        }
-    }
-}
-
-private extension SkillTrainingLevel {
-    var label: String {
-        switch self {
-        case .untrained: "Untrained"
-        case .known: "Known"
-        case .trained: "Trained"
-        case .veteran: "Veteran"
-        }
     }
 }
 

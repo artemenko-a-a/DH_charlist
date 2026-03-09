@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted runtime-polished implementation through Batch 23.
+This checklist tracks the currently accepted runtime-polished implementation through Batch 29.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -97,10 +97,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
     - duplicate a character and verify duplicate starts with empty history while original history remains intact
     - create a character from a template and verify created character history starts empty
 
-Latest local validation status (2026-03-08):
+Latest local validation status (2026-03-09):
 - Host app compiles successfully in Xcode (`BuildProject`).
 - SwiftPM regression/build validation passes (`swift test`, `swift build`).
-- Simulator interaction could not be executed in this environment because `CoreSimulatorService` was unavailable; manual runtime execution should be recorded per run (pass/fail + notes).
+- Focused simulator runtime sanity now passes for quick mechanics via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`.
+- Canonical smoke automation also passes via `./scripts/run_ui_smoke.sh`.
+- Continue to record manual runtime execution per run (pass/fail + notes), especially for visual/ergonomic review.
 
 23. Batch 24 UI automation companion (not a replacement for manual acceptance):
     - run canonical UI smoke suite: `./scripts/run_ui_smoke.sh`
@@ -112,3 +114,11 @@ Latest local validation status (2026-03-08):
       - `-dh-ui-persistence-json` or `-dh-ui-persistence-swiftdata`
     - expected screenshot export location: `DHCharListHost/artifacts/ui-screenshots/<timestamp>/attachments`
     - continue to perform final visual/manual review using this checklist; automated screenshots are only a fast regression aid.
+24. Batch 29 quick mechanics helpers:
+    - open `Characteristics & Resources`, tap a characteristic quick-check scope button, and verify the helper opens with the selected characteristic source
+    - apply at least one preset modifier and verify the breakdown/final target updates transparently
+    - apply a custom signed modifier (for example `-10`) and verify the final target updates again
+    - open `Skills`, create or select a skill, open its quick check, and verify training contribution plus final target are shown
+    - open `Session Mode`, tap `Open Quick Mechanics`, and verify the helper opens from the session-oriented flow
+    - if temporary session modifiers exist, verify they appear as reusable helper shortcuts
+    - on compact sheet sizes, scroll within the helper if needed to reach the breakdown and final target rows

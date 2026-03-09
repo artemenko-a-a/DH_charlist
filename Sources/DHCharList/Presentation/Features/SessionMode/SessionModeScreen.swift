@@ -15,6 +15,7 @@ public struct SessionModeScreen: View {
     @State private var session: SessionState
     @State private var pinnedCheckDraft: PinnedCheckDraft?
     @State private var temporaryModifierDraft: TemporaryModifierDraft?
+    @State private var quickCheckSelection: QuickMechanicsSelection?
 
     public init() {
         context = .unscoped
@@ -70,6 +71,16 @@ public struct SessionModeScreen: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(item: $quickCheckSelection) { selection in
+            QuickMechanicsHelperView(
+                characteristics: characterSnapshot?.characteristics ?? .empty,
+                skills: characterSnapshot?.skills ?? [],
+                sessionModifiers: session.temporaryModifiers,
+                initialSelection: selection
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     @ViewBuilder
@@ -96,6 +107,33 @@ public struct SessionModeScreen: View {
                 CogitatorSectionHeader("Session", subtitle: "Liturgical Operations State")
             } footer: {
                 Text("Enable when running live checks and temporary combat/session adjustments.")
+                    .cogitatorSupportingText()
+            }
+
+            Section {
+                Button {
+                    quickCheckSelection = .characteristic(.weaponSkill)
+                } label: {
+                    Label("Open Quick Mechanics", systemImage: "scope")
+                }
+                .cogitatorPanelRow()
+                .accessibilityLabel("Open Quick Mechanics")
+                .accessibilityHint("Build a characteristic or skill check from current character data.")
+                .accessibilityIdentifier("quick-mechanics.session")
+
+                if let characterSnapshot, !characterSnapshot.skills.isEmpty {
+                    Text("\(characterSnapshot.skills.count) skills are available in the builder, along with \(session.temporaryModifiers.count) active temporary modifiers.")
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+                } else {
+                    Text("Open the builder for characteristic checks now, or add skills first to include skill-based checks.")
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+                }
+            } header: {
+                CogitatorSectionHeader("Quick Mechanics", subtitle: "Fast Session Check Builder")
+            } footer: {
+                Text("Use this for explicit target calculation without rolling dice or auto-resolving outcomes.")
                     .cogitatorSupportingText()
             }
 
@@ -257,6 +295,13 @@ public struct SessionModeScreen: View {
             return .caution
         }
         return .nominal
+    }
+
+    private var characterSnapshot: Character? {
+        guard case let .character(characterID, viewModel) = context else {
+            return nil
+        }
+        return viewModel.character(by: characterID)
     }
 }
 

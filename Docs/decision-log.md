@@ -114,6 +114,11 @@
    - **Type:** Fact.
    - **Impact:** The repository now documents an exact manual finish line for TestFlight (real bundle ID, Apple team/signing, App Store Connect record, signed export/upload) while preserving accepted runtime behavior and avoiding unsafe committed signing data.
 
+23. **Decision:** Keep the existing host `.xcresult`/`xccov` coverage capture for diagnostics, but move the required gate to SwiftPM package coverage JSON over `Sources/DHCharList`.
+   - **Reason:** The previous required gate could go green from host/test bundle coverage alone, which did not truthfully prove that the package source surface was measured.
+   - **Type:** Fact.
+   - **Impact:** Required CI now fails when `package_surface` is missing or incomplete, while still publishing host result-bundle diagnostics for runtime and host-scheme troubleshooting. This remains a baseline-first non-vanity policy, not a diff-coverage system.
+
 ## 2026-03-09
 
 23. **Decision:** Model quick mechanics as a transparent target builder over existing characteristics, skill training modifiers, and explicit user-selected modifiers, without adding dice rolling or automatic history persistence.

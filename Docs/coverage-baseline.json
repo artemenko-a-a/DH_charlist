@@ -1,36 +1,236 @@
 {
   "status": "active",
-  "captured_at": "2026-03-08T16:10:00Z",
+  "captured_at": "2026-03-09T15:27:01+00:00",
   "source_scheme": "DHCharListHost",
-  "source_of_truth": "xcodebuild test result bundle + xcrun xccov",
+  "source_of_truth": "SwiftPM code coverage JSON over Sources/DHCharList for gate enforcement, with xcodebuild/xccov host artifacts retained as diagnostics",
   "baseline": {
-    "overall_line_coverage_pct": 62.5,
-    "metrics_source": "DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
-    "targets": [
-      {
-        "name": "DHCharListHost.app",
-        "covered_lines": 8,
-        "executable_lines": 23,
-        "line_coverage_pct": 34.78
-      }
-    ]
+    "metrics_source": "/Users/an.artemenko/repos/DH_charlist/DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
+    "package_surface": {
+      "line_coverage_pct": 11.38,
+      "covered_lines": 1167,
+      "executable_lines": 10255,
+      "file_count": 26,
+      "files": [
+        {
+          "path": "App/AppContainer.swift",
+          "executable_lines": 110,
+          "covered_lines": 94,
+          "line_coverage_pct": 85.45
+        },
+        {
+          "path": "Application/CharacterImportPreviewSummary.swift",
+          "executable_lines": 21,
+          "covered_lines": 21,
+          "line_coverage_pct": 100.0
+        },
+        {
+          "path": "Application/CharacterTemplateUseCases.swift",
+          "executable_lines": 66,
+          "covered_lines": 58,
+          "line_coverage_pct": 87.88
+        },
+        {
+          "path": "Application/CharacterUseCases.swift",
+          "executable_lines": 187,
+          "covered_lines": 171,
+          "line_coverage_pct": 91.44
+        },
+        {
+          "path": "Application/ProfileAutosaveCoordinator.swift",
+          "executable_lines": 44,
+          "covered_lines": 44,
+          "line_coverage_pct": 100.0
+        },
+        {
+          "path": "Application/QuickMechanicsCheck.swift",
+          "executable_lines": 94,
+          "covered_lines": 81,
+          "line_coverage_pct": 86.17
+        },
+        {
+          "path": "Domain/Character.swift",
+          "executable_lines": 177,
+          "covered_lines": 173,
+          "line_coverage_pct": 97.74
+        },
+        {
+          "path": "Domain/CharacterTemplate.swift",
+          "executable_lines": 41,
+          "covered_lines": 39,
+          "line_coverage_pct": 95.12
+        },
+        {
+          "path": "Infrastructure/ImportExport/CharacterJSONImportExportService.swift",
+          "executable_lines": 66,
+          "covered_lines": 65,
+          "line_coverage_pct": 98.48
+        },
+        {
+          "path": "Infrastructure/Persistence/JSONFileCharacterRepository.swift",
+          "executable_lines": 34,
+          "covered_lines": 34,
+          "line_coverage_pct": 100.0
+        },
+        {
+          "path": "Infrastructure/Persistence/JSONFileCharacterTemplateRepository.swift",
+          "executable_lines": 42,
+          "covered_lines": 42,
+          "line_coverage_pct": 100.0
+        },
+        {
+          "path": "Infrastructure/Persistence/SwiftDataCharacterRepository.swift",
+          "executable_lines": 65,
+          "covered_lines": 64,
+          "line_coverage_pct": 98.46
+        },
+        {
+          "path": "Infrastructure/Persistence/SwiftDataCharacterTemplateRepository.swift",
+          "executable_lines": 65,
+          "covered_lines": 63,
+          "line_coverage_pct": 96.92
+        },
+        {
+          "path": "Presentation/AdaptiveLayout.swift",
+          "executable_lines": 6,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/AppShell/DHCharListAppShell.swift",
+          "executable_lines": 54,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/CharacterList/CharacterListScreen.swift",
+          "executable_lines": 2485,
+          "covered_lines": 88,
+          "line_coverage_pct": 3.54
+        },
+        {
+          "path": "Presentation/Features/Characteristics/CharacteristicsScreen.swift",
+          "executable_lines": 316,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/Diagnostics/PersistenceStatusScreen.swift",
+          "executable_lines": 280,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/Equipment/EquipmentScreen.swift",
+          "executable_lines": 1277,
+          "covered_lines": 58,
+          "line_coverage_pct": 4.54
+        },
+        {
+          "path": "Presentation/Features/History/CampaignHistoryScreen.swift",
+          "executable_lines": 842,
+          "covered_lines": 33,
+          "line_coverage_pct": 3.92
+        },
+        {
+          "path": "Presentation/Features/Mechanics/QuickMechanicsHelperView.swift",
+          "executable_lines": 680,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/Notes/NotesScreen.swift",
+          "executable_lines": 494,
+          "covered_lines": 23,
+          "line_coverage_pct": 4.66
+        },
+        {
+          "path": "Presentation/Features/Profile/ProfileScreen.swift",
+          "executable_lines": 138,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/SessionMode/SessionModeScreen.swift",
+          "executable_lines": 1859,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/Skills/SkillsScreen.swift",
+          "executable_lines": 669,
+          "covered_lines": 16,
+          "line_coverage_pct": 2.39
+        },
+        {
+          "path": "Presentation/Theme/CogitatorTheme.swift",
+          "executable_lines": 143,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        }
+      ],
+      "areas": [
+        {
+          "name": "App",
+          "covered_lines": 94,
+          "executable_lines": 110,
+          "file_count": 1,
+          "line_coverage_pct": 85.45
+        },
+        {
+          "name": "Application",
+          "covered_lines": 375,
+          "executable_lines": 412,
+          "file_count": 5,
+          "line_coverage_pct": 91.02
+        },
+        {
+          "name": "Domain",
+          "covered_lines": 212,
+          "executable_lines": 218,
+          "file_count": 2,
+          "line_coverage_pct": 97.25
+        },
+        {
+          "name": "Infrastructure",
+          "covered_lines": 268,
+          "executable_lines": 272,
+          "file_count": 5,
+          "line_coverage_pct": 98.53
+        },
+        {
+          "name": "Presentation",
+          "covered_lines": 218,
+          "executable_lines": 9243,
+          "file_count": 13,
+          "line_coverage_pct": 2.36
+        }
+      ]
+    },
+    "host_xccov": {
+      "line_coverage_pct": 96.0,
+      "covered_lines": 696,
+      "executable_lines": 725
+    }
   },
   "policy": {
-    "allowed_overall_drop_pp": 0.5,
-    "enforce_target_regression": true,
-    "allowed_target_drop_pp": 1.0,
-    "minimum_executable_lines_for_target_gate": 1,
-    "changed_code_expectation": "No new or modified Domain/Application/Infrastructure code should reduce line coverage for touched files unless explicitly justified in PR notes.",
+    "require_package_surface": true,
+    "require_all_baseline_files_present": true,
+    "allowed_package_drop_pp": 0.5,
+    "enforce_area_regression": true,
+    "allowed_area_drop_pp": 1.0,
+    "minimum_package_file_count": 20,
+    "minimum_area_executable_lines": 1,
+    "changed_code_expectation": "This gate is baseline-first package coverage, not diff coverage; new or changed package code should still add direct tests where practical, especially in Domain/Application/Infrastructure.",
     "layer_expectations": {
       "Domain": "Prefer strong meaningful coverage. New logic should include direct tests.",
       "Application": "Prefer strong meaningful coverage for use-case and orchestration paths.",
       "Infrastructure/Persistence": "Prefer strong coverage around repository behavior and serialization pathways.",
-      "Presentation/SwiftUI": "Coverage is tracked, but strict percentage gating is secondary to behavior-oriented tests and smoke checks."
+      "Presentation/SwiftUI": "Coverage is measured and guarded as part of package surface visibility, but large SwiftUI surfaces still rely heavily on behavior-oriented tests and smoke checks."
     }
   },
   "staged_adoption": [
-    "Stage 1: freeze measured baseline from real xccov artifacts.",
-    "Stage 2 (current): enforce overall non-regression (0.5pp budget) and conservative non-test target non-regression (1.0pp budget).",
-    "Stage 3: add robust per-layer policy after stable multi-run evidence and better layer-to-coverage mapping."
+    "Stage 1: capture hybrid host diagnostics plus truthful SwiftPM package surface coverage.",
+    "Stage 2 (current): require package surface presence, baseline file presence, package non-regression, and per-area non-regression.",
+    "Stage 3: add stronger changed-file or diff-aware gates only after the repository has a truthful implementation for that signal."
   ]
 }

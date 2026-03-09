@@ -7,6 +7,7 @@ SCHEME="${COVERAGE_SCHEME:-DHCharListHost}"
 XCODE_HOME="${COVERAGE_XCODE_HOME:-/tmp/dhcharlist-xcode-home}"
 ISOLATE_XCODE_HOME="${COVERAGE_ISOLATE_XCODE_HOME:-0}"
 OUTPUT_ROOT="${COVERAGE_OUTPUT_ROOT:-$ROOT_DIR/DHCharListHost/artifacts/coverage}"
+SWIFTPM_BUILD_PATH="${COVERAGE_SWIFTPM_BUILD_PATH:-/tmp/dh_charlist-coverage-build}"
 
 _pick_simulator_destination() {
     xcrun simctl list devices available --json 2>/dev/null | python3 -c "
@@ -30,6 +31,8 @@ RESULT_BUNDLE_PATH="$RUN_DIR/TestResults.xcresult"
 BUILD_LOG_PATH="$RUN_DIR/xcodebuild-test.log"
 SUMMARY_TEXT_PATH="$RUN_DIR/xccov-summary.txt"
 REPORT_JSON_PATH="$RUN_DIR/xccov-report.json"
+SWIFTPM_LOG_PATH="$RUN_DIR/swiftpm-test.log"
+SWIFTPM_CODECOV_JSON_PATH="$RUN_DIR/swiftpm-codecov.json"
 METRICS_JSON_PATH="$RUN_DIR/coverage-metrics.json"
 
 mkdir -p "$RUN_DIR"
@@ -89,9 +92,38 @@ fi
 xcrun xccov view --report "$RESULT_BUNDLE_PATH" > "$SUMMARY_TEXT_PATH"
 xcrun xccov view --report --json "$RESULT_BUNDLE_PATH" > "$REPORT_JSON_PATH"
 
+SWIFTPM_TEST_COMMAND=(
+    swift
+    test
+    --enable-code-coverage
+    --build-path "$SWIFTPM_BUILD_PATH"
+)
+
+echo "Running: ${SWIFTPM_TEST_COMMAND[*]}"
+set +e
+"${SWIFTPM_TEST_COMMAND[@]}" 2>&1 | tee "$SWIFTPM_LOG_PATH"
+SWIFTPM_TEST_EXIT=${PIPESTATUS[0]}
+set -e
+
+if [[ $SWIFTPM_TEST_EXIT -ne 0 ]]; then
+    echo "swift test --enable-code-coverage failed with exit code $SWIFTPM_TEST_EXIT" >&2
+    exit "$SWIFTPM_TEST_EXIT"
+fi
+
+SWIFTPM_CODECOV_PATH="$(swift test --show-codecov-path --build-path "$SWIFTPM_BUILD_PATH" | tail -n 1)"
+if [[ -z "$SWIFTPM_CODECOV_PATH" || ! -f "$SWIFTPM_CODECOV_PATH" ]]; then
+    echo "SwiftPM code coverage JSON not found after coverage run." >&2
+    echo "Expected path: $SWIFTPM_CODECOV_PATH" >&2
+    exit 2
+fi
+
+cp "$SWIFTPM_CODECOV_PATH" "$SWIFTPM_CODECOV_JSON_PATH"
+
 python3 "$ROOT_DIR/scripts/write_coverage_metrics.py" \
     --report-json "$REPORT_JSON_PATH" \
     --summary-text "$SUMMARY_TEXT_PATH" \
+    --swiftpm-codecov-json "$SWIFTPM_CODECOV_JSON_PATH" \
+    --package-source-root "$ROOT_DIR/Sources/DHCharList" \
     --output "$METRICS_JSON_PATH"
 
 ln -sfn "$RUN_DIR" "$OUTPUT_ROOT/latest"
@@ -101,6 +133,8 @@ Coverage artifacts generated:
 - Result bundle: $RESULT_BUNDLE_PATH
 - xccov text summary: $SUMMARY_TEXT_PATH
 - xccov JSON report: $REPORT_JSON_PATH
+- SwiftPM coverage log: $SWIFTPM_LOG_PATH
+- SwiftPM coverage JSON: $SWIFTPM_CODECOV_JSON_PATH
 - machine metrics JSON: $METRICS_JSON_PATH
 - latest symlink: $OUTPUT_ROOT/latest
 - destination used: $DESTINATION

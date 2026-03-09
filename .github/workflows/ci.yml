@@ -61,5 +61,7 @@ jobs:
             DHCharListHost/artifacts/coverage/latest/xcodebuild-test.log
             DHCharListHost/artifacts/coverage/latest/xccov-summary.txt
             DHCharListHost/artifacts/coverage/latest/xccov-report.json
+            DHCharListHost/artifacts/coverage/latest/swiftpm-test.log
+            DHCharListHost/artifacts/coverage/latest/swiftpm-codecov.json
             DHCharListHost/artifacts/coverage/latest/coverage-metrics.json
           if-no-files-found: warn

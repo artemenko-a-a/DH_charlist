@@ -1,21 +1,27 @@
-# Batch 32 State
+# Batch 33 State
 
 - status: validated
-- scope: persistence observability only; no migration system, no storage-management UI, no persistence rewrite
-- user-visible diagnostics behavior:
-  - the app now keeps a structured persistence bootstrap result
-  - `Persistence Status` is available from `Characters` -> `Import/Export`
-  - diagnostics show requested backend, active backend, and whether fallback is active
-  - when requested `SwiftData` falls back to JSON, the `Characters` screen shows an explicit persistence notice
-- architecture/runtime boundaries:
-  - JSON-backed persistence remains the default/fallback runtime path
-  - SwiftData-backed persistence remains the validated alternative path
-  - fallback still keeps the app usable; this batch only makes it explicit and diagnosable
+- scope: truthful coverage gate only; no product/runtime/persistence behavior changes
+- coverage policy state:
+  - required gate now depends on `package_surface` coverage for `Sources/DHCharList`
+  - host `.xcresult` + `xccov` artifacts are still generated and uploaded, but are diagnostics only
+  - baseline is now package-first and tracks overall package coverage plus top-level areas and baseline file presence
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b32-persistence-status.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testPersistenceStatusShowsJSONDefaultBackend -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testPersistenceStatusShowsSwiftDataWhenRequested`
-- focused runtime note:
-  - simulator sanity now covers the visible persistence diagnostics surface on both JSON default and SwiftData-selected launch paths
-  - deterministic package tests also cover a forced SwiftData bootstrap failure path and verify JSON fallback diagnostics
+  - `./scripts/run_xcode_coverage.sh`
+  - `./scripts/refresh_coverage_baseline.sh`
+  - `./scripts/check_coverage_policy.sh`
+  - negative case: `python3 -c "import json; import pathlib; metrics=json.loads(pathlib.Path('DHCharListHost/artifacts/coverage/latest/coverage-metrics.json').read_text()); metrics.pop('package_surface', None); pathlib.Path('/tmp/dh-b33-missing-package-surface.json').write_text(json.dumps(metrics))"` then `COVERAGE_METRICS_PATH=/tmp/dh-b33-missing-package-surface.json ./scripts/check_coverage_policy.sh`
+- measured baseline snapshot:
+  - package coverage: `11.38%`
+  - package files: `26`
+  - areas:
+    - `App`: `85.45%`
+    - `Application`: `91.02%`
+    - `Domain`: `97.25%`
+    - `Infrastructure`: `98.53%`
+    - `Presentation`: `2.36%`
+- truthful limitations:
+  - the gate does not claim diff coverage or touched-file coverage
+  - large SwiftUI presentation surfaces still rely heavily on behavior tests and runtime smoke coverage

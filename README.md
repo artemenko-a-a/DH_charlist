@@ -148,9 +148,13 @@ How to build the package:
 ```bash
 swift build
 ```
-## Coverage workflow (Batch 17)
+## Coverage workflow (Batch 33)
 
-Coverage source of truth is Xcode result bundles plus `xccov` output.
+Coverage gating is now based on the real package source surface in `Sources/DHCharList`.
+
+Source of truth:
+- gate enforcement: SwiftPM code coverage JSON produced from `swift test --enable-code-coverage`
+- host diagnostics: Xcode result bundle plus `xcrun xccov` output from the `DHCharListHost` scheme
 
 Canonical local coverage command:
 ```bash
@@ -159,10 +163,12 @@ Canonical local coverage command:
 
 What this command does:
 - runs `xcodebuild test` with code coverage enabled for the `DHCharListHost` scheme
+- runs `swift test --enable-code-coverage` for the package
 - writes a `.xcresult` bundle
 - exports human-readable coverage summary text via `xcrun xccov view --report`
 - exports machine-readable JSON coverage report via `xcrun xccov view --report --json`
-- writes normalized machine metrics JSON for automation
+- captures SwiftPM code coverage JSON for `Sources/DHCharList`
+- writes normalized machine metrics JSON for automation and policy checks
 
 Coverage artifact locations:
 - default per-run output: `DHCharListHost/artifacts/coverage/<timestamp>/`
@@ -172,6 +178,8 @@ Coverage artifact locations:
   - `xcodebuild-test.log`
   - `xccov-summary.txt`
   - `xccov-report.json`
+  - `swiftpm-test.log`
+  - `swiftpm-codecov.json`
   - `coverage-metrics.json`
 - override output root when needed:
 ```bash
@@ -190,30 +198,35 @@ Policy + regression check:
 ```
 
 Current enforced policy (staged, non-vanity):
-- baseline-first from real `xccov` artifacts (`coverage-metrics.json`)
-- overall non-regression gate:
-  - baseline: `62.50%`
-  - allowed drop: `0.50pp`
-- conservative per-target non-regression gate (non-test targets captured in baseline):
-  - currently enforced target: `DHCharListHost.app`
-  - allowed drop: `1.00pp`
-- Domain/Application/Infrastructure still carry stronger testing expectations by policy intent, but strict per-layer numeric gating remains staged until layer mapping in coverage artifacts is robust.
+- baseline-first from real package coverage artifacts in `coverage-metrics.json`
+- `package_surface` must be present; host-only/test-only artifacts are rejected
+- all baseline package files must still appear in current metrics
+- overall package non-regression is enforced with a `0.50pp` budget from the measured baseline
+- per-area non-regression is enforced for the top-level package areas (`App`, `Application`, `Domain`, `Infrastructure`, `Presentation`) with a `1.00pp` budget
+- host `xccov` metrics are still captured, but they are diagnostics only and are not enough on their own to produce a green gate
 
 Coverage gate failure conditions:
 - `coverage-metrics.json` is missing
-- baseline file is missing or baseline overall is unset
-- current overall coverage drops below `baseline - allowed_overall_drop_pp`
-- any enforced non-test target drops below `target_baseline - allowed_target_drop_pp`
-- any enforced target disappears from current metrics or loses executable lines below policy floor
+- `package_surface` is missing or too small to be truthful
+- baseline package file coverage surface disappears from current metrics
+- current package coverage drops below `baseline - allowed_package_drop_pp`
+- any enforced package area drops below `area_baseline - allowed_area_drop_pp`
+- a baseline-tracked package area disappears or falls below the executable-line floor
+
+What the gate now guarantees:
+- green means `Sources/DHCharList` was actually measured in the current coverage capture
+- green means the measured package surface did not regress beyond the allowed package/area budgets
+
+What the gate still does not guarantee:
+- it is not diff coverage or touched-file coverage
+- it does not prove strong UI coverage for large SwiftUI presentation files
+- it does not replace runtime smoke checks or focused UI tests
 
 How to intentionally refresh baseline:
 1. Run a new coverage capture with `./scripts/run_xcode_coverage.sh`.
 2. Review `DHCharListHost/artifacts/coverage/latest/coverage-metrics.json`.
 3. Run `./scripts/refresh_coverage_baseline.sh`.
 4. Re-run `./scripts/check_coverage_policy.sh` to confirm the updated baseline is internally consistent.
-
-Current environment note:
-- the active `DHCharListHost` scheme reports `0` attached tests in Xcode test-plan metadata, so coverage collection from that scheme requires test action coverage to be present in the selected scheme.
 
 How to run in simulator
 
@@ -383,6 +396,8 @@ CI artifacts:
   - `xcodebuild-test.log`
   - `xccov-summary.txt`
   - `xccov-report.json`
+  - `swiftpm-test.log`
+  - `swiftpm-codecov.json`
   - `coverage-metrics.json`
 - `ui-smoke-artifacts` (manual workflow, smoke mode)
 - `ui-screenshot-artifacts` (manual workflow, screenshots mode; includes exported attachments)

@@ -40,6 +40,7 @@ struct ProfileScreen: View {
                     .lineLimit(3...6)
                     .accessibilityLabel("Description")
                     .accessibilityHint("Brief notes about origin, personality, and appearance.")
+                    .cogitatorInputField()
                     .cogitatorPanelRow()
             } header: {
                 CogitatorSectionHeader("Description", subtitle: "Narrative Notes")

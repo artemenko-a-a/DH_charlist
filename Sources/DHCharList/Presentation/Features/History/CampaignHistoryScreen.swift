@@ -242,6 +242,7 @@ private struct HistoryEntryEditorSheet: View {
                         .cogitatorPanelRow()
                     TextEditor(text: $draft.body)
                         .frame(minHeight: 140)
+                        .cogitatorInputField()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Entry", subtitle: "Type, Title, and Notes")

@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted runtime-polished implementation through Batch 30.
+This checklist tracks the currently accepted runtime-polished implementation through Batch 34.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -73,12 +73,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
 19. Batch 20 visual theme sanity (Adeptus Mechanicus-inspired foundation):
     - verify high-visibility screens (`Character` detail overview, `Characteristics & Resources`, `Equipment`, `Session Mode`) use the same palette and panel styling
     - verify section headers are readable and consistent (technical/dossier tone without obscuring plain language)
-    - verify status chips (bonuses, AP, XP available, temporary modifiers) remain legible in Light/Dark appearance and at larger Dynamic Type sizes
+    - verify status chips (bonuses, AP, XP available, temporary modifiers) remain legible in the dark-first app appearance and at larger Dynamic Type sizes
     - verify row background styling does not reduce swipe/edit affordances and does not obscure list separators/context
     - verify editor sheets (equipment/session) retain clear data-entry readability with themed background/chrome
 20. Batch 21 deep polish sanity (coherence pass):
     - verify major screens (`Characters`, character detail, `Profile`, `Skills`, `Notes`, `Equipment`, `Session`) use consistent section rhythm and row density without clipped interactions
-    - verify helper/supporting text hierarchy is consistent and readable (section footers, summaries, empty rows) in Light/Dark and larger Dynamic Type
+    - verify helper/supporting text hierarchy is consistent and readable (section footers, summaries, empty rows) in the dark-first app appearance and at larger Dynamic Type
     - verify existing editor sheets keep consistent Cancel/Save placement and that Save remains clearly primary when valid
     - verify `Session` screen operational state readability (`ACTIVE`/`STANDBY`) and pinned/modifier editing clarity without behavior change
     - verify iPad layout uses wider readable content width without creating narrow content islands or excessive line length
@@ -150,3 +150,10 @@ Latest local validation status (2026-03-09):
       - `Active Backend` is `SwiftData` when bootstrap succeeds
       - if bootstrap falls back, `Active Backend` is `JSON File`, `Fallback Active` is `Yes`, and a diagnostic note is visible
     - when fallback is active, verify the `Characters` screen shows a persistence notice instead of silently behaving as though SwiftData were active
+27. Batch 34 visual consistency + dark-theme hardening:
+    - verify the app now stays in a coherent dark-first appearance across `Characters`, character detail, `Profile`, `Characteristics & Resources`, `Skills`, `Notes`, `Equipment`, `Session`, `Templates`, `Campaign Log`, `Import/Export`, `Persistence Status`, and `Quick Check`
+    - verify navigation bars, tab bar, search surfaces, sheets, and editor screens no longer introduce obvious bright/white theme-breaking chrome
+    - verify multiline editors (`Description`, freeform notes, history body, combat condition, pinned check, weapon traits, specialisations) render on dark readable surfaces instead of bright default editor backgrounds
+    - verify readout rows (overview values, quick mechanics breakdown, skill derived values) have clear label/value contrast and remain readable at larger Dynamic Type sizes
+    - verify warning/status surfaces remain visually distinct without breaking the overall dark hierarchy (for example the persistence fallback notice)
+    - if using `./scripts/run_ui_screenshots.sh`, review exported attachments as a companion artifact, not a replacement for manual visual acceptance

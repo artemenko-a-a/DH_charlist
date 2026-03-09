@@ -119,6 +119,11 @@
    - **Type:** Fact.
    - **Impact:** Required CI now fails when `package_surface` is missing or incomplete, while still publishing host result-bundle diagnostics for runtime and host-scheme troubleshooting. This remains a baseline-first non-vanity policy, not a diff-coverage system.
 
+24. **Decision:** Enforce a centralized dark-first app chrome at the presentation layer (`CogitatorTheme` + app shell) instead of chasing white/light system surfaces screen by screen.
+   - **Reason:** Batch 34 identified repeated theme breaks in navigation bars, tab chrome, search/sheet surfaces, and editor backgrounds; centralized dark appearance and shared surface/readout modifiers are lower-risk and more consistent than scattered per-screen overrides.
+   - **Type:** Fact.
+   - **Impact:** The app now prefers a consistent dark appearance across host chrome, sheets, search-related surfaces, and existing editor/readout screens while preserving accepted runtime and persistence behavior.
+
 ## 2026-03-09
 
 23. **Decision:** Model quick mechanics as a transparent target builder over existing characteristics, skill training modifiers, and explicit user-selected modifiers, without adding dice rolling or automatic history persistence.

@@ -255,6 +255,7 @@ private struct SkillEditorView: View {
                         .lineLimit(2...4)
                         .accessibilityLabel("Specialisations")
                         .accessibilityHint("Separate items with commas, semicolons, or line breaks.")
+                        .cogitatorInputField()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Specialisations", subtitle: "Optional Focus Areas")
@@ -262,8 +263,10 @@ private struct SkillEditorView: View {
 
                 Section {
                     LabeledContent("Target", value: String(draft.target(with: characteristics)))
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                     LabeledContent("Training Modifier", value: "\(draft.training.modifier >= 0 ? "+" : "")\(draft.training.modifier)")
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Derived", subtitle: "Computed Check Data")

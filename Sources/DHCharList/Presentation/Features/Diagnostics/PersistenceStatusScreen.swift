@@ -95,10 +95,12 @@ struct PersistenceFallbackNoticeView: View {
                 Button("View Persistence Status") {
                     openDetails()
                 }
+                .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("persistence.status.open")
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("persistence.fallback.notice")
+            .cogitatorWarningSurface()
             .cogitatorPanelRow()
         } header: {
             CogitatorSectionHeader("Persistence Notice", subtitle: "Fallback Active")

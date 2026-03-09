@@ -347,6 +347,7 @@ public struct SessionModeScreen: View {
                                 .foregroundStyle(CogitatorPalette.warning)
                                 .frame(width: 14)
                             Text(condition)
+                                .foregroundStyle(CogitatorPalette.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
@@ -391,6 +392,7 @@ public struct SessionModeScreen: View {
                                 .foregroundStyle(CogitatorPalette.brass)
                                 .frame(width: 14)
                             Text(check)
+                                .foregroundStyle(CogitatorPalette.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
@@ -431,6 +433,7 @@ public struct SessionModeScreen: View {
                     } label: {
                         HStack {
                             Text(key)
+                                .foregroundStyle(CogitatorPalette.textPrimary)
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
                             Spacer()
@@ -688,6 +691,7 @@ private struct PinnedCheckEditorView: View {
                     TextField("Pinned Check", text: $draft.value, axis: .vertical)
                         .lineLimit(2...4)
                         .accessibilityLabel("Pinned Check")
+                        .cogitatorInputField()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Pinned Check", subtitle: "Quick Table Reference")
@@ -842,6 +846,7 @@ private struct CombatConditionEditorView: View {
                         .lineLimit(2...4)
                         .accessibilityLabel("Combat Condition")
                         .accessibilityIdentifier("combat.condition.text")
+                        .cogitatorInputField()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Combat Condition", subtitle: "Short Visible Note")

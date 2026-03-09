@@ -447,6 +447,7 @@ private struct WeaponEditorView: View {
                 TextField("Traits", text: $draft.traits, axis: .vertical)
                     .lineLimit(2...4)
                     .accessibilityLabel("Weapon Traits")
+                    .cogitatorInputField()
                     .cogitatorPanelRow()
             }
             .cogitatorScreenChrome()

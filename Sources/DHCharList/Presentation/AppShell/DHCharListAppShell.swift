@@ -52,6 +52,7 @@ public struct DHCharListAppShell: View {
                 .tag(1)
         }
         .tint(CogitatorPalette.marsRed)
+        .cogitatorAppChrome()
     }
 }
 #endif

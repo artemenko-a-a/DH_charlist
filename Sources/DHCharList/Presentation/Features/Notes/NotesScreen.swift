@@ -32,6 +32,7 @@ struct NotesScreen: View {
                     .frame(minHeight: 140)
                     .accessibilityLabel("Freeform Notes")
                     .accessibilityHint("Use this area for longer unstructured session notes.")
+                    .cogitatorInputField()
                     .cogitatorPanelRow()
             } header: {
                 CogitatorSectionHeader("Freeform Notes", subtitle: "Unstructured Field Record")
@@ -99,6 +100,7 @@ struct NotesScreen: View {
                             .lineLimit(3)
                             .multilineTextAlignment(.leading)
                             .fixedSize(horizontal: false, vertical: true)
+                            .foregroundStyle(CogitatorPalette.textPrimary)
                     }
                     .buttonStyle(.plain)
                     .cogitatorPanelRow()
@@ -213,6 +215,7 @@ private struct NoteEntryEditorView: View {
                     .lineLimit(2...4)
                     .accessibilityLabel(draft.section.singularTitle)
                     .accessibilityHint("Enter a short note for this section.")
+                    .cogitatorInputField()
                     .cogitatorPanelRow()
             }
             .cogitatorScreenChrome()

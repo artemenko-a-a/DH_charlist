@@ -1,27 +1,21 @@
-# Batch 33 State
+# Batch 34 State
 
-- status: validated
-- scope: truthful coverage gate only; no product/runtime/persistence behavior changes
-- coverage policy state:
-  - required gate now depends on `package_surface` coverage for `Sources/DHCharList`
-  - host `.xcresult` + `xccov` artifacts are still generated and uploaded, but are diagnostics only
-  - baseline is now package-first and tracks overall package coverage plus top-level areas and baseline file presence
+- status: validated for code/runtime traversal; manual visual acceptance still pending
+- scope: UI consistency and dark-theme hardening only; no product scope, navigation, persistence, or model changes
+- presentation/theme state:
+  - centralized dark-first app chrome now applies at the app shell and shared screen theme level
+  - navigation/tab/sheet chrome is now aligned with the existing cogitator palette instead of falling back to bright default system surfaces
+  - reusable readout styling now strengthens label/value contrast on overview and helper screens
+  - multiline editor surfaces now use darker input chrome for readability
+  - warning/status surfaces now have a more explicit visual hierarchy
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-  - `./scripts/run_xcode_coverage.sh`
-  - `./scripts/refresh_coverage_baseline.sh`
-  - `./scripts/check_coverage_policy.sh`
-  - negative case: `python3 -c "import json; import pathlib; metrics=json.loads(pathlib.Path('DHCharListHost/artifacts/coverage/latest/coverage-metrics.json').read_text()); metrics.pop('package_surface', None); pathlib.Path('/tmp/dh-b33-missing-package-surface.json').write_text(json.dumps(metrics))"` then `COVERAGE_METRICS_PATH=/tmp/dh-b33-missing-package-surface.json ./scripts/check_coverage_policy.sh`
-- measured baseline snapshot:
-  - package coverage: `11.38%`
-  - package files: `26`
-  - areas:
-    - `App`: `85.45%`
-    - `Application`: `91.02%`
-    - `Domain`: `97.25%`
-    - `Infrastructure`: `98.53%`
-    - `Presentation`: `2.36%`
+  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
+  - `./scripts/run_ui_screenshots.sh`
+- runtime traversal note:
+  - simulator screenshot traversal passed and exported attachments for `Characters`, character detail, `Characteristics`, `Skills`, `Notes`, `Equipment`, `Session`, `History`, and `Templates`
+  - this session did not include direct human inspection of those images, so final visual acceptance remains manual
 - truthful limitations:
-  - the gate does not claim diff coverage or touched-file coverage
-  - large SwiftUI presentation surfaces still rely heavily on behavior tests and runtime smoke coverage
+  - no new UI/product features were added
+  - dark-theme hardening is centralized, but final contrast/aesthetic sign-off still depends on a manual screenshot/device review

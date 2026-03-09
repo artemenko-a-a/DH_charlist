@@ -7,8 +7,10 @@ import SwiftUI
 enum CogitatorPalette {
     static let canvas = Color(red: 0.10, green: 0.11, blue: 0.13)
     static let canvasSecondary = Color(red: 0.16, green: 0.17, blue: 0.20)
+    static let modalSurface = Color(red: 0.12, green: 0.13, blue: 0.16)
     static let panel = Color(red: 0.20, green: 0.22, blue: 0.26)
     static let panelRaised = Color(red: 0.24, green: 0.26, blue: 0.30)
+    static let editorField = Color(red: 0.17, green: 0.18, blue: 0.22)
     static let panelEdge = Color(red: 0.57, green: 0.48, blue: 0.34)
     static let marsRed = Color(red: 0.58, green: 0.17, blue: 0.14)
     static let brass = Color(red: 0.82, green: 0.70, blue: 0.48)
@@ -116,9 +118,19 @@ private struct CogitatorScreenChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .scrollContentBackground(.hidden)
-            .background(CogitatorPalette.screenGradient)
+            .background {
+                Rectangle()
+                    .fill(CogitatorPalette.screenGradient)
+                    .ignoresSafeArea()
+            }
             .foregroundStyle(CogitatorPalette.textPrimary)
             .tint(CogitatorPalette.marsRed)
+#if os(iOS)
+            .toolbarBackground(CogitatorPalette.canvasSecondary.opacity(0.98), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .presentationBackground(CogitatorPalette.modalSurface)
+#endif
     }
 }
 
@@ -142,6 +154,7 @@ private struct CogitatorPanelRowModifier: ViewModifier {
                             .stroke(CogitatorPalette.panelEdge.opacity(0.55), lineWidth: 1)
                     }
             )
+            .listRowSeparator(.hidden)
             .listRowSeparatorTint(CogitatorPalette.panelEdge.opacity(0.45))
     }
 }
@@ -170,13 +183,90 @@ private struct CogitatorFormRhythmModifier: ViewModifier {
 private struct CogitatorSupportingTextModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.caption)
+            .font(.caption.weight(.medium))
             .foregroundStyle(CogitatorPalette.textSecondary)
     }
 }
 
 @available(iOS 17, macOS 14, *)
+private struct CogitatorAppChromeModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .preferredColorScheme(.dark)
+            .background {
+                Rectangle()
+                    .fill(CogitatorPalette.screenGradient)
+                    .ignoresSafeArea()
+            }
+#if os(iOS)
+            .toolbarBackground(CogitatorPalette.canvasSecondary.opacity(0.98), for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
+            .toolbarColorScheme(.dark, for: .tabBar)
+#endif
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CogitatorInputFieldModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+#if os(iOS)
+            .scrollContentBackground(.hidden)
+#endif
+            .foregroundStyle(CogitatorPalette.textPrimary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .background {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(CogitatorPalette.editorField)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(CogitatorPalette.panelEdge.opacity(0.4), lineWidth: 1)
+                    }
+            }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CogitatorStatusSurfaceModifier: ViewModifier {
+    let accent: Color
+
+    func body(content: Content) -> some View {
+        content
+            .padding(12)
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(CogitatorPalette.panelRaised.opacity(0.92))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(accent.opacity(0.55), lineWidth: 1)
+                    }
+            }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CogitatorReadoutLabelStyle: LabeledContentStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            configuration.label
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(CogitatorPalette.textSecondary)
+            Spacer(minLength: 12)
+            configuration.content
+                .font(.body.weight(.semibold))
+                .foregroundStyle(CogitatorPalette.textPrimary)
+                .multilineTextAlignment(.trailing)
+        }
+    }
+}
+
+@available(iOS 17, macOS 14, *)
 extension View {
+    func cogitatorAppChrome() -> some View {
+        modifier(CogitatorAppChromeModifier())
+    }
+
     func cogitatorScreenChrome() -> some View {
         modifier(CogitatorScreenChromeModifier())
     }
@@ -195,6 +285,18 @@ extension View {
 
     func cogitatorSupportingText() -> some View {
         modifier(CogitatorSupportingTextModifier())
+    }
+
+    func cogitatorInputField() -> some View {
+        modifier(CogitatorInputFieldModifier())
+    }
+
+    func cogitatorWarningSurface() -> some View {
+        modifier(CogitatorStatusSurfaceModifier(accent: CogitatorPalette.warning))
+    }
+
+    func cogitatorReadoutStyle() -> some View {
+        labeledContentStyle(CogitatorReadoutLabelStyle())
     }
 
     func cogitatorEmphasisText() -> some View {

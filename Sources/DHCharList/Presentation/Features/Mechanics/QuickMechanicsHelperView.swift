@@ -245,20 +245,26 @@ struct QuickMechanicsHelperView: View {
         Section {
             if let breakdown {
                 LabeledContent("Check Name", value: breakdown.checkName)
+                    .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
                 LabeledContent("Source", value: breakdown.sourceName)
+                    .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
                 LabeledContent("Base Value", value: String(breakdown.baseValue))
+                    .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
                 if let derivedBonus = breakdown.derivedBonus {
                     LabeledContent("Derived Bonus", value: String(derivedBonus))
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 }
                 if let trainingModifier = breakdown.trainingModifier {
                     LabeledContent("Training Contribution", value: trainingModifier.signedValueLabel)
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 }
                 LabeledContent("Applied Modifier", value: breakdown.appliedModifier.signedValueLabel)
+                    .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
 
                 HStack {

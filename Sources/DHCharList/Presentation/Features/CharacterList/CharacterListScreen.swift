@@ -819,6 +819,8 @@ private struct TemplateRenameSheet: View {
             Form {
                 Section {
                     TextField("Template Name", text: $nameDraft)
+                        .cogitatorInputField()
+                        .cogitatorPanelRow()
                 }
             }
             .formContentWidth()
@@ -914,14 +916,19 @@ struct CharacterDetailScreen: View {
             List {
                 Section {
                     LabeledContent("Name", value: character.profile.name.isEmpty ? "—" : character.profile.name)
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                     LabeledContent("Home world", value: character.profile.homeWorld.isEmpty ? "—" : character.profile.homeWorld)
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                     LabeledContent("Background", value: character.profile.background.isEmpty ? "—" : character.profile.background)
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                     LabeledContent("Role", value: character.profile.role.isEmpty ? "—" : character.profile.role)
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                     LabeledContent("Updated", value: character.updatedAt.formatted(date: .abbreviated, time: .shortened))
+                        .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Overview", subtitle: "Dossier Snapshot")

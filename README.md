@@ -236,6 +236,18 @@ UI_DESTINATION="id=99E2D143-E43E-4CE7-9F72-D05AE2A7A51C" ./scripts/run_ui_smoke.
 UI_DESTINATION="id=99E2D143-E43E-4CE7-9F72-D05AE2A7A51C" ./scripts/run_ui_screenshots.sh
 ```
 
+GitHub-hosted manual workflow note:
+- `.github/workflows/ui-tests.yml` is now live on GitHub-hosted runners
+- the workflow stays optional/manual (`workflow_dispatch`)
+- hosted assumptions are explicit:
+  - runner label: `macos-15`
+  - Xcode path: `/Applications/Xcode_16.4.app/Contents/Developer`
+  - simulator selection: first available iPhone simulator on the runner
+  - simulator readiness gate: `xcrun simctl bootstatus <udid> -b` before invoking the canonical UI scripts
+- live hosted validation for Batch 27:
+  - smoke mode completed green in GitHub Actions
+  - screenshot mode completed green in GitHub Actions and uploaded exported PNG attachments
+
 What UI smoke currently covers:
 - app launch + character list visibility
 - create blank character
@@ -268,6 +280,10 @@ What is optional/heavier:
 - `UI Tests (manual)` workflow:
   - smoke path: `./scripts/run_ui_smoke.sh`
   - screenshots path: `./scripts/run_ui_screenshots.sh`
+  - hosted workflow assumptions:
+    - `macos-15`
+    - `DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer`
+    - first available iPhone simulator, with `bootstatus -b` wait before test execution
 
 CI artifacts:
 - `coverage-artifacts` (from required `ci.yml` job):

@@ -103,3 +103,8 @@
    - **Reason:** UI simulator tests are useful but heavier and more environment-sensitive; required CI should prioritize stable regression gates with clear failure signals.
    - **Type:** Fact.
    - **Impact:** Required CI now blocks merges on meaningful build/test/coverage regressions, while UI smoke/screenshots remain available on-demand with published artifacts.
+
+21. **Decision:** Pin the optional hosted UI workflow to `macos-15` + Xcode 16.4 (`DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer`), wait for simulator boot completion with `xcrun simctl bootstatus -b`, and keep bounded timeouts on the manual smoke/screenshot steps.
+   - **Reason:** The first real GitHub-hosted smoke runs on `macos-15-arm64` stalled after simulator connection and `xctrunner` launch handoff; a workflow-only runner readiness fix was the minimal reversible change that stabilized hosted execution without touching app/runtime behavior.
+   - **Type:** Fact.
+   - **Impact:** Optional UI smoke and screenshot workflow modes now complete green on GitHub-hosted runners with explicit runner/Xcode assumptions, while required CI remains unchanged and the UI workflow stays manual by design.

@@ -19,9 +19,17 @@ jobs:
   ui-tests:
     name: UI ${{ github.event.inputs.test_target }} tests (DHCharListHost)
     runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Report Xcode environment
+        run: |
+          xcode-select -p
+          xcodebuild -version
 
       - name: Select simulator destination
         id: sim
@@ -47,15 +55,18 @@ jobs:
           if [[ "$DEST" == id=* ]]; then
             UDID="${DEST#id=}"
             xcrun simctl boot "$UDID" 2>/dev/null || true
+            xcrun simctl bootstatus "$UDID" -b
           fi
 
       - name: Run UI smoke tests
         if: github.event.inputs.test_target == 'smoke'
+        timeout-minutes: 12
         run: |
           UI_DESTINATION="${{ steps.sim.outputs.destination }}" ./scripts/run_ui_smoke.sh
 
       - name: Run UI screenshot tests
         if: github.event.inputs.test_target == 'screenshots'
+        timeout-minutes: 15
         run: |
           UI_DESTINATION="${{ steps.sim.outputs.destination }}" ./scripts/run_ui_screenshots.sh
 

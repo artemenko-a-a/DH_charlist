@@ -1,21 +1,21 @@
-# Batch 34 State
+# Batch 35 State
 
-- status: validated for code/runtime traversal; manual visual acceptance still pending
-- scope: UI consistency and dark-theme hardening only; no product scope, navigation, persistence, or model changes
-- presentation/theme state:
-  - centralized dark-first app chrome now applies at the app shell and shared screen theme level
-  - navigation/tab/sheet chrome is now aligned with the existing cogitator palette instead of falling back to bright default system surfaces
-  - reusable readout styling now strengthens label/value contrast on overview and helper screens
-  - multiline editor surfaces now use darker input chrome for readability
-  - warning/status surfaces now have a more explicit visual hierarchy
+- status: validated for build/runtime sanity; focused manual acceptance still pending
+- scope: printable/shareable single-character dossier only; no persistence, navigation, or architecture redesign
+- dossier/export state:
+  - character detail now exposes a `Dossier` action
+  - dossier preview uses a structured document-style layout instead of mirroring the in-app dark chrome
+  - dossier composition is explicit and testable in `Application`
+  - iOS host runtime prepares a PDF and exposes the native share sheet for share / Save to Files / print destinations
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `./scripts/run_ui_screenshots.sh`
-- runtime traversal note:
-  - simulator screenshot traversal passed and exported attachments for `Characters`, character detail, `Characteristics`, `Skills`, `Notes`, `Equipment`, `Session`, `History`, and `Templates`
-  - this session did not include direct human inspection of those images, so final visual acceptance remains manual
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b35-dossier-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCharacterDossierPreviewPreparesPrintablePDF`
+- runtime sanity note:
+  - focused host UI validation confirmed the dossier entry point opens, the preview sheet renders, PDF-ready status appears, and the share action is available
+  - this session did not include a human review of the real share destinations (`Save to Files`, `Print`) or final document-layout aesthetics
 - truthful limitations:
-  - no new UI/product features were added
-  - dark-theme hardening is centralized, but final contrast/aesthetic sign-off still depends on a manual screenshot/device review
+  - share/print path is scoped to a single character
+  - no publishing subsystem, batch export, cloud sharing, or editable PDF mode was added
+  - final manual acceptance should still verify document readability and native share-sheet destinations on a normal simulator/device session

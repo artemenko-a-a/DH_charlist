@@ -157,3 +157,11 @@ Latest local validation status (2026-03-09):
     - verify readout rows (overview values, quick mechanics breakdown, skill derived values) have clear label/value contrast and remain readable at larger Dynamic Type sizes
     - verify warning/status surfaces remain visually distinct without breaking the overall dark hierarchy (for example the persistence fallback notice)
     - if using `./scripts/run_ui_screenshots.sh`, review exported attachments as a companion artifact, not a replacement for manual visual acceptance
+28. Batch 35 printable/shareable dossier:
+    - open any character detail and tap `Dossier`
+    - verify the dossier preview opens as a readable document-style sheet rather than a copy of the dark in-app chrome
+    - verify the preview includes practical structured sections from current data (identity, characteristics/resources, session snapshot, and any populated skills/notes/equipment/history)
+    - verify `Printable PDF` status becomes ready
+    - tap `Share PDF` and verify the native share sheet opens
+    - verify the share destinations include practical export options such as `Save to Files` and `Print` when available on the device/simulator context
+    - close the dossier and verify normal character detail flow is unchanged

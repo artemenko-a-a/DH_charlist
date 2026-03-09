@@ -145,3 +145,8 @@
    - **Reason:** The high-severity risk was silent destructive replacement; making that behavior explicit is the minimal safe fix that preserves accepted import architecture and persistence behavior without implying undo/restore guarantees that are not actually implemented.
    - **Type:** Fact.
    - **Impact:** Import is now honest and safer at the UI boundary, while backup/snapshot and merge/conflict handling remain intentionally deferred.
+
+26. **Decision:** Implement Batch 35 dossier export as a single-character preview + generated PDF share path from existing character detail, using a structured dossier composer plus the native iOS share sheet instead of a custom report engine or multi-step publishing flow.
+   - **Reason:** The batch requires a practical printable/shareable output without changing accepted architecture or expanding into batch publishing, cloud sharing, or a new persistence subsystem.
+   - **Type:** Fact.
+   - **Impact:** Current character data can now be previewed in a readable document layout and exported through the native share/print path, while dossier logic remains explicit, testable, and scoped to one character at a time.

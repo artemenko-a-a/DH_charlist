@@ -44,6 +44,10 @@ The project currently includes:
   - standard modifiers (`+30` to `-30`) plus custom signed modifier entry
   - session-mode quick access with temporary modifier reuse
 - user-facing JSON import/export with replace-all preview and destructive confirmation
+- single-character dossier export:
+  - open from character detail
+  - preview a readable structured dossier in-app
+  - share/save/print a generated PDF through the native iOS share sheet
 - runtime host app bridge for simulator launch via `DHCharListHost`
 - two validated local persistence paths:
   - JSON repository
@@ -119,6 +123,33 @@ Current safety boundary:
 - cancel is the safe default
 - import is not currently undoable from the app
 - backup/snapshot before import is intentionally deferred for now
+
+## Character dossier export (Batch 35)
+
+The app now supports a single-character dossier flow for printing or sharing without turning export into a publishing subsystem.
+
+Where to open it:
+- open any character
+- tap `Dossier` in the character detail toolbar
+
+What it does:
+- shows an in-app readable dossier preview with document-style layout
+- structures existing accepted data into practical sections:
+  - identity / profile
+  - characteristics / resources
+  - skills
+  - notes / abilities
+  - equipment
+  - session snapshot
+  - recent history summary when present
+- prepares a printable PDF from the current character state
+- uses the native iOS share sheet for share / Save to Files / print destinations
+
+Current scope limits:
+- single character only
+- no roster batch export
+- no cloud sharing
+- no editable PDF form mode
 
 ## Combat workspace (Batch 30)
 

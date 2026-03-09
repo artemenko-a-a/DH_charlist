@@ -70,6 +70,29 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertFalse(labeledElement(containing: "Smoke Acolyte").exists)
     }
 
+    func testCharacterDossierPreviewPreparesPrintablePDF() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let dossierButton = app.buttons["dossier.open"]
+        XCTAssertTrue(dossierButton.waitForExistence(timeout: 5))
+        dossierButton.tap()
+
+        XCTAssertTrue(app.navigationBars["Character Dossier"].waitForExistence(timeout: 8))
+
+        let pdfStatus = app.staticTexts["dossier.pdf.status"]
+        XCTAssertTrue(pdfStatus.waitForExistence(timeout: 8))
+        XCTAssertTrue(pdfStatus.label.localizedCaseInsensitiveContains("ready"))
+
+        let shareButton = app.buttons["dossier.share.pdf"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(shareButton.isEnabled)
+
+        app.buttons["Close"].tap()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+    }
+
     func testSmokeCoreFlowsAndEntryPoints() {
         launchForSmoke()
 
@@ -104,6 +127,9 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         returnToCharacterDetail()
         XCTAssertTrue(app.staticTexts["Smoke Edited"].waitForExistence(timeout: 8))
+
+        let dossierButton = app.buttons["dossier.open"]
+        XCTAssertTrue(dossierButton.waitForExistence(timeout: 5))
 
         openDetailSection("Characteristics & Resources", expectedNavTitle: "Characteristics")
         openDetailSection("Skills", expectedNavTitle: "Skills")

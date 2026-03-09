@@ -910,6 +910,7 @@ struct CharacterDetailScreen: View {
     let characterID: UUID
     @ObservedObject var viewModel: CharacterListViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var isShowingDossier = false
 
     var body: some View {
         if let character = viewModel.character(by: characterID) {
@@ -1028,7 +1029,21 @@ struct CharacterDetailScreen: View {
             .cogitatorFormRhythm()
             .cogitatorScreenChrome()
             .navigationTitle(character.profile.name.isEmpty ? "Character" : character.profile.name)
+            .sheet(isPresented: $isShowingDossier) {
+                CharacterDossierScreen(character: character)
+            }
             .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isShowingDossier = true
+                    } label: {
+                        Label("Dossier", systemImage: "doc.text")
+                    }
+                    .accessibilityIdentifier("dossier.open")
+                    .accessibilityLabel("Open Dossier")
+                    .accessibilityHint("Preview a printable single-character dossier and share it as PDF.")
+                }
+
                 ToolbarItem(placement: .automatic) {
                     Button {
                         Task { await viewModel.saveCharacterAsTemplate(characterID: characterID) }

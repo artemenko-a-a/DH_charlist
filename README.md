@@ -195,6 +195,11 @@ Assets baseline:
 - `DHCharListHost` project and shared scheme build in Xcode.
 - Host app metadata, deployment settings, and signing structure are coherent for local development and future distribution configuration.
 - Placeholder app icon structure is present to avoid archive/distribution preparation blockers caused by missing icon assets.
+- Batch 28 validated a real unsigned device archive path for `DHCharListHost`:
+  - `xcodebuild ... -configuration Release -destination 'generic/platform=iOS' build CODE_SIGNING_ALLOWED=NO`
+  - `xcodebuild ... -configuration Release -destination 'generic/platform=iOS' archive CODE_SIGNING_ALLOWED=NO`
+- Batch 28 also probed export behavior from that archive and confirmed the real remaining boundary:
+  - `xcodebuild -exportArchive ...` fails with `No Team Found in Archive` until a real Apple team/signing context is configured.
 
 ### What remains manual before TestFlight/App Store distribution
 
@@ -203,6 +208,12 @@ Assets baseline:
 - Replace placeholder AppIcon assets with final branded assets meeting Apple requirements.
 - Create/configure App Store Connect app record, certificates/profiles/capabilities for your account.
 - Perform real device archive/export validation under your signing identity, then upload through Organizer.
+
+Batch 28 distribution/TestFlight notes:
+- current committed app bundle id remains `com.example.DHCharListHost`
+- current committed marketing/build versions remain `1.0` / `1`
+- the repository is now truthfully `archive-ready` and `TestFlight-prepared`, not fully TestFlight-ready without Apple-account-controlled signing
+- exact manual steps and command examples are documented in `Docs/testflight-distribution.md`
 
 ## UI smoke + screenshot workflow (Batch 24)
 

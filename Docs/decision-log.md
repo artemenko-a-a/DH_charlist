@@ -108,3 +108,8 @@
    - **Reason:** The first real GitHub-hosted smoke runs on `macos-15-arm64` stalled after simulator connection and `xctrunner` launch handoff; a workflow-only runner readiness fix was the minimal reversible change that stabilized hosted execution without touching app/runtime behavior.
    - **Type:** Fact.
    - **Impact:** Optional UI smoke and screenshot workflow modes now complete green on GitHub-hosted runners with explicit runner/Xcode assumptions, while required CI remains unchanged and the UI workflow stays manual by design.
+
+22. **Decision:** Keep committed distribution signing neutral for Batch 28 and stop at a truthful `archive-ready / TestFlight-prepared` state instead of hardcoding a real team identifier, bundle identifier, or upload credential into repository state.
+   - **Reason:** A real unsigned archive now succeeds, and the first export probe fails specifically with `No Team Found in Archive`; the remaining work is Apple-account-controlled and cannot be completed safely from repo-only configuration without introducing personal/team-specific values.
+   - **Type:** Fact.
+   - **Impact:** The repository now documents an exact manual finish line for TestFlight (real bundle ID, Apple team/signing, App Store Connect record, signed export/upload) while preserving accepted runtime behavior and avoiding unsafe committed signing data.

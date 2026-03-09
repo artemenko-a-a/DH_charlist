@@ -1,13 +1,21 @@
-# Batch 27 State
+# Batch 28 State
 
-- status: validated
-- scope: optional GitHub Actions UI workflow only
-- hosted smoke run: `22848098651` green (`7m58s`)
-- hosted screenshots run: `22848408585` green (`17m17s`)
-- workflow assumptions:
-  - `runs-on: macos-15`
-  - `DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer`
-  - first available iPhone simulator on runner
-  - `xcrun simctl bootstatus <udid> -b` before invoking canonical UI scripts
-- required CI: unchanged and still required
-- optional UI workflow: still manual by design
+- status: validated as archive-ready / TestFlight-prepared
+- scope: distribution/TestFlight bring-up only
+- validated host build/archive commands:
+  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
+  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Release -destination 'generic/platform=iOS' build CODE_SIGNING_ALLOWED=NO`
+  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Release -destination 'generic/platform=iOS' archive -archivePath /tmp/DHCharListHost-Batch28.xcarchive CODE_SIGNING_ALLOWED=NO`
+- archive truth:
+  - `CFBundleIdentifier = com.example.DHCharListHost`
+  - `CFBundleShortVersionString = 1.0`
+  - `CFBundleVersion = 1`
+  - `SigningIdentity = ""`
+  - `Team = ""`
+- export probe:
+  - `xcodebuild -exportArchive ...` fails with `No Team Found in Archive`
+- remaining manual boundary:
+  - replace placeholder bundle identifier(s)
+  - select Apple Developer team / signing context locally
+  - create/configure App Store Connect app record
+  - perform signed archive/export/upload

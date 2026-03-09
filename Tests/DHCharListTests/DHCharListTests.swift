@@ -840,6 +840,53 @@ import SwiftData
     #expect(persisted?.session.temporaryModifiers.isEmpty == true)
 }
 
+@Test func activeWeaponSelectionAndCombatConditionsPersistCorrectly() async throws {
+    let fileURL = uniqueTestFileURL("session-combat-workspace")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+
+    let created = try await useCases.createCharacter(profile: Profile(name: "Combat Workspace"))
+    let sidearm = Weapon(name: "Laspistol", type: "Pistol")
+    let blade = Weapon(name: "Mono Sword", type: "Melee")
+
+    _ = try await useCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(weapons: [sidearm, blade])
+    )
+
+    let updatedSession = SessionState(
+        modeEnabled: true,
+        pinnedChecks: ["Dodge +10"],
+        temporaryModifiers: ["Smoke": -20],
+        activeWeaponID: blade.id,
+        combatConditions: ["Pinned Down", "Partial Cover"]
+    )
+    let updated = try await useCases.updateSession(characterID: created.id, session: updatedSession)
+    let persisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: created.id)
+
+    #expect(updated.session.activeWeaponID == blade.id)
+    #expect(updated.session.combatConditions == ["Pinned Down", "Partial Cover"])
+    #expect(persisted?.session == updatedSession)
+}
+
+@Test func legacySessionDecodingDefaultsCombatWorkspaceFields() throws {
+    let legacyJSON = """
+    {
+      "modeEnabled": true,
+      "pinnedChecks": ["Awareness +10"],
+      "temporaryModifiers": {"Smoke": -20}
+    }
+    """
+
+    let decoded = try JSONDecoder().decode(SessionState.self, from: Data(legacyJSON.utf8))
+
+    #expect(decoded.modeEnabled == true)
+    #expect(decoded.pinnedChecks == ["Awareness +10"])
+    #expect(decoded.temporaryModifiers == ["Smoke": -20])
+    #expect(decoded.activeWeaponID == nil)
+    #expect(decoded.combatConditions.isEmpty)
+}
+
 @Test func sessionEditsRemainScopedToSelectedCharacter() async throws {
     let fileURL = uniqueTestFileURL("session-scoping")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -847,13 +894,17 @@ import SwiftData
 
     let first = try await useCases.createCharacter(profile: Profile(name: "First Session"))
     let second = try await useCases.createCharacter(profile: Profile(name: "Second Session"))
+    let firstWeapon = Weapon(name: "Combat Shotgun")
 
     let firstSession = SessionState(
         modeEnabled: true,
         pinnedChecks: ["Dodge +10", "Awareness +20"],
-        temporaryModifiers: ["Smoke": -20, "Blessing": 10]
+        temporaryModifiers: ["Smoke": -20, "Blessing": 10],
+        activeWeaponID: firstWeapon.id,
+        combatConditions: ["Pinned Down"]
     )
 
+    _ = try await useCases.updateEquipment(characterID: first.id, equipment: EquipmentState(weapons: [firstWeapon]))
     _ = try await useCases.updateSession(characterID: first.id, session: firstSession)
 
     let firstPersisted = try await JSONFileCharacterRepository(fileURL: fileURL).fetch(id: first.id)
@@ -1600,7 +1651,19 @@ private func makeSwiftDataTemplateRepository(testName: String) throws -> SwiftDa
 #endif
 
 private func sampleCharacter(name: String) -> Character {
-    Character(
+    let weapon = Weapon(
+        id: UUID(),
+        name: "Laspistol",
+        type: "Pistol",
+        range: "30m",
+        damage: "1d10+2 E",
+        penetration: "0",
+        clip: "30",
+        reload: "Half",
+        traits: "Reliable"
+    )
+
+    return Character(
         id: UUID(),
         profile: Profile(
             name: name,
@@ -1651,19 +1714,7 @@ private func sampleCharacter(name: String) -> Character {
             notes: "Sample notes"
         ),
         equipment: EquipmentState(
-            weapons: [
-                Weapon(
-                    id: UUID(),
-                    name: "Laspistol",
-                    type: "Pistol",
-                    range: "30m",
-                    damage: "1d10+2 E",
-                    penetration: "0",
-                    clip: "30",
-                    reload: "Half",
-                    traits: "Reliable"
-                )
-            ],
+            weapons: [weapon],
             armour: [Armour(id: UUID(), location: "Body", armourPoints: 4)],
             movement: MovementProfile(halfMove: 3, fullMove: 6, charge: 9, run: 18),
             inventory: [InventoryItem(id: UUID(), name: "Data-slate", quantity: 1, weight: 0.8)]
@@ -1671,7 +1722,9 @@ private func sampleCharacter(name: String) -> Character {
         session: SessionState(
             modeEnabled: true,
             pinnedChecks: ["Medicae +10"],
-            temporaryModifiers: ["Darkness": -10]
+            temporaryModifiers: ["Darkness": -10],
+            activeWeaponID: weapon.id,
+            combatConditions: ["In Cover"]
         ),
         updatedAt: Date(timeIntervalSince1970: 1_700_000_000)
     )

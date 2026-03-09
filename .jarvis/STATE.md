@@ -1,22 +1,21 @@
-# Batch 29 State
+# Batch 30 State
 
 - status: validated
-- scope: rules-aware quick mechanics helpers only
-- user-visible helper entry points:
-  - `Characteristics & Resources` scope button on a characteristic row
-  - `Skills` quick-check button on a skill row
-  - `Session Mode` -> `Open Quick Mechanics`
-- helper boundaries:
-  - uses existing characteristic values and existing skill training modifiers
-  - supports preset modifiers `+30`, `+20`, `+10`, `+0`, `-10`, `-20`, `-30`
-  - supports custom signed modifier input
-  - can reuse current Session Mode temporary modifiers when present
-  - does not roll dice or persist results automatically
+- scope: combat workspace + encounter-speed helpers only
+- user-visible workspace additions:
+  - `Session Mode` now foregrounds current wounds, fatigue, and current fate for live adjustment
+  - active weapon can be selected from existing weapon entries and is summarized in the workspace
+  - movement values are visible alongside pinned checks, temporary modifiers, and quick mechanics shortcuts
+  - short combat condition notes can be added/edited/deleted in the same workspace
+- modeling boundaries:
+  - new combat-facing state stays in `SessionState` as explicit lightweight fields (`activeWeaponID`, `combatConditions`)
+  - uses existing equipment/weapon data; no combat engine, initiative tracker, or dice automation was added
+  - quick mechanics integration reuses the accepted Batch 29 helper and existing session temporary modifiers
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b29-quick-mechanics-rerun-3.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b30-combat-workspace.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
   - `./scripts/run_ui_smoke.sh`
 - focused runtime note:
-  - compact-sheet simulator sanity required scrolling within the helper to reach the breakdown/final target row
+  - the combat workspace simulator sanity covered active-weapon selection, quick mechanics launch, combat condition entry, and pinned-check/modifier reuse from the same session flow

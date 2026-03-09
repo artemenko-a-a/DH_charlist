@@ -120,3 +120,8 @@
    - **Reason:** Batch 29 requires practical in-session help for common checks, but expanding into a rules engine or hidden automation would exceed scope and introduce avoidable behavior risk.
    - **Type:** Fact.
    - **Impact:** Users can assemble common characteristic/skill checks quickly from accepted character data, while runtime/persistence behavior stays stable and the helper remains inspectable and reversible.
+
+24. **Decision:** Keep Batch 30 combat-workspace additions inside the existing `SessionState` as explicit lightweight fields (`activeWeaponID`, `combatConditions`) instead of creating a separate combat subsystem or rules-driven status model.
+   - **Reason:** The batch only needs faster in-session access to already accepted character/session data; a new combat model would expand scope, duplicate state, and increase migration risk without solving a proven problem.
+   - **Type:** Fact.
+   - **Impact:** Active weapon focus and short combat notes persist on the same local/session path as pinned checks and temporary modifiers, preserving JSON-default and SwiftData-alternative behavior while keeping combat state transparent and reversible.

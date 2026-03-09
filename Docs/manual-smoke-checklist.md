@@ -1,6 +1,6 @@
 # Manual Smoke Checklist (iOS/iPadOS)
 
-This checklist tracks the currently accepted runtime-polished implementation through Batch 29.
+This checklist tracks the currently accepted runtime-polished implementation through Batch 30.
 
 1. Launch app and confirm `Characters` + `Session` tabs open.
 2. In `Characters`, create a new character and open detail.
@@ -35,8 +35,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
    - verify quick-add menu is available
    - verify in-screen search filters weapons/armour/inventory and filtered delete targets the correct row
    - verify persistence after navigation/re-open
-11. Open `Session Mode` from character detail:
+11. Open `Session Mode` from character detail and treat it as the combat workspace:
     - toggle session mode
+    - adjust current wounds / fatigue / current fate and verify the values update immediately
+    - if at least one weapon exists, change the active weapon and verify the selected weapon summary updates
+    - open quick mechanics from the workspace and verify the helper opens with a combat-relevant shortcut
+    - add/edit/delete a combat condition note
     - add/edit/delete a pinned check
     - add/edit/delete a temporary modifier
     - verify persistence after navigation/re-open
@@ -101,6 +105,7 @@ Latest local validation status (2026-03-09):
 - Host app compiles successfully in Xcode (`BuildProject`).
 - SwiftPM regression/build validation passes (`swift test`, `swift build`).
 - Focused simulator runtime sanity now passes for quick mechanics via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`.
+- Focused simulator runtime sanity now also passes for the combat workspace via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`.
 - Canonical smoke automation also passes via `./scripts/run_ui_smoke.sh`.
 - Continue to record manual runtime execution per run (pass/fail + notes), especially for visual/ergonomic review.
 
@@ -122,3 +127,10 @@ Latest local validation status (2026-03-09):
     - open `Session Mode`, tap `Open Quick Mechanics`, and verify the helper opens from the session-oriented flow
     - if temporary session modifiers exist, verify they appear as reusable helper shortcuts
     - on compact sheet sizes, scroll within the helper if needed to reach the breakdown and final target rows
+25. Batch 30 combat workspace helpers:
+    - create or edit a weapon in `Equipment`, then open `Session Mode` and verify it appears as an active-weapon choice
+    - switch the active weapon and verify the workspace shows the selected weapon name plus live-play fields
+    - adjust wounds / fatigue / fate from the workspace controls and verify the displayed values update without leaving the screen
+    - add at least one combat condition and verify it persists after navigating away and back
+    - verify pinned checks and temporary modifiers remain usable from the same workspace
+    - verify quick mechanics shortcuts from the workspace reduce taps for a common combat check

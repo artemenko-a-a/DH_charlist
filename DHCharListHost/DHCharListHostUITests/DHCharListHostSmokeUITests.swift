@@ -131,6 +131,102 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         app.buttons["Done"].tap()
     }
 
+    func testCombatWorkspaceActivePlayFlow() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addWeaponButton = app.buttons["Add Weapon"]
+        XCTAssertTrue(addWeaponButton.waitForExistence(timeout: 5))
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let weaponNameField = app.textFields["Weapon Name"]
+        XCTAssertTrue(weaponNameField.waitForExistence(timeout: 5))
+        weaponNameField.tap()
+        weaponNameField.typeText("Laspistol")
+        app.buttons["Save"].tap()
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let sessionSection = app.staticTexts["Session Mode"]
+        reveal(sessionSection, maxSwipes: 3)
+        XCTAssertTrue(sessionSection.waitForExistence(timeout: 5))
+        sessionSection.tap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+
+        let increaseWounds = app.buttons["combat.wounds.increment"]
+        XCTAssertTrue(increaseWounds.waitForExistence(timeout: 5))
+        increaseWounds.tap()
+        let woundsValue = app.staticTexts["combat.wounds.value"]
+        XCTAssertTrue(woundsValue.waitForExistence(timeout: 5))
+        XCTAssertEqual(woundsValue.label, "1")
+
+        let activeWeaponButton = app.buttons["Set Active Weapon Laspistol"]
+        reveal(activeWeaponButton, maxSwipes: 3)
+        XCTAssertTrue(activeWeaponButton.waitForExistence(timeout: 5))
+        activeWeaponButton.tap()
+        let activeWeaponName = app.staticTexts["combat.active-weapon.name"]
+        XCTAssertTrue(activeWeaponName.waitForExistence(timeout: 5))
+        XCTAssertEqual(activeWeaponName.label, "Laspistol")
+
+        let weaponSkillQuickCheck = app.buttons["quick-mechanics.session.weapon-skill"]
+        reveal(weaponSkillQuickCheck, maxSwipes: 2)
+        XCTAssertTrue(weaponSkillQuickCheck.waitForExistence(timeout: 5))
+        weaponSkillQuickCheck.tap()
+        XCTAssertTrue(app.navigationBars["Quick Check"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+
+        let addConditionButton = app.buttons["combat.add-condition"]
+        reveal(addConditionButton, maxSwipes: 3)
+        XCTAssertTrue(addConditionButton.waitForExistence(timeout: 5))
+        addConditionButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Condition"].waitForExistence(timeout: 5))
+
+        let conditionField = textInput("combat.condition.text")
+        XCTAssertTrue(conditionField.waitForExistence(timeout: 5))
+        conditionField.tap()
+        conditionField.typeText("Pinned Down")
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Pinned Down"].waitForExistence(timeout: 5))
+
+        let addPinnedCheckButton = app.buttons["Add Pinned Check"]
+        reveal(addPinnedCheckButton, maxSwipes: 3)
+        XCTAssertTrue(addPinnedCheckButton.waitForExistence(timeout: 5))
+        addPinnedCheckButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Check"].waitForExistence(timeout: 5))
+
+        let pinnedCheckField = textInput("Pinned Check")
+        XCTAssertTrue(pinnedCheckField.waitForExistence(timeout: 5))
+        pinnedCheckField.tap()
+        pinnedCheckField.typeText("Dodge +10")
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Dodge +10"].waitForExistence(timeout: 5))
+
+        let addTemporaryModifierButton = app.buttons["Add Temporary Modifier"]
+        reveal(addTemporaryModifierButton, maxSwipes: 3)
+        XCTAssertTrue(addTemporaryModifierButton.waitForExistence(timeout: 5))
+        addTemporaryModifierButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Modifier"].waitForExistence(timeout: 5))
+
+        let modifierLabelField = app.textFields["Modifier Label"]
+        XCTAssertTrue(modifierLabelField.waitForExistence(timeout: 5))
+        modifierLabelField.tap()
+        modifierLabelField.typeText("Smoke")
+
+        let modifierValueField = app.textFields["Modifier Value"]
+        XCTAssertTrue(modifierValueField.waitForExistence(timeout: 5))
+        modifierValueField.tap()
+        modifierValueField.clearAndEnterText("-20")
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Smoke"].waitForExistence(timeout: 5))
+    }
+
     private func assertQuickCheckFinalTarget(_ expectedValue: String) {
         let finalTarget = app.staticTexts["quick-check.final-target"]
         reveal(finalTarget, maxSwipes: 4)
@@ -147,6 +243,14 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
                 return
             }
         }
+    }
+
+    private func textInput(_ identifier: String) -> XCUIElement {
+        let textField = app.textFields[identifier]
+        if textField.exists {
+            return textField
+        }
+        return app.textViews[identifier]
     }
 }
 

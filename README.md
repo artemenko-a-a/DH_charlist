@@ -37,7 +37,7 @@ The project currently includes:
   - movement
   - inventory
   - local in-screen search/filter for weapons/armour/inventory
-- session mode editing
+- session mode / combat workspace editing
 - quick mechanics helpers:
   - characteristic-based quick checks
   - skill-based quick checks
@@ -85,6 +85,24 @@ Current helper behavior:
 - custom signed modifier input is supported
 - current Session Mode temporary modifiers can be reused directly in the helper when present
 - on compact sheet sizes, scroll within the helper to reach the full breakdown and final target rows
+
+## Combat workspace (Batch 30)
+
+`Session Mode` now acts as a practical combat workspace over the accepted character/session data. It keeps state explicit and local-first; it does not add automated combat resolution.
+
+What it surfaces:
+- quick-adjust current wounds, fatigue, and current fate
+- active weapon selection from existing weapon entries plus a compact live-play summary
+- movement values from existing equipment data
+- pinned checks and temporary modifiers in the same workspace
+- short combat condition/status notes
+- one-tap quick mechanics shortcuts for common combat-facing checks
+
+Current workspace behavior:
+- active weapon selection persists as session-scoped state and clears safely if the referenced weapon is removed later
+- combat conditions are lightweight user-managed notes, not a rules-driven status engine
+- quick mechanics access from `Session Mode` remains transparent and uses the same modifier breakdown as Batch 29
+- iPhone layouts prioritize the combat summary and shortcuts first, while keeping the full workspace usable on iPad
 
 ## How to run tests
 

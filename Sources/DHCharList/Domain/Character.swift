@@ -350,10 +350,46 @@ public struct SessionState: Codable, Equatable, Sendable {
     public var modeEnabled: Bool
     public var pinnedChecks: [String]
     public var temporaryModifiers: [String: Int]
+    public var activeWeaponID: UUID?
+    public var combatConditions: [String]
 
-    public init(modeEnabled: Bool = false, pinnedChecks: [String] = [], temporaryModifiers: [String: Int] = [:]) {
+    public init(
+        modeEnabled: Bool = false,
+        pinnedChecks: [String] = [],
+        temporaryModifiers: [String: Int] = [:],
+        activeWeaponID: UUID? = nil,
+        combatConditions: [String] = []
+    ) {
         self.modeEnabled = modeEnabled
         self.pinnedChecks = pinnedChecks
         self.temporaryModifiers = temporaryModifiers
+        self.activeWeaponID = activeWeaponID
+        self.combatConditions = combatConditions
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case modeEnabled
+        case pinnedChecks
+        case temporaryModifiers
+        case activeWeaponID
+        case combatConditions
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        modeEnabled = try container.decodeIfPresent(Bool.self, forKey: .modeEnabled) ?? false
+        pinnedChecks = try container.decodeIfPresent([String].self, forKey: .pinnedChecks) ?? []
+        temporaryModifiers = try container.decodeIfPresent([String: Int].self, forKey: .temporaryModifiers) ?? [:]
+        activeWeaponID = try container.decodeIfPresent(UUID.self, forKey: .activeWeaponID)
+        combatConditions = try container.decodeIfPresent([String].self, forKey: .combatConditions) ?? []
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(modeEnabled, forKey: .modeEnabled)
+        try container.encode(pinnedChecks, forKey: .pinnedChecks)
+        try container.encode(temporaryModifiers, forKey: .temporaryModifiers)
+        try container.encodeIfPresent(activeWeaponID, forKey: .activeWeaponID)
+        try container.encode(combatConditions, forKey: .combatConditions)
     }
 }

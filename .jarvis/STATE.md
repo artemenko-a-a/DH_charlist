@@ -1,23 +1,21 @@
-# Batch 31 State
+# Batch 32 State
 
 - status: validated
-- scope: import safety only; no merge mode, backup workflow, or persistence redesign
-- user-visible import behavior:
-  - import now stages the payload before mutation and shows a lightweight preview summary
-  - the confirmation explicitly states the number of detected characters
-  - the confirmation explicitly states that import is replace-all, not merge
-  - the confirmation explicitly states that local characters missing from the file will be removed
-  - `Cancel` is the safe default path
+- scope: persistence observability only; no migration system, no storage-management UI, no persistence rewrite
+- user-visible diagnostics behavior:
+  - the app now keeps a structured persistence bootstrap result
+  - `Persistence Status` is available from `Characters` -> `Import/Export`
+  - diagnostics show requested backend, active backend, and whether fallback is active
+  - when requested `SwiftData` falls back to JSON, the `Characters` screen shows an explicit persistence notice
 - architecture/runtime boundaries:
-  - accepted replace-all import path remains `CharacterUseCases.importCharacters(from:using:)`
   - JSON-backed persistence remains the default/fallback runtime path
   - SwiftData-backed persistence remains the validated alternative path
-  - backup/snapshot before import is intentionally deferred for this batch
+  - fallback still keeps the app usable; this batch only makes it explicit and diagnosable
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b31-import-safety-pair.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testImportReplaceAllPreviewCanBeCancelledSafely -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testImportReplaceAllPreviewCanBeConfirmedExplicitly`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b32-persistence-status.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testPersistenceStatusShowsJSONDefaultBackend -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testPersistenceStatusShowsSwiftDataWhenRequested`
 - focused runtime note:
-  - simulator sanity now covers both safe cancel and explicit destructive confirm paths for import preview/confirmation
-  - a real dismissal-order bug was fixed so confirmation no longer clears staged import state before executing the accepted replace-all import
+  - simulator sanity now covers the visible persistence diagnostics surface on both JSON default and SwiftData-selected launch paths
+  - deterministic package tests also cover a forced SwiftData bootstrap failure path and verify JSON fallback diagnostics

@@ -1,6 +1,40 @@
 import XCTest
 
 final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
+    func testPersistenceStatusShowsJSONDefaultBackend() {
+        launchForSmoke()
+        openPersistenceStatus()
+
+        let requested = app.staticTexts["persistence.status.requested.value"]
+        let active = app.staticTexts["persistence.status.active.value"]
+        let fallback = app.staticTexts["persistence.status.fallback.value"]
+
+        XCTAssertTrue(requested.waitForExistence(timeout: 5))
+        XCTAssertEqual(requested.label, "JSON File")
+        XCTAssertTrue(active.waitForExistence(timeout: 5))
+        XCTAssertEqual(active.label, "JSON File")
+        XCTAssertTrue(fallback.waitForExistence(timeout: 5))
+        XCTAssertEqual(fallback.label, "No")
+    }
+
+    func testPersistenceStatusShowsSwiftDataWhenRequested() {
+        app.launchArguments.removeAll { $0 == "-dh-ui-persistence-json" }
+        app.launchArguments += ["-dh-ui-persistence-swiftdata"]
+        launchForSmoke()
+        openPersistenceStatus()
+
+        let requested = app.staticTexts["persistence.status.requested.value"]
+        let active = app.staticTexts["persistence.status.active.value"]
+        let fallback = app.staticTexts["persistence.status.fallback.value"]
+
+        XCTAssertTrue(requested.waitForExistence(timeout: 5))
+        XCTAssertEqual(requested.label, "SwiftData")
+        XCTAssertTrue(active.waitForExistence(timeout: 5))
+        XCTAssertEqual(active.label, "SwiftData")
+        XCTAssertTrue(fallback.waitForExistence(timeout: 5))
+        XCTAssertEqual(fallback.label, "No")
+    }
+
     func testImportReplaceAllPreviewCanBeCancelledSafely() {
         app.launchArguments += ["-dh-ui-stage-import-preview"]
         launchForSmoke()

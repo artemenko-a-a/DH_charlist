@@ -4,7 +4,7 @@ Dark Heresy II character manager for iPhone/iPad.
 
 > Current state: the project is implemented and validated on two local persistence paths:
 > - JSON-backed path — validated and kept as the default/fallback path
-> - SwiftData path — validated and selectable through composition/bootstrap
+> - SwiftData path — validated and selectable through composition/bootstrap, with explicit fallback diagnostics when JSON remains active
 
 ## Implemented and validated
 
@@ -49,6 +49,8 @@ The project currently includes:
   - JSON repository
   - SwiftData repository
   - template persistence is supported on both paths
+  - current backend status is visible from the `Characters` import/export menu via `Persistence Status`
+  - if requested `SwiftData` falls back to JSON, the app shows a persistence notice instead of hiding the fallback
 
 ## Persistence modes
 
@@ -61,6 +63,23 @@ SwiftData is also implemented and validated and can be selected through composit
 - `AppContainer.live(persistence: .swiftData)`
 
 The JSON-backed path remains available as the conservative fallback.
+
+### Persistence diagnostics (Batch 32)
+
+The app now exposes the actual bootstrap result instead of silently masking fallback:
+
+- requested backend
+- active backend
+- whether fallback occurred
+- fallback diagnostic note when available
+
+Where to check it:
+- `Characters` -> `Import/Export` -> `Persistence Status`
+
+Current behavior:
+- requesting `SwiftData` still falls back to JSON when bootstrap cannot complete
+- fallback keeps the app usable
+- fallback is surfaced explicitly in diagnostics, and the `Characters` screen shows a notice when JSON is active instead of requested `SwiftData`
 
 ## Quick mechanics helpers (Batch 29)
 

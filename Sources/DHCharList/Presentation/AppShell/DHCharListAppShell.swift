@@ -42,6 +42,7 @@ public struct DHCharListAppShell: View {
                 useCases: container.characterUseCases,
                 templateUseCases: container.templateUseCases,
                 importExportService: container.importExportService,
+                persistenceStatus: container.persistenceStatus,
                 initialImportPayload: initialImportPayload
             )
                 .tabItem { Label("Characters", systemImage: "person.3") }

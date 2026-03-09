@@ -385,6 +385,7 @@ public struct CharacterListScreen: View {
     @State private var didPrepareInitialImport = false
     @State private var isShowingImportPicker = false
     @State private var isShowingExportPicker = false
+    @State private var isShowingPersistenceStatus = false
     @State private var isShowingQuickStart = false
     @State private var isShowingTemplateManager = false
     @State private var exportDocument: CharacterExportDocument?
@@ -392,12 +393,14 @@ public struct CharacterListScreen: View {
     @State private var pendingDeleteCharacterID: UUID?
     @State private var isShowingDeleteConfirmation = false
     @State private var searchText = ""
+    private let persistenceStatus: AppContainer.PersistenceBootstrapStatus
     private let initialImportPayload: Data?
 
     public init(
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
+        persistenceStatus: AppContainer.PersistenceBootstrapStatus,
         initialImportPayload: Data? = nil
     ) {
         _viewModel = StateObject(
@@ -407,12 +410,19 @@ public struct CharacterListScreen: View {
                 importExportService: importExportService
             )
         )
+        self.persistenceStatus = persistenceStatus
         self.initialImportPayload = initialImportPayload
     }
 
     public var body: some View {
         NavigationStack {
             List {
+                if persistenceStatus.didFallback {
+                    PersistenceFallbackNoticeView(status: persistenceStatus) {
+                        isShowingPersistenceStatus = true
+                    }
+                }
+
                 if filteredCharacters.isEmpty, !viewModel.characters.isEmpty {
                     Section {
                         ContentUnavailableView(
@@ -479,9 +489,13 @@ public struct CharacterListScreen: View {
                                 isShowingExportPicker = true
                             }
                         }
+
+                        Button("Persistence Status", systemImage: "externaldrive") {
+                            isShowingPersistenceStatus = true
+                        }
                     }
                     .accessibilityLabel("Import or Export Characters")
-                    .accessibilityHint("Import characters from JSON or export all characters to JSON.")
+                    .accessibilityHint("Import characters from JSON, export all characters to JSON, or open persistence diagnostics.")
                 }
 
                 ToolbarItem(placement: .automatic) {
@@ -515,6 +529,9 @@ public struct CharacterListScreen: View {
             }
             .sheet(isPresented: $isShowingQuickStart) {
                 TemplateQuickStartSheet(viewModel: viewModel)
+            }
+            .sheet(isPresented: $isShowingPersistenceStatus) {
+                PersistenceStatusScreen(status: persistenceStatus)
             }
             .sheet(isPresented: $isShowingTemplateManager) {
                 TemplateManagementScreen(viewModel: viewModel)

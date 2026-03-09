@@ -41,4 +41,16 @@ class DHCharListHostUITestCase: XCTestCase {
         XCTAssertTrue(app.navigationBars[expectedNavTitle].waitForExistence(timeout: 8))
         returnToCharacterDetail()
     }
+
+    func openPersistenceStatus() {
+        let importExportMenu = app.buttons["Import or Export Characters"]
+        XCTAssertTrue(importExportMenu.waitForExistence(timeout: 5))
+        importExportMenu.tap()
+
+        let persistenceStatusButton = app.buttons["Persistence Status"]
+        XCTAssertTrue(persistenceStatusButton.waitForExistence(timeout: 5))
+        persistenceStatusButton.tap()
+
+        XCTAssertTrue(app.navigationBars["Persistence Status"].waitForExistence(timeout: 8))
+    }
 }

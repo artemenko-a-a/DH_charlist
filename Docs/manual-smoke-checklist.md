@@ -139,3 +139,14 @@ Latest local validation status (2026-03-09):
     - add at least one combat condition and verify it persists after navigating away and back
     - verify pinned checks and temporary modifiers remain usable from the same workspace
     - verify quick mechanics shortcuts from the workspace reduce taps for a common combat check
+26. Batch 32 persistence diagnostics:
+    - from `Characters`, open `Import/Export` -> `Persistence Status`
+    - on the default JSON path, verify:
+      - `Requested Backend` is `JSON File`
+      - `Active Backend` is `JSON File`
+      - `Fallback Active` is `No`
+    - if running a SwiftData-selected host/bootstrap path, verify:
+      - `Requested Backend` is `SwiftData`
+      - `Active Backend` is `SwiftData` when bootstrap succeeds
+      - if bootstrap falls back, `Active Backend` is `JSON File`, `Fallback Active` is `Yes`, and a diagnostic note is visible
+    - when fallback is active, verify the `Characters` screen shows a persistence notice instead of silently behaving as though SwiftData were active

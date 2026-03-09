@@ -126,6 +126,11 @@
    - **Type:** Fact.
    - **Impact:** Active weapon focus and short combat notes persist on the same local/session path as pinned checks and temporary modifiers, preserving JSON-default and SwiftData-alternative behavior while keeping combat state transparent and reversible.
 
+25. **Decision:** Keep JSON as the accepted safe fallback for requested `SwiftData`, but surface the real bootstrap result through a lightweight diagnostics/status surface instead of leaving fallback silent.
+   - **Reason:** Batch 32 needs observability and diagnosability, not a storage redesign. Blocking launch or removing fallback would change accepted runtime behavior more than necessary.
+   - **Type:** Fact.
+   - **Impact:** The app stays usable on fallback, while requested backend, active backend, and fallback diagnostics are now explicit and testable.
+
 25. **Decision:** Keep JSON import semantics as explicit replace-all and add a lightweight preview + destructive confirmation layer instead of introducing merge, restore, or backup workflow in Batch 31.
    - **Reason:** The high-severity risk was silent destructive replacement; making that behavior explicit is the minimal safe fix that preserves accepted import architecture and persistence behavior without implying undo/restore guarantees that are not actually implemented.
    - **Type:** Fact.

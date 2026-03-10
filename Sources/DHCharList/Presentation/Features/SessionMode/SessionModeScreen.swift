@@ -95,8 +95,7 @@ public struct SessionModeScreen: View {
             QuickMechanicsHelperView(
                 characteristics: characterSnapshot?.characteristics ?? .empty,
                 skills: characterSnapshot?.skills ?? [],
-                sessionModifiers: session.normalizedTemporaryModifiers,
-                sessionConditions: session.normalizedCombatConditions,
+                combatContext: sessionCombatContext,
                 initialSelection: selection,
                 origin: .sessionCombat
             )
@@ -186,37 +185,22 @@ public struct SessionModeScreen: View {
                     .cogitatorSupportingText()
                     .cogitatorPanelRow()
             } else {
-                if let activeWeapon {
+                if let activeWeapon = sessionCombatContext.activeWeapon {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(activeWeapon.displayName)
                             .font(.headline)
                             .foregroundStyle(CogitatorPalette.textPrimary)
                             .accessibilityIdentifier("combat.active-weapon.name")
 
-                        let primaryLine = [
-                            activeWeapon.type.trimmedOrNil,
-                            activeWeapon.range.trimmedOrNil.map { "Range \($0)" },
-                            activeWeapon.damage.trimmedOrNil.map { "Damage \($0)" },
-                            activeWeapon.penetration.trimmedOrNil.map { "Pen \($0)" }
-                        ]
-                            .compactMap { $0 }
-
-                        if !primaryLine.isEmpty {
-                            Text(primaryLine.joined(separator: " • "))
+                        if !activeWeapon.primarySummary.isEmpty {
+                            Text(activeWeapon.primarySummary.joined(separator: " • "))
                                 .font(.subheadline)
                                 .foregroundStyle(CogitatorPalette.amber)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        let secondaryLine = [
-                            activeWeapon.clip.trimmedOrNil.map { "Clip \($0)" },
-                            activeWeapon.reload.trimmedOrNil.map { "Reload \($0)" },
-                            activeWeapon.traits.trimmedOrNil
-                        ]
-                            .compactMap { $0 }
-
-                        if !secondaryLine.isEmpty {
-                            Text(secondaryLine.joined(separator: " • "))
+                        if !activeWeapon.secondarySummary.isEmpty {
+                            Text(activeWeapon.secondarySummary.joined(separator: " • "))
                                 .font(.caption)
                                 .foregroundStyle(CogitatorPalette.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -484,20 +468,19 @@ public struct SessionModeScreen: View {
     }
 
     private var sortedTemporaryModifiers: [CheckModifier] {
-        session.normalizedTemporaryModifiers
+        sessionCombatContext.temporaryModifiers
     }
 
     private var normalizedCombatConditions: [RuleCondition] {
-        session.normalizedCombatConditions
+        sessionCombatContext.combatConditions
+    }
+
+    private var sessionCombatContext: CombatContext {
+        session.combatContext(availableWeapons: availableWeapons)
     }
 
     private var availableWeapons: [Weapon] {
         characterSnapshot?.equipment.weapons ?? []
-    }
-
-    private var activeWeapon: Weapon? {
-        guard let activeWeaponID = session.activeWeaponID else { return nil }
-        return availableWeapons.first(where: { $0.id == activeWeaponID })
     }
 
     private var movementProfile: MovementProfile {
@@ -508,7 +491,7 @@ public struct SessionModeScreen: View {
         let builderSummary = characterSnapshot?.skills.isEmpty == false
             ? "\(characterSnapshot?.skills.count ?? 0) skills are available in the full builder."
             : "Add skills to include skill-based checks in the full builder."
-        return "\(builderSummary) \(session.pinnedChecks.count) pinned checks and \(sortedTemporaryModifiers.count) temporary modifiers remain usable below."
+        return "\(builderSummary) \(sessionCombatContext.pinnedChecks.count) pinned checks and \(sortedTemporaryModifiers.count) temporary modifiers remain usable below."
     }
 
     @ViewBuilder

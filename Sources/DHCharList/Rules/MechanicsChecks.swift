@@ -218,6 +218,109 @@ struct RuleCondition: Identifiable, Equatable, Sendable {
     }
 }
 
+struct CombatPinnedCheck: Identifiable, Equatable, Sendable {
+    let id: String
+    let label: String
+    let source: String
+
+    static func sessionPinnedCheck(index: Int, text: String) -> CombatPinnedCheck {
+        let cleanedText = text.trimmedOrPlaceholder("Unnamed Pinned Check")
+        return CombatPinnedCheck(
+            id: "pinned-check.\(index).\(cleanedText.stableToken)",
+            label: cleanedText,
+            source: "Session Pinned Check"
+        )
+    }
+}
+
+struct ActiveWeaponContext: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let displayName: String
+    let type: String?
+    let range: String?
+    let damage: String?
+    let penetration: String?
+    let clip: String?
+    let reload: String?
+    let traits: String?
+
+    var primarySummary: [String] {
+        [
+            type,
+            range.map { "Range \($0)" },
+            damage.map { "Damage \($0)" },
+            penetration.map { "Pen \($0)" }
+        ]
+        .compactMap { $0 }
+    }
+
+    var secondarySummary: [String] {
+        [
+            clip.map { "Clip \($0)" },
+            reload.map { "Reload \($0)" },
+            traits
+        ]
+        .compactMap { $0 }
+    }
+
+    static func from(_ weapon: Weapon) -> ActiveWeaponContext {
+        ActiveWeaponContext(
+            id: weapon.id,
+            displayName: weapon.name.trimmedOrPlaceholder("Unnamed Weapon"),
+            type: weapon.type.trimmedOrNil,
+            range: weapon.range.trimmedOrNil,
+            damage: weapon.damage.trimmedOrNil,
+            penetration: weapon.penetration.trimmedOrNil,
+            clip: weapon.clip.trimmedOrNil,
+            reload: weapon.reload.trimmedOrNil,
+            traits: weapon.traits.trimmedOrNil
+        )
+    }
+}
+
+struct CombatContext: Equatable, Sendable {
+    let modeEnabled: Bool
+    let activeWeapon: ActiveWeaponContext?
+    let combatConditions: [RuleCondition]
+    let pinnedChecks: [CombatPinnedCheck]
+    let temporaryModifiers: [CheckModifier]
+
+    func preparation(
+        for definition: CheckDefinition,
+        appliedModifiers: [CheckModifier] = []
+    ) -> CombatCheckPreparationContext {
+        CombatCheckPreparationContext(
+            definition: definition,
+            origin: .sessionCombat,
+            activeWeapon: activeWeapon,
+            combatConditions: combatConditions,
+            pinnedChecks: pinnedChecks,
+            availableTemporaryModifiers: temporaryModifiers,
+            appliedModifiers: appliedModifiers
+        )
+    }
+}
+
+struct CombatCheckPreparationContext: Equatable, Sendable {
+    let definition: CheckDefinition
+    let origin: CheckOrigin
+    let activeWeapon: ActiveWeaponContext?
+    let combatConditions: [RuleCondition]
+    let pinnedChecks: [CombatPinnedCheck]
+    let availableTemporaryModifiers: [CheckModifier]
+    let appliedModifiers: [CheckModifier]
+
+    func makeRequest(characteristics: CharacteristicSet) -> CheckRequest {
+        CheckRequest(
+            definition: definition,
+            characteristics: characteristics,
+            origin: origin,
+            modifiers: appliedModifiers,
+            conditions: combatConditions
+        )
+    }
+}
+
 enum RuleContributionKind: Equatable, Sendable {
     case derivedBonus
     case training
@@ -341,6 +444,13 @@ struct CheckRequest: Equatable, Sendable {
             modifiers: modifier == 0 ? [] : [CheckModifier.manual(value: modifier)],
             conditions: conditions
         )
+    }
+
+    static func combatPreparation(
+        _ preparation: CombatCheckPreparationContext,
+        characteristics: CharacteristicSet
+    ) -> CheckRequest {
+        preparation.makeRequest(characteristics: characteristics)
     }
 }
 
@@ -475,6 +585,28 @@ private extension CheckDefinition {
 }
 
 extension SessionState {
+    func combatContext(availableWeapons: [Weapon]) -> CombatContext {
+        let activeWeapon = activeWeaponID
+            .flatMap { activeWeaponID in
+                availableWeapons.first(where: { $0.id == activeWeaponID })
+            }
+            .map(ActiveWeaponContext.from)
+
+        return CombatContext(
+            modeEnabled: modeEnabled,
+            activeWeapon: activeWeapon,
+            combatConditions: normalizedCombatConditions,
+            pinnedChecks: normalizedPinnedChecks,
+            temporaryModifiers: normalizedTemporaryModifiers
+        )
+    }
+
+    var normalizedPinnedChecks: [CombatPinnedCheck] {
+        pinnedChecks.enumerated().map { index, value in
+            CombatPinnedCheck.sessionPinnedCheck(index: index, text: value)
+        }
+    }
+
     var normalizedTemporaryModifiers: [CheckModifier] {
         temporaryModifiers
             .map { key, value in
@@ -601,6 +733,11 @@ private extension String {
     func trimmedOrPlaceholder(_ placeholder: String) -> String {
         let cleaned = trimmingCharacters(in: .whitespacesAndNewlines)
         return cleaned.isEmpty ? placeholder : cleaned
+    }
+
+    var trimmedOrNil: String? {
+        let cleaned = trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? nil : cleaned
     }
 
     var stableToken: String {

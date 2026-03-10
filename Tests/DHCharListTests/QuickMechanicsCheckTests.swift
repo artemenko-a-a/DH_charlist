@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import DHCharList
 
@@ -243,6 +244,128 @@ import Testing
     #expect(session.normalizedTemporaryModifiers.allSatisfy { $0.scope == .combatSessionOnly })
     #expect(session.normalizedCombatConditions.map(\.kind) == [.pinned, .cover, .injury, .custom])
     #expect(session.normalizedCombatConditions.allSatisfy { $0.source == "Session Combat Condition" })
+}
+
+@Test func combatContextFormalizesActiveWeaponPinnedChecksConditionsAndModifiers() {
+    let weaponID = UUID()
+    let session = SessionState(
+        modeEnabled: true,
+        pinnedChecks: ["Dodge +10", "Awareness"],
+        temporaryModifiers: [
+            "Smoke": -20,
+            "Aim": 10
+        ],
+        activeWeaponID: weaponID,
+        combatConditions: [
+            "Pinned Down",
+            "Partial Cover"
+        ]
+    )
+    let weapon = Weapon(
+        id: weaponID,
+        name: "Laspistol",
+        type: "Pistol",
+        range: "30m",
+        damage: "1d10+2",
+        penetration: "0",
+        clip: "30",
+        reload: "Half",
+        traits: "Reliable"
+    )
+
+    let context = session.combatContext(availableWeapons: [weapon])
+
+    #expect(context.modeEnabled)
+    #expect(context.activeWeapon?.id == weaponID)
+    #expect(context.activeWeapon?.displayName == "Laspistol")
+    #expect(
+        context.activeWeapon?.primarySummary == [
+            "Pistol",
+            "Range 30m",
+            "Damage 1d10+2",
+            "Pen 0"
+        ]
+    )
+    #expect(
+        context.activeWeapon?.secondarySummary == [
+            "Clip 30",
+            "Reload Half",
+            "Reliable"
+        ]
+    )
+    #expect(context.pinnedChecks.map { $0.label } == ["Dodge +10", "Awareness"])
+    #expect(context.temporaryModifiers.map { $0.label } == ["Aim", "Smoke"])
+    #expect(context.combatConditions.map { $0.kind } == [RuleConditionKind.pinned, RuleConditionKind.cover])
+}
+
+@Test func combatContextDropsMissingActiveWeaponWithoutDiscardingOtherCombatState() {
+    let session = SessionState(
+        modeEnabled: true,
+        pinnedChecks: ["Dodge +10"],
+        temporaryModifiers: ["Smoke": -20],
+        activeWeaponID: UUID(),
+        combatConditions: ["Pinned Down"]
+    )
+
+    let context = session.combatContext(availableWeapons: [])
+
+    #expect(context.activeWeapon == nil)
+    #expect(context.pinnedChecks.map { $0.label } == ["Dodge +10"])
+    #expect(context.temporaryModifiers.map { $0.label } == ["Smoke"])
+    #expect(context.combatConditions.map { $0.label } == ["Pinned Down"])
+}
+
+@Test func combatCheckPreparationContextBuildsStructuredSessionCombatRequest() {
+    let weaponID = UUID()
+    let characteristics = CharacteristicSet(
+        weaponSkill: 39,
+        ballisticSkill: 37,
+        strength: 34,
+        toughness: 35,
+        agility: 40,
+        intelligence: 31,
+        perception: 41,
+        willpower: 38,
+        fellowship: 30
+    )
+    let skill = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let session = SessionState(
+        modeEnabled: true,
+        pinnedChecks: ["Dodge +10"],
+        temporaryModifiers: ["Aim": 10],
+        activeWeaponID: weaponID,
+        combatConditions: ["Pinned Down"]
+    )
+    let weapon = Weapon(id: weaponID, name: "Laspistol", type: "Pistol", range: "30m")
+
+    let context = session.combatContext(availableWeapons: [weapon])
+    let preparation = context.preparation(
+        for: CheckDefinition.skill(skill),
+        appliedModifiers: [
+            CheckModifier.sessionTemporary(label: "Aim", value: 10),
+            CheckModifier.conditionDerived(label: "Pinned Down", value: -30)
+        ]
+    )
+    let request = CheckRequest.combatPreparation(preparation, characteristics: characteristics)
+    let result = MechanicsCheckResolver.resolve(request)
+
+    #expect(preparation.origin == CheckOrigin.sessionCombat)
+    #expect(preparation.activeWeapon?.displayName == "Laspistol")
+    #expect(preparation.pinnedChecks.map { $0.label } == ["Dodge +10"])
+    #expect(preparation.availableTemporaryModifiers.map { $0.label } == ["Aim"])
+    #expect(request.definition == CheckDefinition.skill(skill))
+    #expect(request.origin == CheckOrigin.sessionCombat)
+    #expect(request.conditions == context.combatConditions)
+    #expect(request.modifiers.map { $0.label } == ["Aim", "Pinned Down"])
+    #expect(result.finalTarget == 31)
+    #expect(
+        result.breakdown.contributions.map { $0.label } == [
+            "Derived Bonus",
+            "Training Contribution",
+            "Aim",
+            "Pinned Down"
+        ]
+    )
 }
 
 @Test func derivedValueCalculatorRemainsConsistentWithMechanicsCheckResolver() {

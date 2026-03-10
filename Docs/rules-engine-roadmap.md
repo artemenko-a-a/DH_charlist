@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stages 1, 2, and 3 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1, 2, 3, and 4 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -178,7 +178,23 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 4 — Combat context model
 **Goal:** formalize combat-relevant context without building a full combat engine.
 
-### Intended outcomes
+### Implemented foundation
+- explicit `CombatContext` model for the accepted session/combat workspace state that matters to current rules work
+- explicit `ActiveWeaponContext` with bounded summary fields for the selected weapon already used by the workspace and quick-mechanics preparation
+- explicit `CombatPinnedCheck` normalization for accepted pinned check entries
+- explicit `CombatCheckPreparationContext` for combat-facing check preparation before it becomes a `CheckRequest`
+- `SessionState` adapters that normalize accepted `activeWeaponID`, `combatConditions`, `pinnedChecks`, and `temporaryModifiers` into rules-layer combat context without changing persistence shape
+- current `SessionModeScreen` and `QuickMechanicsHelperView` now consume the bounded combat context path instead of passing loose combat/session values across the rules boundary
+
+### Still intentionally bounded
+- no damage resolution
+- no attack resolution
+- no hit locations
+- no initiative or action-economy engine
+- no broader combat simulator/state machine
+- accepted persistence still stores raw session combat fields; normalization happens at the rules boundary instead of through a storage redesign
+
+### Originally intended outcomes
 - active weapon context
 - combat condition context
 - attack/check preparation context
@@ -301,7 +317,7 @@ The roadmap is succeeding if, over time:
 - calculations move out of UI and into explicit rules models
 - breakdowns become standard output
 - modifier/condition handling becomes normalized through explicit rules-layer models and session adapters
-- combat-related helpers become more structured without exploding scope
+- combat-related helpers and workspace state become more structured without exploding scope
 - CI/tests can validate rules behavior deterministically
 - future rules work becomes easier rather than more chaotic
 
@@ -313,5 +329,6 @@ At the time of writing:
 
 - the project has mechanics helpers and combat-oriented helpers
 - the project now has a bounded `Rules` foundation for current check-target calculations with explicit request/result/breakdown modeling
+- the project now also has a bounded combat-context layer for active weapon, combat conditions, pinned checks, and combat check preparation
 - the project does **not** yet have a full rules engine
 - this roadmap exists to make future rules work incremental, explainable, and safe

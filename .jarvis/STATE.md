@@ -1,27 +1,25 @@
-# Batch 38 State
+# Batch 39 State
 
-- status: validated for build/runtime sanity; no full rules-engine or combat-engine acceptance claimed
-- scope: explainable check engine only; accepted runtime, persistence, and navigation behavior remain unchanged
+- status: validated for build/runtime sanity; no full combat-engine acceptance claimed
+- scope: combat context model only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - current accepted checks still live in `Sources/DHCharList/Rules/MechanicsChecks.swift`
-  - `CheckRequest` now carries explicit `CheckDefinition` variants for current supported check kinds: `characteristic` and `skill`
-  - `MechanicsCheckResolver` now resolves both accepted check kinds through one shared explainable pipeline instead of splitting the resolution path across helper-specific branches
-  - `RuleBreakdown` now carries stable ordered contributions built from one engine path: base/source resolution, derived bonus, training contribution where relevant, and structured modifiers
-  - normalized Batch 37 modifiers/conditions remain the accepted input model; session temporary modifiers and combat conditions still flow through the same adapters and UI entry points
-  - `QuickMechanicsHelperView` and `DerivedValueCalculator` continue to use the same rules-layer engine path
+  - current accepted mechanics logic still lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
+  - the rules layer now exposes explicit combat-facing models: `CombatContext`, `ActiveWeaponContext`, `CombatPinnedCheck`, and `CombatCheckPreparationContext`
+  - `SessionState` still persists accepted local-first combat/session fields in their existing raw shape and now normalizes them into bounded combat context only when rules/session/combat flows need it
+  - `QuickMechanicsHelperView` now consumes optional structured `CombatContext` input instead of passing loose session modifier/condition collections across the rules boundary
+  - `SessionModeScreen` now reads active weapon summary, combat conditions, pinned checks, and temporary modifiers through the same structured combat-context path
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b38-quick-mechanics-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b38-combat-workspace-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b39-combat-context.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
   - `./scripts/run_xcode_coverage.sh`
   - `./scripts/check_coverage_policy.sh`
 - runtime sanity note:
-  - focused host UI validation confirmed characteristic quick check, skill quick check, preset/custom modifier application, session/combat-derived modifier reuse, and continued visible breakdown rendering
+  - focused host UI validation confirmed active weapon selection/use in the combat workspace, visible combat-condition state, and quick mechanics launch from the combat/session flow
 - coverage note:
-  - refreshed truthful package-surface gate passed at `15.63%` current package coverage against the `14.18%` baseline
+  - truthful package-surface gate passed at `16.38%` current package coverage against the `14.18%` baseline
 - truthful limitations:
-  - this is not a full rules engine or combat simulator
-  - conditions remain explicit context unless deliberately modeled as numeric modifiers
-  - damage resolution, initiative/action economy, psychic subsystem automation, generic catch-all check types, broader combat automation, and rules registries/DSL remain intentionally out of scope
+  - this is not a full combat engine or combat simulator
+  - the project still does not resolve attacks, damage, hit locations, initiative/action economy, or psychic automation
+  - accepted persistence still stores raw combat/session state; the new combat context is a derived rules-layer model, not a storage redesign

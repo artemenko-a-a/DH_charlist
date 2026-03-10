@@ -92,6 +92,7 @@ Quick mechanics is a transparent in-session target builder. It uses existing cha
 Developer note:
 - current mechanics-check calculation logic lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
 - the helper now resolves through one unified `MechanicsCheckResolver` path over explicit `CheckDefinition`, `CheckRequest`, `CheckResult`, `RuleBreakdown`, `RuleContribution`, `CheckModifier`, and `RuleCondition` models
+- current session/combat helper entry points now also normalize accepted active-weapon, combat-condition, pinned-check, and temporary-modifier state into explicit `CombatContext`, `ActiveWeaponContext`, and `CombatCheckPreparationContext` models before invoking the rules layer
 - this is a foundation for future rules work, not a full rules engine
 
 Where to open it:
@@ -279,7 +280,7 @@ Current architectural state
     •    Composition/bootstrap chooses the persistence implementation.
     •    JSON-backed path is the default validated runtime-safe path.
     •    SwiftData path is implemented as a validated alternative.
-    •    Current mechanics checks live in a dedicated `Rules` layer and resolve through one explicit engine path with `CheckDefinition` variants, request/result/breakdown models, and normalized modifier/condition inputs.
+    •    Current mechanics checks live in a dedicated `Rules` layer and resolve through one explicit engine path with `CheckDefinition` variants, request/result/breakdown models, normalized modifier/condition inputs, and a bounded combat-context adapter for the accepted Session Mode / combat workspace flows.
 
 Notes
 

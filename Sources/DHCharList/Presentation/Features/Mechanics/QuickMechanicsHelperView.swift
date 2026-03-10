@@ -64,8 +64,7 @@ private enum QuickMechanicsCategory: String, CaseIterable, Identifiable {
 struct QuickMechanicsHelperView: View {
     private let characteristics: CharacteristicSet
     private let skills: [Skill]
-    private let sessionModifiers: [CheckModifier]
-    private let sessionConditions: [RuleCondition]
+    private let combatContext: CombatContext?
     private let origin: CheckOrigin
 
     @State private var selectedCategory: QuickMechanicsCategory
@@ -79,15 +78,13 @@ struct QuickMechanicsHelperView: View {
     init(
         characteristics: CharacteristicSet,
         skills: [Skill],
-        sessionModifiers: [CheckModifier] = [],
-        sessionConditions: [RuleCondition] = [],
+        combatContext: CombatContext? = nil,
         initialSelection: QuickMechanicsSelection? = nil,
         origin: CheckOrigin = .standard
     ) {
         self.characteristics = characteristics
         self.skills = skills
-        self.sessionModifiers = sessionModifiers
-        self.sessionConditions = sessionConditions
+        self.combatContext = combatContext
         self.origin = origin
 
         let resolvedSelection = QuickMechanicsSelection.resolvedInitialSelection(initialSelection, skills: skills)
@@ -104,11 +101,11 @@ struct QuickMechanicsHelperView: View {
                 selectionSection
                 modifierSection
 
-                if !sortedSessionModifiers.isEmpty {
+                if !availableSessionModifiers.isEmpty {
                     sessionModifiersSection
                 }
 
-                if !sessionConditions.isEmpty {
+                if !combatConditions.isEmpty {
                     activeConditionsSection
                 }
 
@@ -254,7 +251,7 @@ struct QuickMechanicsHelperView: View {
     @ViewBuilder
     private var activeConditionsSection: some View {
         Section {
-            ForEach(sessionConditions) { condition in
+            ForEach(combatConditions) { condition in
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "exclamationmark.bubble.fill")
                         .foregroundStyle(CogitatorPalette.warning)
@@ -350,7 +347,43 @@ struct QuickMechanicsHelperView: View {
         currentRequest.map(MechanicsCheckResolver.resolve)
     }
 
+    private var sortedSessionModifiers: [CheckModifier] {
+        availableSessionModifiers.sorted {
+            $0.label.localizedCaseInsensitiveCompare($1.label) == .orderedAscending
+        }
+    }
+
+    private var availableSessionModifiers: [CheckModifier] {
+        combatContext?.temporaryModifiers ?? []
+    }
+
+    private var combatConditions: [RuleCondition] {
+        combatContext?.combatConditions ?? []
+    }
+
+    private var currentCombatPreparation: CombatCheckPreparationContext? {
+        guard let combatContext else { return nil }
+
+        switch selectedCategory {
+        case .characteristic:
+            return combatContext.preparation(
+                for: .characteristic(selectedCharacteristic),
+                appliedModifiers: [appliedModifier]
+            )
+        case .skill:
+            guard let selectedSkill else { return nil }
+            return combatContext.preparation(
+                for: .skill(selectedSkill),
+                appliedModifiers: [appliedModifier]
+            )
+        }
+    }
+
     private var currentRequest: CheckRequest? {
+        if let currentCombatPreparation {
+            return .combatPreparation(currentCombatPreparation, characteristics: characteristics)
+        }
+
         switch selectedCategory {
         case .characteristic:
             return .characteristic(
@@ -358,7 +391,7 @@ struct QuickMechanicsHelperView: View {
                 characteristics: characteristics,
                 origin: origin,
                 modifiers: [appliedModifier],
-                conditions: sessionConditions
+                conditions: combatConditions
             )
         case .skill:
             guard let selectedSkill else { return nil }
@@ -367,14 +400,8 @@ struct QuickMechanicsHelperView: View {
                 characteristics: characteristics,
                 origin: origin,
                 modifiers: [appliedModifier],
-                conditions: sessionConditions
+                conditions: combatConditions
             )
-        }
-    }
-
-    private var sortedSessionModifiers: [CheckModifier] {
-        sessionModifiers.sorted {
-            $0.label.localizedCaseInsensitiveCompare($1.label) == .orderedAscending
         }
     }
 

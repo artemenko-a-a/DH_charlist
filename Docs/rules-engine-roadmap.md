@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stages 1, 2, 3, 4, 5, and 6 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, and `Sources/DHCharList/Rules/DamagePipeline.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1, 2, 3, 4, 5, 6, and 7 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, `Sources/DHCharList/Rules/DamagePipeline.swift`, and `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -255,11 +255,37 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 7 — Scenario and golden-rule tests
 **Goal:** make rules behavior regression-resistant and trustworthy.
 
-### Intended test types
-- unit tests
-- golden tests
-- scenario tests
-- compatibility tests against existing saved/imported state
+### Implemented foundation
+- dedicated in-package table-driven golden/scenario suite in `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`
+- golden explainable check scenarios covering accepted:
+  - characteristic checks
+  - skill checks
+  - preset modifiers
+  - custom modifiers
+  - session-derived modifiers
+  - condition-derived modifiers
+- bounded combat-context-backed scenarios covering:
+  - active weapon mapping
+  - pinned checks
+  - temporary modifiers
+  - combat conditions
+  - combat check preparation
+- bounded damage scenarios covering:
+  - raw damage
+  - penetration and armour interaction
+  - toughness mitigation
+  - zero-floor behavior
+  - wound application
+  - overflow handling
+- stable assertions over both:
+  - final numeric outputs
+  - ordered structured breakdown/contribution expectations
+
+### Still intentionally bounded
+- no external snapshot framework
+- no compatibility harness for every historical saved/imported payload
+- no diff/snapshot UI testing disguised as rules validation
+- no expansion into new rules behavior beyond the currently accepted bounded engine
 
 ---
 

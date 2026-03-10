@@ -180,3 +180,8 @@
    - **Reason:** The project needs a real damage pipeline foundation now, but accepted app data only safely justifies deterministic mitigation and wound application. Full damage expression parsing and combat-rule automation would widen semantics faster than the current rules layer can explain or validate.
    - **Type:** Fact.
    - **Impact:** The rules layer now has structured, testable damage request/result/breakdown modeling and a combat-context helper built from accepted current data, while critical tables, hit locations, full weapon trait resolution, and broader attack automation remain intentionally deferred.
+
+33. **Decision:** Use in-package table-driven golden/scenario assertions for accepted rules outputs instead of introducing an external fixture schema or snapshot-testing framework in Batch 42.
+   - **Reason:** Batch 42 needs stronger deterministic regression protection now, but the accepted rules surface is still bounded enough that explicit scenario definitions in Swift remain more reviewable, easier to keep deterministic, and less operationally risky than adding a separate fixture/snapshot system.
+   - **Type:** Fact.
+   - **Impact:** `RulesGoldenScenarioTests.swift` now locks accepted explainable check, combat-context, and bounded damage outputs through explicit scenario data plus structured expectations for breakdown ordering and numeric results. Future rules work has a stronger regression net without adding a new test framework or implying broader saved-state compatibility guarantees than the repository actually supports.

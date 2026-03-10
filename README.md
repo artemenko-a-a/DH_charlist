@@ -95,6 +95,7 @@ Developer note:
 - current session/combat helper entry points now also normalize accepted active-weapon, combat-condition, pinned-check, and temporary-modifier state into explicit `CombatContext`, `ActiveWeaponContext`, and `CombatCheckPreparationContext` models before invoking the rules layer
 - stable mechanics metadata now comes from bounded typed registries in `Sources/DHCharList/Rules/RulesRegistries.swift`, including difficulty presets, canonical skill metadata, weapon type/trait metadata, and condition metadata with safe ad hoc fallback for unknown/custom values
 - a separate bounded damage foundation now lives in `Sources/DHCharList/Rules/DamagePipeline.swift` with explicit request/result/breakdown modeling for raw damage, mitigation, and wound application; it is a rules-layer foundation, not a user-facing combat simulator
+- deterministic golden/scenario regression protection for the accepted rules foundation now lives in `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`, locking explainable check outputs, combat-context-backed preparation, and bounded damage outcomes through explicit table-driven expectations
 - this is a foundation for future rules work, not a full rules engine
 
 Where to open it:

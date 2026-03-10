@@ -1,23 +1,25 @@
-# Batch 41 State
+# Batch 42 State
 
-- status: validated for build/runtime sanity; no full combat-engine acceptance claimed
-- scope: bounded damage pipeline foundation only; accepted runtime, persistence, and navigation behavior remain unchanged
+- status: validated for build, coverage, and focused host runtime sanity
+- scope: deterministic golden/scenario regression protection for the accepted rules foundation only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - `Sources/DHCharList/Rules/DamagePipeline.swift` now defines explicit `DamageSource`, `DamageMitigation`, `DamageRequest`, `DamageResult`, `DamageBreakdown`, and `DamageContribution` models plus `DamageResolver`
-  - the damage pipeline now resolves deterministic raw-damage, penetration, armour mitigation, toughness mitigation, applied damage, wound delta, and overflow through one explicit rules-layer path
-  - `CombatContext` can now build damage requests from accepted `ResourceState.currentWounds`, `CharacteristicSet.bonus.toughness`, explicit armour input, and the current active-weapon context without changing persistence shape
-  - accepted combat/session UI flows remain unchanged; the new damage layer is a rules foundation, not a user-facing combat simulator
+  - `Tests/DHCharListTests/RulesGoldenScenarioTests.swift` now defines a dedicated table-driven golden/scenario suite for the accepted rules layer
+  - the suite locks accepted explainable check outputs through explicit scenarios covering characteristic checks, skill checks, preset modifiers, custom modifiers, session-derived modifiers, and condition-derived modifiers
+  - combat-context-backed scenarios now verify structured active-weapon mapping, pinned checks, temporary modifiers, combat conditions, and combat check preparation without expanding into attack resolution
+  - bounded damage scenarios now verify deterministic raw damage, penetration, armour mitigation, toughness mitigation, wound application, zero-floor behavior, overflow tracking, and structured breakdown ordering
+  - accepted quick mechanics and combat workspace behavior remain unchanged; Batch 42 adds regression nets, not new mechanics features
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
   - `./scripts/run_xcode_coverage.sh`
   - `./scripts/check_coverage_policy.sh`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b42-rules-golden-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
 - runtime sanity note:
-  - actual host runtime review was performed through the live coverage run, including `testCombatWorkspaceActivePlayFlow` and `testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
+  - actual host runtime review was performed through the live coverage run and the focused rerun, including `testCombatWorkspaceActivePlayFlow` and `testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
 - coverage note:
   - truthful package-surface gate passed at `18.45%` current package coverage against the `14.18%` baseline, with the `Rules` area at `95.60%`
 - truthful limitations:
-  - this is not a full attack-resolution or combat engine
-  - the project still does not resolve critical tables, hit locations, full weapon trait resolution, initiative/action economy, psychic automation, or broader combat simulation
-  - raw damage remains an explicit bounded input; the project does not yet parse full weapon damage expressions into automated resolution
+  - this is not a full rules-engine compatibility harness or snapshot framework
+  - the suite currently locks accepted check, combat-context, and bounded damage behavior only
+  - full attack resolution, critical tables, hit locations, initiative/action economy, psychic automation, and broader combat simulation remain intentionally out of scope

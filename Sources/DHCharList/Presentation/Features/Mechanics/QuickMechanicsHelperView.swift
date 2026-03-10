@@ -177,16 +177,16 @@ struct QuickMechanicsHelperView: View {
                     .foregroundStyle(CogitatorPalette.textSecondary)
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
-                    ForEach(CheckModifierPreset.standard) { preset in
+                    ForEach(DifficultyPresetRegistry.standard) { preset in
                         if appliedModifier.kind == .preset && appliedModifier.value == preset.value {
                             Button(preset.value.signedValueLabel) {
-                                applyModifier(preset.normalizedModifier)
+                                applyModifier(preset.normalizedModifier())
                             }
                             .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("quick-check.modifier.\(preset.value.accessibilitySignedToken)")
                         } else {
                             Button(preset.value.signedValueLabel) {
-                                applyModifier(preset.normalizedModifier)
+                                applyModifier(preset.normalizedModifier())
                             }
                             .buttonStyle(.bordered)
                             .accessibilityIdentifier("quick-check.modifier.\(preset.value.accessibilitySignedToken)")

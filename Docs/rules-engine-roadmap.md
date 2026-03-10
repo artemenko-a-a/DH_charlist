@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stages 1, 2, 3, and 4 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1, 2, 3, 4, and 5 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift` and `Sources/DHCharList/Rules/RulesRegistries.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -211,15 +211,21 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 5 — Rules data registries
 **Goal:** move stable rules metadata into structured data.
 
-### Intended candidates
-- difficulty presets
-- skill metadata
-- weapon tags/traits metadata
-- status-effect metadata
-- action categories
+### Implemented foundation
+- `Sources/DHCharList/Rules/RulesRegistries.swift`
+- bounded difficulty preset registry used by quick-mechanics preset modifiers
+- bounded skill metadata registry with canonical metadata plus safe ad hoc fallback for unknown/custom skill labels
+- bounded weapon type metadata registry used by `ActiveWeaponContext`
+- bounded weapon trait metadata registry used by combat-context summaries
+- bounded condition metadata registry used by normalized `RuleCondition` inference and labels
+- current rules/combat paths consume these registries instead of repeating the same stable metadata as scattered constants
 
-### Note
-This is not yet a full DSL requirement.
+### Still intentionally bounded after Stage 5
+- no full external rules dataset
+- no custom rules DSL
+- no exhaustive catalog of every Dark Heresy II skill, weapon trait, or condition
+- unknown/custom values still fall back to explicit ad hoc metadata instead of being rejected
+- no trait resolution, damage resolution, or broader combat automation
 
 ---
 

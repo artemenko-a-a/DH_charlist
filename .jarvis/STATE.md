@@ -1,25 +1,24 @@
-# Batch 39 State
+# Batch 40 State
 
-- status: validated for build/runtime sanity; no full combat-engine acceptance claimed
-- scope: combat context model only; accepted runtime, persistence, and navigation behavior remain unchanged
+- status: validated for build/runtime sanity; no full rules-engine acceptance claimed
+- scope: rules data registries only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - current accepted mechanics logic still lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
-  - the rules layer now exposes explicit combat-facing models: `CombatContext`, `ActiveWeaponContext`, `CombatPinnedCheck`, and `CombatCheckPreparationContext`
-  - `SessionState` still persists accepted local-first combat/session fields in their existing raw shape and now normalizes them into bounded combat context only when rules/session/combat flows need it
-  - `QuickMechanicsHelperView` now consumes optional structured `CombatContext` input instead of passing loose session modifier/condition collections across the rules boundary
-  - `SessionModeScreen` now reads active weapon summary, combat conditions, pinned checks, and temporary modifiers through the same structured combat-context path
+  - `Sources/DHCharList/Rules/RulesRegistries.swift` now defines bounded typed registries for difficulty presets, canonical skill metadata, weapon type metadata, weapon trait metadata, and condition metadata
+  - current rules/combat paths now consume those registries instead of relying only on scattered stable constants
+  - canonical registry entries use safe ad hoc fallback metadata for unknown/custom values, so accepted custom data still works without persistence changes
+  - `CheckModifier.preset`, skill-check definition resolution, `RuleCondition` normalization, and `ActiveWeaponContext` now read registry-backed metadata
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b39-combat-context.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b40-rules-registries.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
   - `./scripts/run_xcode_coverage.sh`
   - `./scripts/check_coverage_policy.sh`
 - runtime sanity note:
-  - focused host UI validation confirmed active weapon selection/use in the combat workspace, visible combat-condition state, and quick mechanics launch from the combat/session flow
+  - focused host UI validation confirmed characteristic/skill quick checks, preset modifier behavior, and combat workspace behavior remain intact where registry-backed metadata is now involved
 - coverage note:
-  - truthful package-surface gate passed at `16.38%` current package coverage against the `14.18%` baseline
+  - truthful package-surface gate passed at `17.47%` current package coverage against the `14.18%` baseline, with the `Rules` area at `95.90%`
 - truthful limitations:
-  - this is not a full combat engine or combat simulator
-  - the project still does not resolve attacks, damage, hit locations, initiative/action economy, or psychic automation
-  - accepted persistence still stores raw combat/session state; the new combat context is a derived rules-layer model, not a storage redesign
+  - this is not a full rules engine or a custom rules DSL
+  - the project still does not resolve damage, hit locations, initiative/action economy, psychic automation, or broader combat simulation
+  - registries are intentionally bounded; unknown/custom values still resolve through structured ad hoc fallback metadata

@@ -1,25 +1,5 @@
 import Foundation
 
-struct CheckModifierPreset: Identifiable, Equatable, Sendable {
-    let value: Int
-
-    var id: Int { value }
-
-    var normalizedModifier: CheckModifier {
-        .preset(value: value)
-    }
-
-    static let standard: [CheckModifierPreset] = [
-        CheckModifierPreset(value: 30),
-        CheckModifierPreset(value: 20),
-        CheckModifierPreset(value: 10),
-        CheckModifierPreset(value: 0),
-        CheckModifierPreset(value: -10),
-        CheckModifierPreset(value: -20),
-        CheckModifierPreset(value: -30)
-    ]
-}
-
 enum CheckOrigin: Equatable, Sendable {
     case standard
     case sessionCombat
@@ -74,7 +54,11 @@ struct CheckModifier: Identifiable, Equatable, Sendable {
         value: Int,
         scope: CheckModifierScope = .allChecks
     ) -> CheckModifier {
-        CheckModifier(
+        if let preset = DifficultyPresetRegistry.preset(for: value) {
+            return preset.normalizedModifier(scope: scope)
+        }
+
+        return CheckModifier(
             id: "preset.\(scope.stableIdentifier).\(value.accessibilitySignedToken)",
             kind: .preset,
             scope: scope,
@@ -168,30 +152,11 @@ enum RuleConditionKind: String, Equatable, Sendable {
     case custom
 
     static func inferred(from label: String) -> RuleConditionKind {
-        let normalized = label.lowercased()
-        if normalized.contains("pinned") {
-            return .pinned
-        }
-        if normalized.contains("cover") {
-            return .cover
-        }
-        if normalized.contains("suppress") {
-            return .suppression
-        }
-        if normalized.contains("injur") || normalized.contains("wound") || normalized.contains("bleed") {
-            return .injury
-        }
-        return .custom
+        ConditionMetadataRegistry.resolve(label: label).kind
     }
 
     var label: String {
-        switch self {
-        case .pinned: "Pinned"
-        case .cover: "Cover"
-        case .suppression: "Suppression"
-        case .injury: "Injury"
-        case .custom: "Custom"
-        }
+        ConditionMetadataRegistry.metadata(for: self)?.displayName ?? "Custom"
     }
 }
 
@@ -208,9 +173,10 @@ struct RuleCondition: Identifiable, Equatable, Sendable {
         note: String? = nil
     ) -> RuleCondition {
         let cleanedText = text.trimmedOrPlaceholder("Unnamed Condition")
+        let metadata = ConditionMetadataRegistry.resolve(label: cleanedText)
         return RuleCondition(
             id: "session-condition.\(index).\(cleanedText.stableToken)",
-            kind: .inferred(from: cleanedText),
+            kind: metadata.kind,
             label: cleanedText,
             source: "Session Combat Condition",
             note: note
@@ -237,16 +203,18 @@ struct ActiveWeaponContext: Identifiable, Equatable, Sendable {
     let id: UUID
     let displayName: String
     let type: String?
+    let typeMetadata: WeaponTypeMetadata?
     let range: String?
     let damage: String?
     let penetration: String?
     let clip: String?
     let reload: String?
     let traits: String?
+    let traitMetadata: [WeaponTraitMetadata]
 
     var primarySummary: [String] {
         [
-            type,
+            typeMetadata?.displayName ?? type,
             range.map { "Range \($0)" },
             damage.map { "Damage \($0)" },
             penetration.map { "Pen \($0)" }
@@ -268,12 +236,14 @@ struct ActiveWeaponContext: Identifiable, Equatable, Sendable {
             id: weapon.id,
             displayName: weapon.name.trimmedOrPlaceholder("Unnamed Weapon"),
             type: weapon.type.trimmedOrNil,
+            typeMetadata: WeaponTypeRegistry.resolve(weapon.type),
             range: weapon.range.trimmedOrNil,
             damage: weapon.damage.trimmedOrNil,
             penetration: weapon.penetration.trimmedOrNil,
             clip: weapon.clip.trimmedOrNil,
             reload: weapon.reload.trimmedOrNil,
-            traits: weapon.traits.trimmedOrNil
+            traits: weapon.traits.trimmedOrNil,
+            traitMetadata: WeaponTraitRegistry.resolveAll(weapon.traits)
         )
     }
 }
@@ -556,12 +526,13 @@ private extension CheckDefinition {
                 ]
             )
         case .skill(let skill):
-            let baseValue = characteristics.value(for: skill.characteristic)
-            let derivedBonus = characteristics.bonusValue(for: skill.characteristic)
+            let metadata = SkillMetadataRegistry.resolve(skill)
+            let baseValue = characteristics.value(for: metadata.linkedCharacteristic)
+            let derivedBonus = characteristics.bonusValue(for: metadata.linkedCharacteristic)
             return ResolvedCheckDefinition(
                 kind: .skill,
-                checkName: skill.displayName,
-                sourceName: skill.characteristic.label,
+                checkName: metadata.displayName,
+                sourceName: metadata.linkedCharacteristic.label,
                 baseValue: baseValue,
                 defaultContributions: [
                     RuleContribution(
@@ -710,7 +681,7 @@ extension Int {
     }
 }
 
-private extension CheckModifierScope {
+extension CheckModifierScope {
     var stableIdentifier: String {
         switch self {
         case .allChecks:

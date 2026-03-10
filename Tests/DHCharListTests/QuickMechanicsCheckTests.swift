@@ -81,7 +81,8 @@ import Testing
 }
 
 @Test func standardQuickMechanicsPresetsRemainExpected() {
-    #expect(CheckModifierPreset.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
+    #expect(DifficultyPresetRegistry.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
+    #expect(DifficultyPresetRegistry.preset(for: 20)?.source == "Difficulty Preset Registry")
 }
 
 @Test func structuredModifiersRespectScopeFilteringAndOrigin() {
@@ -293,6 +294,8 @@ import Testing
             "Reliable"
         ]
     )
+    #expect(context.activeWeapon?.typeMetadata?.classification == .pistol)
+    #expect(context.activeWeapon?.traitMetadata.map(\.displayName) == ["Reliable"])
     #expect(context.pinnedChecks.map { $0.label } == ["Dodge +10", "Awareness"])
     #expect(context.temporaryModifiers.map { $0.label } == ["Aim", "Smoke"])
     #expect(context.combatConditions.map { $0.kind } == [RuleConditionKind.pinned, RuleConditionKind.cover])

@@ -170,3 +170,8 @@
    - **Reason:** Batch 39 needs explicit, composable combat context for future rules work, but changing accepted local persistence or introducing a larger combat engine/state machine would exceed the batch scope and risk regressions in the current workspace.
    - **Type:** Fact.
    - **Impact:** The rules layer now exposes explicit `CombatContext`, `ActiveWeaponContext`, `CombatPinnedCheck`, and `CombatCheckPreparationContext` models for active weapon, combat conditions, pinned checks, and temporary modifiers. `SessionState` still persists `activeWeaponID`, `combatConditions`, `pinnedChecks`, and `temporaryModifiers` in their accepted local-first form; those values are normalized into structured combat context only when the current session/combat and quick-mechanics flows invoke the rules layer.
+
+31. **Decision:** Introduce bounded typed rules metadata registries with canonical lookup plus safe ad hoc fallback instead of forcing a full rules catalog, external data set, or custom DSL in Batch 40.
+   - **Reason:** Batch 40 needs stable reusable metadata for presets, skills, weapon types/traits, and conditions so the current rules layer stops depending on scattered constants, but the project still accepts custom user-entered data and is not ready for exhaustive rules digitization.
+   - **Type:** Fact.
+   - **Impact:** The rules layer now consumes explicit registries for difficulty presets, skill metadata, weapon metadata, and condition metadata while preserving accepted behavior for unknown/custom values through structured fallback metadata. This improves explainability and future engine safety without changing persistence or widening player-facing mechanics scope.

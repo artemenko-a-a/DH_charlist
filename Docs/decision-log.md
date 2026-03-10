@@ -175,3 +175,8 @@
    - **Reason:** Batch 40 needs stable reusable metadata for presets, skills, weapon types/traits, and conditions so the current rules layer stops depending on scattered constants, but the project still accepts custom user-entered data and is not ready for exhaustive rules digitization.
    - **Type:** Fact.
    - **Impact:** The rules layer now consumes explicit registries for difficulty presets, skill metadata, weapon metadata, and condition metadata while preserving accepted behavior for unknown/custom values through structured fallback metadata. This improves explainability and future engine safety without changing persistence or widening player-facing mechanics scope.
+
+32. **Decision:** Keep the Batch 41 damage foundation bounded to explicit manual/raw damage inputs plus armour, penetration, toughness bonus, and wounds state instead of trying to parse full weapon damage expressions, hit locations, or trait-driven edge cases.
+   - **Reason:** The project needs a real damage pipeline foundation now, but accepted app data only safely justifies deterministic mitigation and wound application. Full damage expression parsing and combat-rule automation would widen semantics faster than the current rules layer can explain or validate.
+   - **Type:** Fact.
+   - **Impact:** The rules layer now has structured, testable damage request/result/breakdown modeling and a combat-context helper built from accepted current data, while critical tables, hit locations, full weapon trait resolution, and broader attack automation remain intentionally deferred.

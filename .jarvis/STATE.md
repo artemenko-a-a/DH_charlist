@@ -1,24 +1,23 @@
-# Batch 40 State
+# Batch 41 State
 
-- status: validated for build/runtime sanity; no full rules-engine acceptance claimed
-- scope: rules data registries only; accepted runtime, persistence, and navigation behavior remain unchanged
+- status: validated for build/runtime sanity; no full combat-engine acceptance claimed
+- scope: bounded damage pipeline foundation only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - `Sources/DHCharList/Rules/RulesRegistries.swift` now defines bounded typed registries for difficulty presets, canonical skill metadata, weapon type metadata, weapon trait metadata, and condition metadata
-  - current rules/combat paths now consume those registries instead of relying only on scattered stable constants
-  - canonical registry entries use safe ad hoc fallback metadata for unknown/custom values, so accepted custom data still works without persistence changes
-  - `CheckModifier.preset`, skill-check definition resolution, `RuleCondition` normalization, and `ActiveWeaponContext` now read registry-backed metadata
+  - `Sources/DHCharList/Rules/DamagePipeline.swift` now defines explicit `DamageSource`, `DamageMitigation`, `DamageRequest`, `DamageResult`, `DamageBreakdown`, and `DamageContribution` models plus `DamageResolver`
+  - the damage pipeline now resolves deterministic raw-damage, penetration, armour mitigation, toughness mitigation, applied damage, wound delta, and overflow through one explicit rules-layer path
+  - `CombatContext` can now build damage requests from accepted `ResourceState.currentWounds`, `CharacteristicSet.bonus.toughness`, explicit armour input, and the current active-weapon context without changing persistence shape
+  - accepted combat/session UI flows remain unchanged; the new damage layer is a rules foundation, not a user-facing combat simulator
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b40-rules-registries.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
   - `./scripts/run_xcode_coverage.sh`
   - `./scripts/check_coverage_policy.sh`
 - runtime sanity note:
-  - focused host UI validation confirmed characteristic/skill quick checks, preset modifier behavior, and combat workspace behavior remain intact where registry-backed metadata is now involved
+  - actual host runtime review was performed through the live coverage run, including `testCombatWorkspaceActivePlayFlow` and `testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
 - coverage note:
-  - truthful package-surface gate passed at `17.47%` current package coverage against the `14.18%` baseline, with the `Rules` area at `95.90%`
+  - truthful package-surface gate passed at `18.45%` current package coverage against the `14.18%` baseline, with the `Rules` area at `95.60%`
 - truthful limitations:
-  - this is not a full rules engine or a custom rules DSL
-  - the project still does not resolve damage, hit locations, initiative/action economy, psychic automation, or broader combat simulation
-  - registries are intentionally bounded; unknown/custom values still resolve through structured ad hoc fallback metadata
+  - this is not a full attack-resolution or combat engine
+  - the project still does not resolve critical tables, hit locations, full weapon trait resolution, initiative/action economy, psychic automation, or broader combat simulation
+  - raw damage remains an explicit bounded input; the project does not yet parse full weapon damage expressions into automated resolution

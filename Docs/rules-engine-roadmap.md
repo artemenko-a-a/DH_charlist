@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stages 1, 2, 3, 4, and 5 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift` and `Sources/DHCharList/Rules/RulesRegistries.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1, 2, 3, 4, 5, and 6 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, and `Sources/DHCharList/Rules/DamagePipeline.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -232,14 +232,21 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 6 — Damage pipeline foundation
 **Goal:** introduce bounded damage resolution primitives.
 
-### Intended outcomes
-- damage request/result
-- mitigation (armour/toughness) modeling
-- wound application
-- bounded, explicit outputs
+### Implemented foundation
+- `Sources/DHCharList/Rules/DamagePipeline.swift`
+- explicit `DamageRequest`
+- explicit `DamageResult`
+- structured `DamageBreakdown`
+- structured `DamageContribution`
+- bounded mitigation model for raw damage, penetration, armour mitigation, and toughness mitigation
+- bounded wound application model for pre-damage wounds, applied damage, post-damage wounds, and overflow tracking
+- combat-context helper that builds damage requests from accepted `CombatContext`, `ResourceState`, and `CharacteristicSet` data without changing persistence shape
 
 ### Still out of scope
 - full critical tables
+- hit locations
+- full attack resolution
+- full weapon trait resolution
 - full perils/psychic incident engine
 - broad combat automation
 

@@ -23,6 +23,7 @@ import Testing
     )
 
     #expect(result.kind == .characteristic)
+    #expect(result.definition == .characteristic(.agility))
     #expect(result.checkName == "Agility Check")
     #expect(result.sourceName == "Agility")
     #expect(result.breakdown.baseValue == 47)
@@ -30,6 +31,7 @@ import Testing
     #expect(result.breakdown.trainingContribution == nil)
     #expect(result.breakdown.appliedModifier == -10)
     #expect(result.breakdown.appliedModifiers.map(\.kind) == [.manual])
+    #expect(result.breakdown.contributions.map(\.label) == ["Derived Bonus", "Custom Modifier"])
     #expect(result.finalTarget == 37)
     #expect(result.breakdown.contribution(of: .derivedBonus)?.appliesToFinalTarget == false)
     #expect(result.breakdown.contribution(of: .modifier)?.appliesToFinalTarget == true)
@@ -58,6 +60,7 @@ import Testing
     )
 
     #expect(result.kind == .skill)
+    #expect(result.definition == .skill(skill))
     #expect(result.checkName == "Awareness")
     #expect(result.sourceName == "Perception")
     #expect(result.breakdown.baseValue == 42)
@@ -65,6 +68,13 @@ import Testing
     #expect(result.breakdown.trainingContribution == 10)
     #expect(result.breakdown.appliedModifier == 20)
     #expect(result.breakdown.appliedModifiers.map(\.kind) == [.preset])
+    #expect(
+        result.breakdown.contributions.map(\.label) == [
+            "Derived Bonus",
+            "Training Contribution",
+            "Standard Preset"
+        ]
+    )
     #expect(result.finalTarget == 72)
     #expect(result.breakdown.contribution(of: .training)?.appliesToFinalTarget == true)
 }
@@ -154,9 +164,61 @@ import Testing
     #expect(result.breakdown.baseValue == 40)
     #expect(result.breakdown.trainingContribution == 10)
     #expect(result.breakdown.appliedModifier == -10)
+    #expect(
+        result.breakdown.contributions.map(\.label) == [
+            "Derived Bonus",
+            "Training Contribution",
+            "Custom Modifier",
+            "Smoke"
+        ]
+    )
     #expect(result.breakdown.appliedModifierContributions.map(\.label) == ["Custom Modifier", "Smoke"])
     #expect(result.breakdown.activeConditions.map(\.kind) == [.cover, .pinned])
     #expect(result.finalTarget == 40)
+}
+
+@Test func unifiedExplainableCheckEngineKeepsStableContributionOrdering() {
+    let characteristics = CharacteristicSet(
+        weaponSkill: 39,
+        ballisticSkill: 34,
+        strength: 35,
+        toughness: 33,
+        agility: 40,
+        intelligence: 31,
+        perception: 41,
+        willpower: 38,
+        fellowship: 30
+    )
+    let skill = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let condition = RuleCondition.sessionCombatCondition(index: 0, text: "Pinned Down")
+
+    let result = MechanicsCheckResolver.resolve(
+        .skill(
+            skill,
+            characteristics: characteristics,
+            origin: .sessionCombat,
+            modifiers: [
+                .preset(value: 10),
+                .sessionTemporary(label: "Aim", value: 20),
+                .conditionDerived(label: "Pinned Down", value: -30)
+            ],
+            conditions: [condition]
+        )
+    )
+
+    #expect(result.definition == .skill(skill))
+    #expect(
+        result.breakdown.contributions.map(\.label) == [
+            "Derived Bonus",
+            "Training Contribution",
+            "Standard Preset",
+            "Aim",
+            "Pinned Down"
+        ]
+    )
+    #expect(result.breakdown.appliedModifiers.map(\.kind) == [.preset, .sessionTemporary, .conditionDerived])
+    #expect(result.breakdown.activeConditions == [condition])
+    #expect(result.finalTarget == 51)
 }
 
 @Test func sessionStateNormalizesTemporaryModifiersAndCombatConditions() {

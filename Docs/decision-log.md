@@ -160,3 +160,8 @@
    - **Reason:** Batch 37 needs structured, explainable mechanics inputs for quick checks and session/combat helper flows, but migrating local persistence or turning combat notes into a full status engine would exceed the accepted batch scope.
    - **Type:** Fact.
    - **Impact:** `MechanicsCheckResolver` now consumes explicit `CheckModifier` and `RuleCondition` models with bounded kind/scope vocabulary, while `SessionState.temporaryModifiers` and `SessionState.combatConditions` remain stored in their existing local-first raw form and are normalized through rules-layer adapters at usage time. Conditions stay visible as explicit context unless they are deliberately modeled as numeric modifiers elsewhere.
+
+29. **Decision:** Keep the explainable check engine bounded to explicit current check variants (`characteristic` and `skill`) and route them through one shared resolver path instead of introducing a generic catch-all check type.
+   - **Reason:** Batch 38 needs one coherent, testable engine for the currently accepted quick mechanics scope, but adding a generic/custom rules concept now would widen semantics faster than the app can explain or validate.
+   - **Type:** Fact.
+   - **Impact:** `CheckRequest` now carries an explicit `CheckDefinition` variant and `MechanicsCheckResolver` resolves both accepted check types through one shared explainable pipeline with stable contribution ordering. The accepted player-facing helper behavior remains intact, while broader check kinds remain intentionally deferred.

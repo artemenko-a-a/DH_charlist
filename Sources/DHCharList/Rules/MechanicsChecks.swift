@@ -30,6 +30,20 @@ enum CheckKind: Equatable, Sendable {
     case skill
 }
 
+enum CheckDefinition: Equatable, Sendable {
+    case characteristic(SkillCharacteristic)
+    case skill(Skill)
+
+    var kind: CheckKind {
+        switch self {
+        case .characteristic:
+            .characteristic
+        case .skill:
+            .skill
+        }
+    }
+}
+
 enum CheckModifierKind: String, Equatable, Sendable {
     case preset
     case manual
@@ -142,26 +156,7 @@ struct CheckModifier: Identifiable, Equatable, Sendable {
     }
 
     func applies(to request: CheckRequest) -> Bool {
-        switch scope {
-        case .allChecks:
-            return true
-        case .characteristicChecks:
-            return request.kind == .characteristic
-        case .skillChecks:
-            return request.kind == .skill
-        case .specificCharacteristic(let characteristic):
-            if case .characteristic(let requestCharacteristic) = request.scope {
-                return requestCharacteristic == characteristic
-            }
-            return false
-        case .specificSkill(let skillID):
-            if case .skill(let skill) = request.scope {
-                return skill.id == skillID
-            }
-            return false
-        case .combatSessionOnly:
-            return request.origin == .sessionCombat
-        }
+        request.definition.matches(modifierScope: scope, origin: request.origin)
     }
 }
 
@@ -274,24 +269,14 @@ struct RuleBreakdown: Equatable, Sendable {
 }
 
 struct CheckRequest: Equatable, Sendable {
-    enum Scope: Equatable, Sendable {
-        case characteristic(SkillCharacteristic)
-        case skill(Skill)
-    }
-
-    let scope: Scope
+    let definition: CheckDefinition
     let characteristics: CharacteristicSet
     let origin: CheckOrigin
     let modifiers: [CheckModifier]
     let conditions: [RuleCondition]
 
     var kind: CheckKind {
-        switch scope {
-        case .characteristic:
-            .characteristic
-        case .skill:
-            .skill
-        }
+        definition.kind
     }
 
     static func characteristic(
@@ -302,7 +287,7 @@ struct CheckRequest: Equatable, Sendable {
         conditions: [RuleCondition] = []
     ) -> CheckRequest {
         CheckRequest(
-            scope: .characteristic(characteristic),
+            definition: .characteristic(characteristic),
             characteristics: characteristics,
             origin: origin,
             modifiers: modifiers,
@@ -334,7 +319,7 @@ struct CheckRequest: Equatable, Sendable {
         conditions: [RuleCondition] = []
     ) -> CheckRequest {
         CheckRequest(
-            scope: .skill(skill),
+            definition: .skill(skill),
             characteristics: characteristics,
             origin: origin,
             modifiers: modifiers,
@@ -360,6 +345,7 @@ struct CheckRequest: Equatable, Sendable {
 }
 
 struct CheckResult: Equatable, Sendable {
+    let definition: CheckDefinition
     let kind: CheckKind
     let checkName: String
     let sourceName: String
@@ -370,91 +356,29 @@ struct CheckResult: Equatable, Sendable {
 
 enum MechanicsCheckResolver {
     static func resolve(_ request: CheckRequest) -> CheckResult {
-        switch request.scope {
-        case .characteristic(let characteristic):
-            resolveCharacteristicCheck(
-                characteristic,
-                request: request
-            )
-        case .skill(let skill):
-            resolveSkillCheck(
-                skill,
-                request: request
-            )
-        }
-    }
-
-    private static func resolveCharacteristicCheck(
-        _ characteristic: SkillCharacteristic,
-        request: CheckRequest
-    ) -> CheckResult {
-        let baseValue = request.characteristics.value(for: characteristic)
-        let derivedBonus = request.characteristics.bonusValue(for: characteristic)
-        let modifierContributions = modifierContributions(for: request)
-        let totalModifier = modifierContributions.reduce(0) { $0 + $1.value }
-        let contributions = [
-            RuleContribution(
-                kind: .derivedBonus,
-                label: "Derived Bonus",
-                value: derivedBonus,
-                appliesToFinalTarget: false,
-                modifier: nil
-            )
-        ] + modifierContributions
+        let resolvedDefinition = request.definition.resolve(using: request.characteristics)
+        let modifierContributions = orderedModifierContributions(for: request)
+        let contributions = resolvedDefinition.defaultContributions + modifierContributions
+        let finalTarget = resolvedDefinition.baseValue
+            + contributions
+            .filter(\.appliesToFinalTarget)
+            .reduce(0) { $0 + $1.value }
 
         return CheckResult(
-            kind: .characteristic,
-            checkName: "\(characteristic.label) Check",
-            sourceName: characteristic.label,
+            definition: request.definition,
+            kind: resolvedDefinition.kind,
+            checkName: resolvedDefinition.checkName,
+            sourceName: resolvedDefinition.sourceName,
             breakdown: RuleBreakdown(
-                baseValue: baseValue,
+                baseValue: resolvedDefinition.baseValue,
                 contributions: contributions,
                 activeConditions: request.conditions,
-                finalTarget: baseValue + totalModifier
+                finalTarget: finalTarget
             )
         )
     }
 
-    private static func resolveSkillCheck(
-        _ skill: Skill,
-        request: CheckRequest
-    ) -> CheckResult {
-        let baseValue = request.characteristics.value(for: skill.characteristic)
-        let derivedBonus = request.characteristics.bonusValue(for: skill.characteristic)
-        let trainingModifier = skill.training.modifier
-        let modifierContributions = modifierContributions(for: request)
-        let totalModifier = modifierContributions.reduce(0) { $0 + $1.value }
-        let contributions = [
-            RuleContribution(
-                kind: .derivedBonus,
-                label: "Derived Bonus",
-                value: derivedBonus,
-                appliesToFinalTarget: false,
-                modifier: nil
-            ),
-            RuleContribution(
-                kind: .training,
-                label: "Training Contribution",
-                value: trainingModifier,
-                appliesToFinalTarget: true,
-                modifier: nil
-            )
-        ] + modifierContributions
-
-        return CheckResult(
-            kind: .skill,
-            checkName: skill.displayName,
-            sourceName: skill.characteristic.label,
-            breakdown: RuleBreakdown(
-                baseValue: baseValue,
-                contributions: contributions,
-                activeConditions: request.conditions,
-                finalTarget: baseValue + trainingModifier + totalModifier
-            )
-        )
-    }
-
-    private static func modifierContributions(for request: CheckRequest) -> [RuleContribution] {
+    private static func orderedModifierContributions(for request: CheckRequest) -> [RuleContribution] {
         request.modifiers
             .filter { $0.applies(to: request) }
             .map { modifier in
@@ -466,6 +390,87 @@ enum MechanicsCheckResolver {
                     modifier: modifier
                 )
             }
+    }
+}
+
+private struct ResolvedCheckDefinition: Equatable, Sendable {
+    let kind: CheckKind
+    let checkName: String
+    let sourceName: String
+    let baseValue: Int
+    let defaultContributions: [RuleContribution]
+}
+
+private extension CheckDefinition {
+    func matches(modifierScope: CheckModifierScope, origin: CheckOrigin) -> Bool {
+        switch modifierScope {
+        case .allChecks:
+            return true
+        case .characteristicChecks:
+            return kind == .characteristic
+        case .skillChecks:
+            return kind == .skill
+        case .specificCharacteristic(let characteristic):
+            if case .characteristic(let requestCharacteristic) = self {
+                return requestCharacteristic == characteristic
+            }
+            return false
+        case .specificSkill(let skillID):
+            if case .skill(let skill) = self {
+                return skill.id == skillID
+            }
+            return false
+        case .combatSessionOnly:
+            return origin == .sessionCombat
+        }
+    }
+
+    func resolve(using characteristics: CharacteristicSet) -> ResolvedCheckDefinition {
+        switch self {
+        case .characteristic(let characteristic):
+            let baseValue = characteristics.value(for: characteristic)
+            let derivedBonus = characteristics.bonusValue(for: characteristic)
+            return ResolvedCheckDefinition(
+                kind: .characteristic,
+                checkName: "\(characteristic.label) Check",
+                sourceName: characteristic.label,
+                baseValue: baseValue,
+                defaultContributions: [
+                    RuleContribution(
+                        kind: .derivedBonus,
+                        label: "Derived Bonus",
+                        value: derivedBonus,
+                        appliesToFinalTarget: false,
+                        modifier: nil
+                    )
+                ]
+            )
+        case .skill(let skill):
+            let baseValue = characteristics.value(for: skill.characteristic)
+            let derivedBonus = characteristics.bonusValue(for: skill.characteristic)
+            return ResolvedCheckDefinition(
+                kind: .skill,
+                checkName: skill.displayName,
+                sourceName: skill.characteristic.label,
+                baseValue: baseValue,
+                defaultContributions: [
+                    RuleContribution(
+                        kind: .derivedBonus,
+                        label: "Derived Bonus",
+                        value: derivedBonus,
+                        appliesToFinalTarget: false,
+                        modifier: nil
+                    ),
+                    RuleContribution(
+                        kind: .training,
+                        label: "Training Contribution",
+                        value: skill.training.modifier,
+                        appliesToFinalTarget: true,
+                        modifier: nil
+                    )
+                ]
+            )
+        }
     }
 }
 

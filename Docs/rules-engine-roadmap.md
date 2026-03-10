@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stages 1 and 2 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1, 2, and 3 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -149,7 +149,25 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 3 — Explainable check engine
 **Goal:** make characteristic/skill checks fully explainable and reusable.
 
-### Intended outcomes
+### Implemented foundation
+- current accepted characteristic-based and skill-based checks now resolve through one shared `MechanicsCheckResolver.resolve(_:)` path
+- `CheckRequest` now models explicit `CheckDefinition` variants instead of leaving the variant split implicit inside helper-specific code
+- current explainable outputs now include:
+  - source/base value
+  - derived bonus
+  - training contribution where relevant
+  - structured applied modifiers
+  - active conditions as explicit context
+  - stable ordered contribution lists
+  - final target
+- `QuickMechanicsHelperView` and `DerivedValueCalculator` both consume the same unified check engine path
+
+### Still intentionally bounded
+- no generic damage/attack/initiative engine
+- no hidden smart automation for unresolved rule cases
+- no automatic numeric condition effects unless a condition is explicitly modeled as a modifier
+
+### Originally intended outcomes
 - characteristic checks through rules layer
 - skill checks through rules layer
 - modifier presets and custom modifiers

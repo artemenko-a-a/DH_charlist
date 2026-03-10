@@ -1,22 +1,27 @@
-# Batch 37 State
+# Batch 38 State
 
-- status: validated for build/runtime sanity; no combat-engine or full rules-engine acceptance claimed
-- scope: modifier and condition normalization only; accepted runtime, persistence, and navigation behavior remain unchanged
+- status: validated for build/runtime sanity; no full rules-engine or combat-engine acceptance claimed
+- scope: explainable check engine only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - current mechanics checks still live in `Sources/DHCharList/Rules/MechanicsChecks.swift`
-  - the rules layer now includes explicit normalized mechanics inputs: `CheckModifier`, `CheckModifierKind`, `CheckModifierScope`, `RuleCondition`, `RuleConditionKind`, and `CheckOrigin`
-  - `MechanicsCheckResolver` now applies multiple structured modifiers by scope/origin and keeps active conditions visible in `RuleBreakdown`
-  - accepted `SessionState` persistence shape is unchanged, but rules-layer adapters now normalize `temporaryModifiers` and `combatConditions` into reusable session modifiers and explicit condition context
-  - `QuickMechanicsHelperView` and `SessionModeScreen` now consume the normalized rules-layer models instead of working with ad hoc modifier labels/numbers directly
+  - current accepted checks still live in `Sources/DHCharList/Rules/MechanicsChecks.swift`
+  - `CheckRequest` now carries explicit `CheckDefinition` variants for current supported check kinds: `characteristic` and `skill`
+  - `MechanicsCheckResolver` now resolves both accepted check kinds through one shared explainable pipeline instead of splitting the resolution path across helper-specific branches
+  - `RuleBreakdown` now carries stable ordered contributions built from one engine path: base/source resolution, derived bonus, training contribution where relevant, and structured modifiers
+  - normalized Batch 37 modifiers/conditions remain the accepted input model; session temporary modifiers and combat conditions still flow through the same adapters and UI entry points
+  - `QuickMechanicsHelperView` and `DerivedValueCalculator` continue to use the same rules-layer engine path
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b36-quick-mechanics.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b37-combat-rerun-3.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b38-quick-mechanics-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b38-combat-workspace-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `./scripts/run_xcode_coverage.sh`
+  - `./scripts/check_coverage_policy.sh`
 - runtime sanity note:
-  - focused host UI validation confirmed characteristic quick check with preset modifier, skill quick check with custom modifier, and session/combat flow with surfaced temporary modifier plus active condition context
+  - focused host UI validation confirmed characteristic quick check, skill quick check, preset/custom modifier application, session/combat-derived modifier reuse, and continued visible breakdown rendering
+- coverage note:
+  - refreshed truthful package-surface gate passed at `15.63%` current package coverage against the `14.18%` baseline
 - truthful limitations:
-  - this is not a full combat status engine or full rules engine
-  - conditions are explicit context only unless deliberately modeled as numeric modifiers
-  - damage resolution, initiative/action economy, psychic subsystem automation, broader combat automation, and rules registries/DSL remain intentionally out of scope
+  - this is not a full rules engine or combat simulator
+  - conditions remain explicit context unless deliberately modeled as numeric modifiers
+  - damage resolution, initiative/action economy, psychic subsystem automation, generic catch-all check types, broader combat automation, and rules registries/DSL remain intentionally out of scope

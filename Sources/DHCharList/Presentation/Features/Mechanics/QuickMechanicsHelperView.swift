@@ -347,27 +347,27 @@ struct QuickMechanicsHelperView: View {
     }
 
     private var checkResult: CheckResult? {
+        currentRequest.map(MechanicsCheckResolver.resolve)
+    }
+
+    private var currentRequest: CheckRequest? {
         switch selectedCategory {
         case .characteristic:
-            return MechanicsCheckResolver.resolve(
-                .characteristic(
-                    selectedCharacteristic,
-                    characteristics: characteristics,
-                    origin: origin,
-                    modifiers: [appliedModifier],
-                    conditions: sessionConditions
-                )
+            return .characteristic(
+                selectedCharacteristic,
+                characteristics: characteristics,
+                origin: origin,
+                modifiers: [appliedModifier],
+                conditions: sessionConditions
             )
         case .skill:
             guard let selectedSkill else { return nil }
-            return MechanicsCheckResolver.resolve(
-                .skill(
-                    selectedSkill,
-                    characteristics: characteristics,
-                    origin: origin,
-                    modifiers: [appliedModifier],
-                    conditions: sessionConditions
-                )
+            return .skill(
+                selectedSkill,
+                characteristics: characteristics,
+                origin: origin,
+                modifiers: [appliedModifier],
+                conditions: sessionConditions
             )
         }
     }

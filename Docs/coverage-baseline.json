@@ -1,21 +1,27 @@
 {
   "status": "active",
-  "captured_at": "2026-03-09T15:27:01+00:00",
+  "captured_at": "2026-03-10T03:47:37+00:00",
   "source_scheme": "DHCharListHost",
   "source_of_truth": "SwiftPM code coverage JSON over Sources/DHCharList for gate enforcement, with xcodebuild/xccov host artifacts retained as diagnostics",
   "baseline": {
     "metrics_source": "/Users/an.artemenko/repos/DH_charlist/DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
     "package_surface": {
-      "line_coverage_pct": 11.38,
-      "covered_lines": 1167,
-      "executable_lines": 10255,
-      "file_count": 26,
+      "line_coverage_pct": 14.18,
+      "covered_lines": 1612,
+      "executable_lines": 11365,
+      "file_count": 28,
       "files": [
         {
           "path": "App/AppContainer.swift",
           "executable_lines": 110,
           "covered_lines": 94,
           "line_coverage_pct": 85.45
+        },
+        {
+          "path": "Application/CharacterDossier.swift",
+          "executable_lines": 377,
+          "covered_lines": 365,
+          "line_coverage_pct": 96.82
         },
         {
           "path": "Application/CharacterImportPreviewSummary.swift",
@@ -40,12 +46,6 @@
           "executable_lines": 44,
           "covered_lines": 44,
           "line_coverage_pct": 100.0
-        },
-        {
-          "path": "Application/QuickMechanicsCheck.swift",
-          "executable_lines": 94,
-          "covered_lines": 81,
-          "line_coverage_pct": 86.17
         },
         {
           "path": "Domain/Character.swift",
@@ -97,15 +97,15 @@
         },
         {
           "path": "Presentation/AppShell/DHCharListAppShell.swift",
-          "executable_lines": 54,
+          "executable_lines": 55,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/CharacterList/CharacterListScreen.swift",
-          "executable_lines": 2485,
+          "executable_lines": 2553,
           "covered_lines": 88,
-          "line_coverage_pct": 3.54
+          "line_coverage_pct": 3.45
         },
         {
           "path": "Presentation/Features/Characteristics/CharacteristicsScreen.swift",
@@ -115,57 +115,69 @@
         },
         {
           "path": "Presentation/Features/Diagnostics/PersistenceStatusScreen.swift",
-          "executable_lines": 280,
+          "executable_lines": 285,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Presentation/Features/Dossier/CharacterDossierScreen.swift",
+          "executable_lines": 405,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/Equipment/EquipmentScreen.swift",
-          "executable_lines": 1277,
+          "executable_lines": 1280,
           "covered_lines": 58,
-          "line_coverage_pct": 4.54
+          "line_coverage_pct": 4.53
         },
         {
           "path": "Presentation/Features/History/CampaignHistoryScreen.swift",
-          "executable_lines": 842,
+          "executable_lines": 846,
           "covered_lines": 33,
-          "line_coverage_pct": 3.92
+          "line_coverage_pct": 3.9
         },
         {
           "path": "Presentation/Features/Mechanics/QuickMechanicsHelperView.swift",
-          "executable_lines": 680,
+          "executable_lines": 696,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/Notes/NotesScreen.swift",
-          "executable_lines": 494,
+          "executable_lines": 504,
           "covered_lines": 23,
-          "line_coverage_pct": 4.66
+          "line_coverage_pct": 4.56
         },
         {
           "path": "Presentation/Features/Profile/ProfileScreen.swift",
-          "executable_lines": 138,
+          "executable_lines": 141,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/SessionMode/SessionModeScreen.swift",
-          "executable_lines": 1859,
+          "executable_lines": 1882,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/Skills/SkillsScreen.swift",
-          "executable_lines": 669,
+          "executable_lines": 681,
           "covered_lines": 16,
-          "line_coverage_pct": 2.39
+          "line_coverage_pct": 2.35
         },
         {
           "path": "Presentation/Theme/CogitatorTheme.swift",
-          "executable_lines": 143,
+          "executable_lines": 251,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
+        },
+        {
+          "path": "Rules/MechanicsChecks.swift",
+          "executable_lines": 169,
+          "covered_lines": 161,
+          "line_coverage_pct": 95.27
         }
       ],
       "areas": [
@@ -178,10 +190,10 @@
         },
         {
           "name": "Application",
-          "covered_lines": 375,
-          "executable_lines": 412,
+          "covered_lines": 659,
+          "executable_lines": 695,
           "file_count": 5,
-          "line_coverage_pct": 91.02
+          "line_coverage_pct": 94.82
         },
         {
           "name": "Domain",
@@ -200,16 +212,23 @@
         {
           "name": "Presentation",
           "covered_lines": 218,
-          "executable_lines": 9243,
-          "file_count": 13,
-          "line_coverage_pct": 2.36
+          "executable_lines": 9901,
+          "file_count": 14,
+          "line_coverage_pct": 2.2
+        },
+        {
+          "name": "Rules",
+          "covered_lines": 161,
+          "executable_lines": 169,
+          "file_count": 1,
+          "line_coverage_pct": 95.27
         }
       ]
     },
     "host_xccov": {
-      "line_coverage_pct": 96.0,
-      "covered_lines": 696,
-      "executable_lines": 725
+      "line_coverage_pct": 96.18,
+      "covered_lines": 730,
+      "executable_lines": 759
     }
   },
   "policy": {

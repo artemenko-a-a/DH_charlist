@@ -170,7 +170,7 @@ struct QuickMechanicsHelperView: View {
                     .foregroundStyle(CogitatorPalette.textSecondary)
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
-                    ForEach(QuickMechanicsModifierPreset.standard) { preset in
+                    ForEach(CheckModifierPreset.standard) { preset in
                         if appliedModifier == preset.value {
                             Button(preset.value.signedValueLabel) {
                                 applyModifier(preset.value)
@@ -243,37 +243,37 @@ struct QuickMechanicsHelperView: View {
     @ViewBuilder
     private var breakdownSection: some View {
         Section {
-            if let breakdown {
-                LabeledContent("Check Name", value: breakdown.checkName)
+            if let checkResult {
+                LabeledContent("Check Name", value: checkResult.checkName)
                     .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
-                LabeledContent("Source", value: breakdown.sourceName)
+                LabeledContent("Source", value: checkResult.sourceName)
                     .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
-                LabeledContent("Base Value", value: String(breakdown.baseValue))
+                LabeledContent("Base Value", value: String(checkResult.breakdown.baseValue))
                     .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
-                if let derivedBonus = breakdown.derivedBonus {
+                if let derivedBonus = checkResult.breakdown.derivedBonus {
                     LabeledContent("Derived Bonus", value: String(derivedBonus))
                         .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 }
-                if let trainingModifier = breakdown.trainingModifier {
+                if let trainingModifier = checkResult.breakdown.trainingContribution {
                     LabeledContent("Training Contribution", value: trainingModifier.signedValueLabel)
                         .cogitatorReadoutStyle()
                         .cogitatorPanelRow()
                 }
-                LabeledContent("Applied Modifier", value: breakdown.appliedModifier.signedValueLabel)
+                LabeledContent("Applied Modifier", value: checkResult.breakdown.appliedModifier.signedValueLabel)
                     .cogitatorReadoutStyle()
                     .cogitatorPanelRow()
 
                 HStack {
                     Text("Final Target")
                     Spacer()
-                    Text(String(breakdown.finalTarget))
+                    Text(String(checkResult.finalTarget))
                         .font(.caption.weight(.semibold))
                         .monospacedDigit()
-                        .foregroundStyle(finalTargetLevel(breakdown.finalTarget).foreground)
+                        .foregroundStyle(finalTargetLevel(checkResult.finalTarget).foreground)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background {
@@ -281,7 +281,7 @@ struct QuickMechanicsHelperView: View {
                                 .fill(CogitatorPalette.panelRaised)
                                 .overlay {
                                     Capsule(style: .continuous)
-                                        .stroke(finalTargetLevel(breakdown.finalTarget).foreground.opacity(0.45), lineWidth: 1)
+                                        .stroke(finalTargetLevel(checkResult.finalTarget).foreground.opacity(0.45), lineWidth: 1)
                                 }
                         }
                         .accessibilityIdentifier("quick-check.final-target")
@@ -304,20 +304,24 @@ struct QuickMechanicsHelperView: View {
         skills.first(where: { $0.id == selectedSkillID }) ?? skills.first
     }
 
-    private var breakdown: QuickMechanicsCheckBreakdown? {
+    private var checkResult: CheckResult? {
         switch selectedCategory {
         case .characteristic:
-            return QuickMechanicsCheckBuilder.characteristicCheck(
-                for: selectedCharacteristic,
-                characteristics: characteristics,
-                modifier: appliedModifier
+            return MechanicsCheckResolver.resolve(
+                .characteristic(
+                    selectedCharacteristic,
+                    characteristics: characteristics,
+                    modifier: appliedModifier
+                )
             )
         case .skill:
             guard let selectedSkill else { return nil }
-            return QuickMechanicsCheckBuilder.skillCheck(
-                for: selectedSkill,
-                characteristics: characteristics,
-                modifier: appliedModifier
+            return MechanicsCheckResolver.resolve(
+                .skill(
+                    selectedSkill,
+                    characteristics: characteristics,
+                    modifier: appliedModifier
+                )
             )
         }
     }

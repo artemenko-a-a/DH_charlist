@@ -14,20 +14,20 @@ import Testing
         fellowship: 27
     )
 
-    let breakdown = QuickMechanicsCheckBuilder.characteristicCheck(
-        for: .agility,
-        characteristics: characteristics,
-        modifier: -10
+    let result = MechanicsCheckResolver.resolve(
+        .characteristic(.agility, characteristics: characteristics, modifier: -10)
     )
 
-    #expect(breakdown.kind == .characteristic)
-    #expect(breakdown.checkName == "Agility Check")
-    #expect(breakdown.sourceName == "Agility")
-    #expect(breakdown.baseValue == 47)
-    #expect(breakdown.derivedBonus == 4)
-    #expect(breakdown.trainingModifier == nil)
-    #expect(breakdown.appliedModifier == -10)
-    #expect(breakdown.finalTarget == 37)
+    #expect(result.kind == .characteristic)
+    #expect(result.checkName == "Agility Check")
+    #expect(result.sourceName == "Agility")
+    #expect(result.breakdown.baseValue == 47)
+    #expect(result.breakdown.derivedBonus == 4)
+    #expect(result.breakdown.trainingContribution == nil)
+    #expect(result.breakdown.appliedModifier == -10)
+    #expect(result.finalTarget == 37)
+    #expect(result.breakdown.contribution(of: .derivedBonus)?.appliesToFinalTarget == false)
+    #expect(result.breakdown.contribution(of: .modifier)?.appliesToFinalTarget == true)
 }
 
 @Test func skillQuickCheckAppliesTrainingAndModifierWithTransparentBreakdown() {
@@ -44,27 +44,26 @@ import Testing
     )
     let skill = Skill(name: "Awareness", characteristic: .perception, training: .trained)
 
-    let breakdown = QuickMechanicsCheckBuilder.skillCheck(
-        for: skill,
-        characteristics: characteristics,
-        modifier: 20
+    let result = MechanicsCheckResolver.resolve(
+        .skill(skill, characteristics: characteristics, modifier: 20)
     )
 
-    #expect(breakdown.kind == .skill)
-    #expect(breakdown.checkName == "Awareness")
-    #expect(breakdown.sourceName == "Perception")
-    #expect(breakdown.baseValue == 42)
-    #expect(breakdown.derivedBonus == 4)
-    #expect(breakdown.trainingModifier == 10)
-    #expect(breakdown.appliedModifier == 20)
-    #expect(breakdown.finalTarget == 72)
+    #expect(result.kind == .skill)
+    #expect(result.checkName == "Awareness")
+    #expect(result.sourceName == "Perception")
+    #expect(result.breakdown.baseValue == 42)
+    #expect(result.breakdown.derivedBonus == 4)
+    #expect(result.breakdown.trainingContribution == 10)
+    #expect(result.breakdown.appliedModifier == 20)
+    #expect(result.finalTarget == 72)
+    #expect(result.breakdown.contribution(of: .training)?.appliesToFinalTarget == true)
 }
 
 @Test func standardQuickMechanicsPresetsRemainExpected() {
-    #expect(QuickMechanicsModifierPreset.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
+    #expect(CheckModifierPreset.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
 }
 
-@Test func derivedValueCalculatorRemainsConsistentWithQuickMechanicsBuilder() {
+@Test func derivedValueCalculatorRemainsConsistentWithMechanicsCheckResolver() {
     let characteristics = CharacteristicSet(
         weaponSkill: 48,
         ballisticSkill: 37,
@@ -91,5 +90,9 @@ import Testing
 
     #expect(characteristicTarget == 28)
     #expect(skillTarget == 29)
-    #expect(QuickMechanicsCheckBuilder.skillCheck(for: skill, characteristics: characteristics, modifier: -10).checkName == "Unnamed Skill")
+    #expect(
+        MechanicsCheckResolver
+            .resolve(.skill(skill, characteristics: characteristics, modifier: -10))
+            .checkName == "Unnamed Skill"
+    )
 }

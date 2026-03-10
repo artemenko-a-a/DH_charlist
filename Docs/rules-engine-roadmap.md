@@ -6,6 +6,8 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
+As of 2026-03-10, Stage 1 is now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
+
 ## Goals
 
 The long-term goal is to build a rules engine that is:
@@ -73,6 +75,22 @@ The roadmap does **not** imply immediate implementation of:
 
 ### Notes
 This stage is about formalization, not adding new gameplay scope.
+
+### Current implemented foundation
+- `Sources/DHCharList/Rules/MechanicsChecks.swift`
+- explicit `CheckRequest`
+- explicit `CheckResult`
+- structured `RuleBreakdown`
+- structured `RuleContribution`
+- `MechanicsCheckResolver` for current characteristic- and skill-based target checks
+- existing quick mechanics UI and `DerivedValueCalculator` routed through this layer
+
+### Still intentionally out of scope after Stage 1
+- damage resolution
+- initiative/action-economy logic
+- psychic subsystem automation
+- combat automation beyond current accepted helpers
+- rules registries/DSL
 
 ---
 
@@ -241,5 +259,6 @@ The roadmap is succeeding if, over time:
 At the time of writing:
 
 - the project has mechanics helpers and combat-oriented helpers
+- the project now has a bounded `Rules` foundation for current check-target calculations with explicit request/result/breakdown modeling
 - the project does **not** yet have a full rules engine
 - this roadmap exists to make future rules work incremental, explainable, and safe

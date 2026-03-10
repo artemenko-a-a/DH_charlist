@@ -208,14 +208,14 @@ public enum DerivedValueCalculator {
         characteristics: CharacteristicSet,
         modifiers: Int = 0
     ) -> Int {
-        QuickMechanicsCheckBuilder
-            .characteristicCheck(for: characteristic, characteristics: characteristics, modifier: modifiers)
+        MechanicsCheckResolver
+            .resolve(.characteristic(characteristic, characteristics: characteristics, modifier: modifiers))
             .finalTarget
     }
 
     public static func skillTarget(for skill: Skill, characteristics: CharacteristicSet, modifiers: Int = 0) -> Int {
-        QuickMechanicsCheckBuilder
-            .skillCheck(for: skill, characteristics: characteristics, modifier: modifiers)
+        MechanicsCheckResolver
+            .resolve(.skill(skill, characteristics: characteristics, modifier: modifiers))
             .finalTarget
     }
 }

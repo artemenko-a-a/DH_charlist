@@ -150,3 +150,8 @@
    - **Reason:** The batch requires a practical printable/shareable output without changing accepted architecture or expanding into batch publishing, cloud sharing, or a new persistence subsystem.
    - **Type:** Fact.
    - **Impact:** Current character data can now be previewed in a readable document layout and exported through the native share/print path, while dossier logic remains explicit, testable, and scoped to one character at a time.
+
+27. **Decision:** Introduce a dedicated `Rules` layer for current mechanics checks and model it with explicit request/result/breakdown types instead of leaving the logic in `Application`/SwiftUI or jumping directly to a full rules engine.
+   - **Reason:** Batch 36 needs a real foundation for future rules work that is deterministic, UI-independent, and explainable, while keeping the accepted player-facing quick mechanics behavior unchanged.
+   - **Type:** Fact.
+   - **Impact:** Current characteristic- and skill-based quick checks now resolve through `MechanicsCheckResolver` and structured `CheckRequest`/`CheckResult`/`RuleBreakdown`/`RuleContribution` models in `Sources/DHCharList/Rules`, making future rules work incremental without expanding into combat automation, damage resolution, initiative, psychic systems, or a rules DSL.

@@ -1,21 +1,23 @@
-# Batch 35 State
+# Batch 36 State
 
-- status: validated for build/runtime sanity; focused manual acceptance still pending
-- scope: printable/shareable single-character dossier only; no persistence, navigation, or architecture redesign
-- dossier/export state:
-  - character detail now exposes a `Dossier` action
-  - dossier preview uses a structured document-style layout instead of mirroring the in-app dark chrome
-  - dossier composition is explicit and testable in `Application`
-  - iOS host runtime prepares a PDF and exposes the native share sheet for share / Save to Files / print destinations
+- status: validated for build/runtime sanity; no full rules-engine acceptance claimed
+- scope: rules domain foundation only; no persistence, navigation, or mechanics-scope expansion
+- rules/mechanics state:
+  - current check-target logic now lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
+  - explicit models now back the accepted helper flow: `CheckRequest`, `CheckResult`, `RuleBreakdown`, `RuleContribution`, and `CheckModifierPreset`
+  - `MechanicsCheckResolver` is the shared calculation entry point for current characteristic-based and skill-based target checks
+  - `QuickMechanicsHelperView` and `DerivedValueCalculator` now consume the shared rules layer instead of owning calculation logic directly
+  - the Batch 33 truthful coverage baseline was refreshed so required coverage now tracks the new `Rules` package area and file surface
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b35-dossier-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCharacterDossierPreviewPreparesPrintablePDF`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b36-quick-mechanics.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
+  - `./scripts/run_xcode_coverage.sh`
+  - `./scripts/refresh_coverage_baseline.sh`
+  - `./scripts/check_coverage_policy.sh`
 - runtime sanity note:
-  - focused host UI validation confirmed the dossier entry point opens, the preview sheet renders, PDF-ready status appears, and the share action is available
-  - this session did not include a human review of the real share destinations (`Save to Files`, `Print`) or final document-layout aesthetics
+  - focused host UI validation confirmed characteristic quick check, skill quick check, preset/custom modifier application, and the `Session Mode` quick-check entry path still behave as expected
 - truthful limitations:
-  - share/print path is scoped to a single character
-  - no publishing subsystem, batch export, cloud sharing, or editable PDF mode was added
-  - final manual acceptance should still verify document readability and native share-sheet destinations on a normal simulator/device session
+  - this is not a full rules engine
+  - damage resolution, initiative/action economy, psychic subsystem automation, broader combat automation, and rules registries/DSL remain intentionally out of scope

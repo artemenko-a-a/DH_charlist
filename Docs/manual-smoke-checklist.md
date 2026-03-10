@@ -165,3 +165,16 @@ Latest local validation status (2026-03-09):
     - tap `Share PDF` and verify the native share sheet opens
     - verify the share destinations include practical export options such as `Save to Files` and `Print` when available on the device/simulator context
     - close the dossier and verify normal character detail flow is unchanged
+29. Batch 36 rules domain foundation:
+    - repeat the Batch 29 quick-mechanics paths from `Characteristics & Resources`, `Skills`, and `Session Mode`
+    - verify the helper still shows an explicit breakdown rather than only a final value:
+      - check name
+      - source characteristic or skill
+      - base value
+      - derived bonus
+      - training contribution when relevant
+      - applied modifier
+      - final target
+    - verify applying a preset modifier and a custom signed modifier still updates the final target without leaving the helper
+    - verify the session entry path still opens the same helper surface and does not diverge from the characteristic/skill flows
+    - this step is a regression pass for the new `Rules` foundation, not a claim that the app now has a full rules engine

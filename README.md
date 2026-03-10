@@ -89,6 +89,11 @@ Current behavior:
 
 Quick mechanics is a transparent in-session target builder. It uses existing character data plus explicit modifiers only; it does not roll dice and does not persist results automatically.
 
+Developer note:
+- current mechanics-check calculation logic lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
+- the helper now consumes explicit `CheckRequest`, `CheckResult`, `RuleBreakdown`, and `RuleContribution` models
+- this is a foundation for future rules work, not a full rules engine
+
 Where to open it:
 - `Characteristics & Resources` via the scope button on a characteristic row
 - `Skills` via the quick-check button on a skill row
@@ -233,7 +238,7 @@ Current enforced policy (staged, non-vanity):
 - `package_surface` must be present; host-only/test-only artifacts are rejected
 - all baseline package files must still appear in current metrics
 - overall package non-regression is enforced with a `0.50pp` budget from the measured baseline
-- per-area non-regression is enforced for the top-level package areas (`App`, `Application`, `Domain`, `Infrastructure`, `Presentation`) with a `1.00pp` budget
+- per-area non-regression is enforced for the top-level package areas tracked by the current baseline (currently `App`, `Application`, `Domain`, `Infrastructure`, `Presentation`, `Rules`) with a `1.00pp` budget
 - host `xccov` metrics are still captured, but they are diagnostics only and are not enough on their own to produce a green gate
 
 Coverage gate failure conditions:
@@ -271,6 +276,7 @@ Current architectural state
     •    Composition/bootstrap chooses the persistence implementation.
     •    JSON-backed path is the default validated runtime-safe path.
     •    SwiftData path is implemented as a validated alternative.
+    •    Current mechanics-check calculations live in a dedicated `Rules` layer and are consumed through explicit request/result/breakdown models.
 
 Notes
 
@@ -278,6 +284,7 @@ This repository was delivered in controlled batches with validation and recovery
 Historical delivery details and batch-by-batch status are tracked in:
     •    Docs/progress-log.md
     •    Docs/decision-log.md
+    •    Docs/rules-engine-roadmap.md
     •    Docs/manual-smoke-checklist.md
 
 ## Batch 18 release-readiness foundation

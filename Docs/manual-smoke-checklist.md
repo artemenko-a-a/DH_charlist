@@ -178,3 +178,11 @@ Latest local validation status (2026-03-09):
     - verify applying a preset modifier and a custom signed modifier still updates the final target without leaving the helper
     - verify the session entry path still opens the same helper surface and does not diverge from the characteristic/skill flows
     - this step is a regression pass for the new `Rules` foundation, not a claim that the app now has a full rules engine
+30. Batch 37 modifier and condition normalization:
+    - from `Characteristics & Resources`, open a characteristic quick check and apply a preset modifier; verify the final target still updates and the breakdown remains explicit
+    - from `Skills`, open a skill quick check and apply a custom signed modifier; verify the final target updates without changing the accepted helper flow
+    - from `Session Mode`, add at least one temporary modifier and one combat condition, then open `Open Builder`
+    - verify the helper now shows session temporary modifiers as reusable actions and active combat conditions as explicit context
+    - verify session temporary modifiers can still be applied from the helper without changing the accepted player-facing target behavior
+    - verify combat conditions are visible/readable context only unless a numeric modifier is explicitly applied elsewhere
+    - this step validates normalized mechanics inputs, not a full combat status engine or automatic condition rules

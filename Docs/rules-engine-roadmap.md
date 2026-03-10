@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-10, Stage 1 is now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-10, Stages 1 and 2 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -97,7 +97,42 @@ This stage is about formalization, not adding new gameplay scope.
 ## Stage 2 — Modifier and condition normalization
 **Goal:** stop treating modifiers as ad hoc numbers/labels.
 
-### Intended outcomes
+### Implemented foundation
+- structured `CheckModifier` model with:
+  - id
+  - kind
+  - scope
+  - signed value
+  - label/source
+  - optional note
+- bounded modifier kinds for current accepted flows:
+  - preset
+  - manual
+  - session temporary
+  - condition-derived
+  - equipment-derived
+- bounded modifier scopes for current accepted flows:
+  - all checks
+  - characteristic checks
+  - skill checks
+  - specific characteristic
+  - specific skill
+  - combat/session only
+- structured `RuleCondition` model with bounded current kinds:
+  - pinned
+  - cover
+  - suppression
+  - injury
+  - custom
+- `SessionState` normalization adapters that keep accepted persistence shape unchanged while exposing structured session temporary modifiers and combat conditions to the rules layer
+- `MechanicsCheckResolver` now applies normalized modifiers by scope/origin and keeps active conditions visible in `RuleBreakdown`
+
+### Still intentionally bounded
+- combat conditions are explicit rules-layer context, not a full status engine
+- conditions are not auto-translated into numeric effects unless they are explicitly modeled as modifiers
+- accepted persistence still stores raw `temporaryModifiers: [String: Int]` and `combatConditions: [String]`; normalization happens in rules adapters instead of through a storage migration
+
+### Originally intended outcomes
 - structured modifier model
 - modifier kind/scope
 - normalized condition model
@@ -247,7 +282,7 @@ The roadmap is succeeding if, over time:
 
 - calculations move out of UI and into explicit rules models
 - breakdowns become standard output
-- modifier/condition handling becomes normalized
+- modifier/condition handling becomes normalized through explicit rules-layer models and session adapters
 - combat-related helpers become more structured without exploding scope
 - CI/tests can validate rules behavior deterministically
 - future rules work becomes easier rather than more chaotic

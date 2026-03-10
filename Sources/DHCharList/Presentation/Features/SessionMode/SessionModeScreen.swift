@@ -95,8 +95,10 @@ public struct SessionModeScreen: View {
             QuickMechanicsHelperView(
                 characteristics: characterSnapshot?.characteristics ?? .empty,
                 skills: characterSnapshot?.skills ?? [],
-                sessionModifiers: session.temporaryModifiers,
-                initialSelection: selection
+                sessionModifiers: session.normalizedTemporaryModifiers,
+                sessionConditions: session.normalizedCombatConditions,
+                initialSelection: selection,
+                origin: .sessionCombat
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
@@ -338,22 +340,27 @@ public struct SessionModeScreen: View {
                     .cogitatorSupportingText()
                     .cogitatorPanelRow()
             } else {
-                ForEach(Array(session.combatConditions.enumerated()), id: \.offset) { index, condition in
+                ForEach(Array(normalizedCombatConditions.enumerated()), id: \.offset) { index, condition in
                     Button {
-                        combatConditionDraft = CombatConditionDraft(index: index, value: condition)
+                        combatConditionDraft = CombatConditionDraft(index: index, value: condition.label)
                     } label: {
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: "exclamationmark.bubble.fill")
                                 .foregroundStyle(CogitatorPalette.warning)
                                 .frame(width: 14)
-                            Text(condition)
-                                .foregroundStyle(CogitatorPalette.textPrimary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(condition.label)
+                                    .foregroundStyle(CogitatorPalette.textPrimary)
+                                Text(condition.kind.label)
+                                    .font(.caption)
+                                    .foregroundStyle(CogitatorPalette.textSecondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                     .buttonStyle(.plain)
                     .cogitatorPanelRow()
-                    .accessibilityLabel("Combat Condition: \(condition)")
+                    .accessibilityLabel("Combat Condition: \(condition.label)")
                     .accessibilityHint("Double tap to edit combat condition.")
                 }
                 .onDelete(perform: deleteCombatConditions)
@@ -427,26 +434,35 @@ public struct SessionModeScreen: View {
                     .cogitatorSupportingText()
                     .cogitatorPanelRow()
             } else {
-                ForEach(sortedTemporaryModifiers, id: \.0) { key, value in
+                ForEach(sortedTemporaryModifiers) { modifier in
                     Button {
-                        temporaryModifierDraft = TemporaryModifierDraft(originalKey: key, key: key, valueText: String(value))
+                        temporaryModifierDraft = TemporaryModifierDraft(
+                            originalKey: modifier.label,
+                            key: modifier.label,
+                            valueText: String(modifier.value)
+                        )
                     } label: {
                         HStack {
-                            Text(key)
-                                .foregroundStyle(CogitatorPalette.textPrimary)
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(modifier.label)
+                                    .foregroundStyle(CogitatorPalette.textPrimary)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(modifier.source)
+                                    .font(.caption)
+                                    .foregroundStyle(CogitatorPalette.textSecondary)
+                            }
                             Spacer()
                             CogitatorStatusChip(
-                                value >= 0 ? "+\(value)" : "\(value)",
-                                level: modifierStatusLevel(value)
+                                modifier.value.signedValueLabel,
+                                level: modifierStatusLevel(modifier.value)
                             )
                         }
                     }
                     .buttonStyle(.plain)
                     .cogitatorPanelRow()
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Temporary Modifier: \(key), \(value >= 0 ? "+" : "")\(value)")
+                    .accessibilityLabel("Temporary Modifier: \(modifier.label), \(modifier.value.signedValueLabel)")
                     .accessibilityHint("Double tap to edit temporary modifier.")
                 }
                 .onDelete(perform: deleteTemporaryModifiers)
@@ -467,10 +483,12 @@ public struct SessionModeScreen: View {
         }
     }
 
-    private var sortedTemporaryModifiers: [(String, Int)] {
-        session.temporaryModifiers
-            .map { ($0.key, $0.value) }
-            .sorted { $0.0.localizedCaseInsensitiveCompare($1.0) == .orderedAscending }
+    private var sortedTemporaryModifiers: [CheckModifier] {
+        session.normalizedTemporaryModifiers
+    }
+
+    private var normalizedCombatConditions: [RuleCondition] {
+        session.normalizedCombatConditions
     }
 
     private var availableWeapons: [Weapon] {
@@ -490,7 +508,7 @@ public struct SessionModeScreen: View {
         let builderSummary = characterSnapshot?.skills.isEmpty == false
             ? "\(characterSnapshot?.skills.count ?? 0) skills are available in the full builder."
             : "Add skills to include skill-based checks in the full builder."
-        return "\(builderSummary) \(session.pinnedChecks.count) pinned checks and \(session.temporaryModifiers.count) temporary modifiers remain usable below."
+        return "\(builderSummary) \(session.pinnedChecks.count) pinned checks and \(sortedTemporaryModifiers.count) temporary modifiers remain usable below."
     }
 
     @ViewBuilder
@@ -614,7 +632,7 @@ public struct SessionModeScreen: View {
     }
 
     private func deleteTemporaryModifiers(at offsets: IndexSet) {
-        let keys = sortedTemporaryModifiers.map { $0.0 }
+        let keys = sortedTemporaryModifiers.map(\.label)
         for offset in offsets where keys.indices.contains(offset) {
             session.temporaryModifiers.removeValue(forKey: keys[offset])
         }

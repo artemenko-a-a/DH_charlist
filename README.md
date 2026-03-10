@@ -91,7 +91,7 @@ Quick mechanics is a transparent in-session target builder. It uses existing cha
 
 Developer note:
 - current mechanics-check calculation logic lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
-- the helper now consumes explicit `CheckRequest`, `CheckResult`, `RuleBreakdown`, and `RuleContribution` models
+- the helper now consumes explicit `CheckRequest`, `CheckResult`, `RuleBreakdown`, `RuleContribution`, `CheckModifier`, and `RuleCondition` models
 - this is a foundation for future rules work, not a full rules engine
 
 Where to open it:
@@ -111,7 +111,9 @@ What it shows:
 Current helper behavior:
 - standard presets: `+30`, `+20`, `+10`, `+0`, `-10`, `-20`, `-30`
 - custom signed modifier input is supported
+- modifiers now resolve through normalized structured inputs with bounded kind/scope instead of ad hoc numbers/labels
 - current Session Mode temporary modifiers can be reused directly in the helper when present
+- current Session Mode combat conditions now appear as explicit helper context, but they are not auto-translated into numeric rule effects yet
 - on compact sheet sizes, scroll within the helper to reach the full breakdown and final target rows
 
 ## Import behavior (Batch 31)
@@ -276,7 +278,7 @@ Current architectural state
     •    Composition/bootstrap chooses the persistence implementation.
     •    JSON-backed path is the default validated runtime-safe path.
     •    SwiftData path is implemented as a validated alternative.
-    •    Current mechanics-check calculations live in a dedicated `Rules` layer and are consumed through explicit request/result/breakdown models.
+    •    Current mechanics-check calculations live in a dedicated `Rules` layer and are consumed through explicit request/result/breakdown plus normalized modifier/condition models.
 
 Notes
 

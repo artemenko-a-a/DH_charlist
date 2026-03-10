@@ -1,23 +1,22 @@
-# Batch 36 State
+# Batch 37 State
 
-- status: validated for build/runtime sanity; no full rules-engine acceptance claimed
-- scope: rules domain foundation only; no persistence, navigation, or mechanics-scope expansion
+- status: validated for build/runtime sanity; no combat-engine or full rules-engine acceptance claimed
+- scope: modifier and condition normalization only; accepted runtime, persistence, and navigation behavior remain unchanged
 - rules/mechanics state:
-  - current check-target logic now lives in `Sources/DHCharList/Rules/MechanicsChecks.swift`
-  - explicit models now back the accepted helper flow: `CheckRequest`, `CheckResult`, `RuleBreakdown`, `RuleContribution`, and `CheckModifierPreset`
-  - `MechanicsCheckResolver` is the shared calculation entry point for current characteristic-based and skill-based target checks
-  - `QuickMechanicsHelperView` and `DerivedValueCalculator` now consume the shared rules layer instead of owning calculation logic directly
-  - the Batch 33 truthful coverage baseline was refreshed so required coverage now tracks the new `Rules` package area and file surface
+  - current mechanics checks still live in `Sources/DHCharList/Rules/MechanicsChecks.swift`
+  - the rules layer now includes explicit normalized mechanics inputs: `CheckModifier`, `CheckModifierKind`, `CheckModifierScope`, `RuleCondition`, `RuleConditionKind`, and `CheckOrigin`
+  - `MechanicsCheckResolver` now applies multiple structured modifiers by scope/origin and keeps active conditions visible in `RuleBreakdown`
+  - accepted `SessionState` persistence shape is unchanged, but rules-layer adapters now normalize `temporaryModifiers` and `combatConditions` into reusable session modifiers and explicit condition context
+  - `QuickMechanicsHelperView` and `SessionModeScreen` now consume the normalized rules-layer models instead of working with ad hoc modifier labels/numbers directly
 - validated commands:
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
   - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b36-quick-mechanics.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
-  - `./scripts/run_xcode_coverage.sh`
-  - `./scripts/refresh_coverage_baseline.sh`
-  - `./scripts/check_coverage_policy.sh`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b37-combat-rerun-3.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
 - runtime sanity note:
-  - focused host UI validation confirmed characteristic quick check, skill quick check, preset/custom modifier application, and the `Session Mode` quick-check entry path still behave as expected
+  - focused host UI validation confirmed characteristic quick check with preset modifier, skill quick check with custom modifier, and session/combat flow with surfaced temporary modifier plus active condition context
 - truthful limitations:
-  - this is not a full rules engine
+  - this is not a full combat status engine or full rules engine
+  - conditions are explicit context only unless deliberately modeled as numeric modifiers
   - damage resolution, initiative/action economy, psychic subsystem automation, broader combat automation, and rules registries/DSL remain intentionally out of scope

@@ -320,6 +320,25 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         modifierValueField.clearAndEnterText("-20")
         app.buttons["Save"].tap()
         XCTAssertTrue(app.staticTexts["Smoke"].waitForExistence(timeout: 5))
+
+        for _ in 0..<3 {
+            app.swipeDown()
+        }
+
+        let reopenQuickCheck = app.buttons["quick-mechanics.session"]
+        XCTAssertTrue(reopenQuickCheck.waitForExistence(timeout: 5))
+        reopenQuickCheck.tap()
+        XCTAssertTrue(app.navigationBars["Quick Check"].waitForExistence(timeout: 5))
+
+        let smokeSessionModifier = app.buttons["quick-check.session-modifier.Smoke"]
+        reveal(smokeSessionModifier, maxSwipes: 4)
+        XCTAssertTrue(smokeSessionModifier.waitForExistence(timeout: 5))
+
+        let activeCondition = app.otherElements["quick-check.condition.Pinned Down"]
+        reveal(activeCondition, maxSwipes: 4)
+        XCTAssertTrue(activeCondition.waitForExistence(timeout: 5))
+
+        app.buttons["Done"].tap()
     }
 
     private func assertQuickCheckFinalTarget(_ expectedValue: String) {

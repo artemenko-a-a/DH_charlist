@@ -64,12 +64,14 @@ private enum QuickMechanicsCategory: String, CaseIterable, Identifiable {
 struct QuickMechanicsHelperView: View {
     private let characteristics: CharacteristicSet
     private let skills: [Skill]
-    private let sessionModifiers: [String: Int]
+    private let sessionModifiers: [CheckModifier]
+    private let sessionConditions: [RuleCondition]
+    private let origin: CheckOrigin
 
     @State private var selectedCategory: QuickMechanicsCategory
     @State private var selectedCharacteristic: SkillCharacteristic
     @State private var selectedSkillID: UUID
-    @State private var appliedModifier: Int
+    @State private var appliedModifier: CheckModifier
     @State private var customModifierText: String
 
     @Environment(\.dismiss) private var dismiss
@@ -77,18 +79,22 @@ struct QuickMechanicsHelperView: View {
     init(
         characteristics: CharacteristicSet,
         skills: [Skill],
-        sessionModifiers: [String: Int] = [:],
-        initialSelection: QuickMechanicsSelection? = nil
+        sessionModifiers: [CheckModifier] = [],
+        sessionConditions: [RuleCondition] = [],
+        initialSelection: QuickMechanicsSelection? = nil,
+        origin: CheckOrigin = .standard
     ) {
         self.characteristics = characteristics
         self.skills = skills
         self.sessionModifiers = sessionModifiers
+        self.sessionConditions = sessionConditions
+        self.origin = origin
 
         let resolvedSelection = QuickMechanicsSelection.resolvedInitialSelection(initialSelection, skills: skills)
         _selectedCategory = State(initialValue: resolvedSelection.category)
         _selectedCharacteristic = State(initialValue: resolvedSelection.characteristic ?? .weaponSkill)
         _selectedSkillID = State(initialValue: resolvedSelection.skillID ?? skills.first?.id ?? UUID())
-        _appliedModifier = State(initialValue: 0)
+        _appliedModifier = State(initialValue: CheckModifier.preset(value: 0))
         _customModifierText = State(initialValue: "0")
     }
 
@@ -100,6 +106,10 @@ struct QuickMechanicsHelperView: View {
 
                 if !sortedSessionModifiers.isEmpty {
                     sessionModifiersSection
+                }
+
+                if !sessionConditions.isEmpty {
+                    activeConditionsSection
                 }
 
                 breakdownSection
@@ -171,15 +181,15 @@ struct QuickMechanicsHelperView: View {
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
                     ForEach(CheckModifierPreset.standard) { preset in
-                        if appliedModifier == preset.value {
+                        if appliedModifier.kind == .preset && appliedModifier.value == preset.value {
                             Button(preset.value.signedValueLabel) {
-                                applyModifier(preset.value)
+                                applyModifier(preset.normalizedModifier)
                             }
                             .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("quick-check.modifier.\(preset.value.accessibilitySignedToken)")
                         } else {
                             Button(preset.value.signedValueLabel) {
-                                applyModifier(preset.value)
+                                applyModifier(preset.normalizedModifier)
                             }
                             .buttonStyle(.bordered)
                             .accessibilityIdentifier("quick-check.modifier.\(preset.value.accessibilitySignedToken)")
@@ -214,28 +224,60 @@ struct QuickMechanicsHelperView: View {
     @ViewBuilder
     private var sessionModifiersSection: some View {
         Section {
-            ForEach(sortedSessionModifiers, id: \.0) { label, value in
+            ForEach(sortedSessionModifiers) { modifier in
                 Button {
-                    applyModifier(value)
+                    applyModifier(modifier)
                 } label: {
                     HStack {
-                        Text(label)
+                        Text(modifier.label)
                             .foregroundStyle(CogitatorPalette.textPrimary)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer()
-                        CogitatorStatusChip(value.signedValueLabel, level: modifierStatusLevel(value))
+                        CogitatorStatusChip(modifier.value.signedValueLabel, level: modifierStatusLevel(modifier.value))
                     }
                 }
                 .buttonStyle(.plain)
                 .cogitatorPanelRow()
-                .accessibilityLabel("Apply Session Modifier \(label)")
-                .accessibilityValue(value.signedValueLabel)
+                .accessibilityLabel("Apply Session Modifier \(modifier.label)")
+                .accessibilityValue(modifier.value.signedValueLabel)
+                .accessibilityIdentifier("quick-check.session-modifier.\(modifier.label)")
             }
         } header: {
             CogitatorSectionHeader("Session Conditions", subtitle: "Reuse Active Temporary Modifiers")
         } footer: {
             Text("These values come from the current character's Session Mode temporary modifiers.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private var activeConditionsSection: some View {
+        Section {
+            ForEach(sessionConditions) { condition in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "exclamationmark.bubble.fill")
+                        .foregroundStyle(CogitatorPalette.warning)
+                        .frame(width: 14)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(condition.label)
+                            .foregroundStyle(CogitatorPalette.textPrimary)
+                        Text(condition.kind.label)
+                            .font(.caption)
+                            .foregroundStyle(CogitatorPalette.textSecondary)
+                    }
+                    Spacer()
+                }
+                .cogitatorPanelRow()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Active Condition: \(condition.label)")
+                .accessibilityValue(condition.kind.label)
+                .accessibilityIdentifier("quick-check.condition.\(condition.label)")
+            }
+        } header: {
+            CogitatorSectionHeader("Active Conditions", subtitle: "Session Combat Context")
+        } footer: {
+            Text("Conditions stay explicit context only here unless they are turned into a real modifier elsewhere.")
                 .cogitatorSupportingText()
         }
     }
@@ -311,7 +353,9 @@ struct QuickMechanicsHelperView: View {
                 .characteristic(
                     selectedCharacteristic,
                     characteristics: characteristics,
-                    modifier: appliedModifier
+                    origin: origin,
+                    modifiers: [appliedModifier],
+                    conditions: sessionConditions
                 )
             )
         case .skill:
@@ -320,30 +364,32 @@ struct QuickMechanicsHelperView: View {
                 .skill(
                     selectedSkill,
                     characteristics: characteristics,
-                    modifier: appliedModifier
+                    origin: origin,
+                    modifiers: [appliedModifier],
+                    conditions: sessionConditions
                 )
             )
         }
     }
 
-    private var sortedSessionModifiers: [(String, Int)] {
-        sessionModifiers
-            .map { ($0.key, $0.value) }
-            .sorted { $0.0.localizedCaseInsensitiveCompare($1.0) == .orderedAscending }
+    private var sortedSessionModifiers: [CheckModifier] {
+        sessionModifiers.sorted {
+            $0.label.localizedCaseInsensitiveCompare($1.label) == .orderedAscending
+        }
     }
 
     private var parsedCustomModifier: Int? {
         Int(customModifierText.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 
-    private func applyModifier(_ value: Int) {
-        appliedModifier = value
-        customModifierText = String(value)
+    private func applyModifier(_ modifier: CheckModifier) {
+        appliedModifier = modifier
+        customModifierText = String(modifier.value)
     }
 
     private func applyCustomModifier() {
         guard let parsedCustomModifier else { return }
-        appliedModifier = parsedCustomModifier
+        appliedModifier = .manual(value: parsedCustomModifier)
     }
 
     private func modifierStatusLevel(_ value: Int) -> CogitatorStatusLevel {

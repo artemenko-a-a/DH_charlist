@@ -155,3 +155,8 @@
    - **Reason:** Batch 36 needs a real foundation for future rules work that is deterministic, UI-independent, and explainable, while keeping the accepted player-facing quick mechanics behavior unchanged.
    - **Type:** Fact.
    - **Impact:** Current characteristic- and skill-based quick checks now resolve through `MechanicsCheckResolver` and structured `CheckRequest`/`CheckResult`/`RuleBreakdown`/`RuleContribution` models in `Sources/DHCharList/Rules`, making future rules work incremental without expanding into combat automation, damage resolution, initiative, psychic systems, or a rules DSL.
+
+28. **Decision:** Normalize modifiers and conditions in the `Rules` layer while keeping the accepted `SessionState` persistence shape unchanged.
+   - **Reason:** Batch 37 needs structured, explainable mechanics inputs for quick checks and session/combat helper flows, but migrating local persistence or turning combat notes into a full status engine would exceed the accepted batch scope.
+   - **Type:** Fact.
+   - **Impact:** `MechanicsCheckResolver` now consumes explicit `CheckModifier` and `RuleCondition` models with bounded kind/scope vocabulary, while `SessionState.temporaryModifiers` and `SessionState.combatConditions` remain stored in their existing local-first raw form and are normalized through rules-layer adapters at usage time. Conditions stay visible as explicit context unless they are deliberately modeled as numeric modifiers elsewhere.

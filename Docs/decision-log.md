@@ -185,3 +185,8 @@
    - **Reason:** Batch 42 needs stronger deterministic regression protection now, but the accepted rules surface is still bounded enough that explicit scenario definitions in Swift remain more reviewable, easier to keep deterministic, and less operationally risky than adding a separate fixture/snapshot system.
    - **Type:** Fact.
    - **Impact:** `RulesGoldenScenarioTests.swift` now locks accepted explainable check, combat-context, and bounded damage outputs through explicit scenario data plus structured expectations for breakdown ordering and numeric results. Future rules work has a stronger regression net without adding a new test framework or implying broader saved-state compatibility guarantees than the repository actually supports.
+
+34. **Decision:** Implement Batch 43 weapon autocomplete as a bounded local compendium with detached copy-on-add instead of embedding rulebook data or linking character weapons back to a mutable source definition.
+   - **Reason:** The current need is faster weapon entry during play, but the batch explicitly forbids embedding copyrighted rulebook datasets, building a full compendium platform, or changing accepted persistence/runtime behavior more than necessary.
+   - **Type:** Fact.
+   - **Impact:** `WeaponCompendiumCatalog` now provides a safe local demo catalog and autocomplete path in the existing equipment editor. Selecting a compendium entry prefills a new weapon draft, but saving still creates a normal character-owned `Weapon` value that remains fully editable and detached from the source definition. User-supplied compendium import stays intentionally deferred.

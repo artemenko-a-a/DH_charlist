@@ -1394,9 +1394,7 @@ import SwiftData
     await gate.allow("Third")
 
     await coordinator.waitForPendingSaves()
-
-    let names = Set(await recorder.saves().map { $0.1.name })
-    #expect(names == Set(["First", "Third"]))
+    try await waitForRecordedNames(recorder, expected: Set(["First", "Third"]))
 }
 
 @Test func profileAutosaveCoordinatorKeepsTrackingIsolatedAcrossCharacters() async throws {
@@ -1664,6 +1662,24 @@ private actor CompletionProbe {
     func isComplete() -> Bool {
         completed
     }
+}
+
+private func waitForRecordedNames(
+    _ recorder: SaveRecorder,
+    expected: Set<String>,
+    attempts: Int = 100,
+    sleepNanoseconds: UInt64 = 5_000_000
+) async throws {
+    for _ in 0..<attempts {
+        let names = Set(await recorder.saves().map { $0.1.name })
+        if names == expected {
+            return
+        }
+        try await Task.sleep(nanoseconds: sleepNanoseconds)
+    }
+
+    let names = Set(await recorder.saves().map { $0.1.name })
+    #expect(names == expected)
 }
 
 private func expectNotFound(_ operation: () async throws -> Void) async {

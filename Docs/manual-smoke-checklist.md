@@ -28,7 +28,12 @@ This checklist tracks the currently accepted runtime-polished implementation thr
    - edit freeform notes
    - verify values persist after back navigation and re-open
 10. Open `Equipment`:
-   - add/edit/delete one weapon
+   - use `Add Weapon` and search the local compendium by name
+   - pick a matching weapon and verify key fields are prefilled in the editor
+   - save it and verify the weapon appears in the character equipment list
+   - re-open that weapon, manually edit at least one field, save, and verify the edited values persist
+   - open `Add Weapon` again, pick the same compendium entry, and verify the source definition still prefills its original values rather than the edited character copy
+   - add/edit/delete one fully manual weapon entry
    - add/edit/delete one armour entry
    - edit movement values
    - add/edit/delete one inventory item
@@ -111,6 +116,7 @@ Latest local validation status (2026-03-09):
 - SwiftPM regression/build validation passes (`swift test`, `swift build`).
 - Focused simulator runtime sanity now passes for quick mechanics via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`.
 - Focused simulator runtime sanity now also passes for the combat workspace via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`.
+- Focused simulator runtime sanity now also passes for the weapon compendium add/edit/detach flow via `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testWeaponCompendiumAutocompleteAddsDetachedEditableCopy`.
 - Canonical smoke automation also passes via `./scripts/run_ui_smoke.sh`.
 - Continue to record manual runtime execution per run (pass/fail + notes), especially for visual/ergonomic review.
 
@@ -186,3 +192,11 @@ Latest local validation status (2026-03-09):
     - verify session temporary modifiers can still be applied from the helper without changing the accepted player-facing target behavior
     - verify combat conditions are visible/readable context only unless a numeric modifier is explicitly applied elsewhere
     - this step validates normalized mechanics inputs, not a full combat status engine or automatic condition rules
+31. Batch 43 weapon compendium autocomplete:
+    - open `Equipment` for an existing character and tap `Add Weapon`
+    - in the `Weapon Compendium` section, search a known local entry such as `las`
+    - verify autocomplete rows show readable key fields before selection
+    - select a match and verify the editor prefills weapon fields
+    - edit at least one prefilled value before saving and verify the saved row reflects the manual override
+    - re-open `Add Weapon`, select the same compendium entry again, and verify the original source values are still offered
+    - verify the existing saved weapon remains unchanged, proving the character-owned instance is detached from the source definition

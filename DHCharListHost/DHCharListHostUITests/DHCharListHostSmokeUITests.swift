@@ -341,6 +341,67 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         app.buttons["Done"].tap()
     }
 
+    func testWeaponCompendiumAutocompleteAddsDetachedEditableCopy() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addWeaponButton = app.buttons["Add Weapon"]
+        XCTAssertTrue(addWeaponButton.waitForExistence(timeout: 5))
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let compendiumSearchField = textInput("weapon-compendium.search")
+        XCTAssertTrue(compendiumSearchField.waitForExistence(timeout: 5))
+        compendiumSearchField.tap()
+        compendiumSearchField.typeText("las")
+
+        let laspistolSuggestion = app.buttons["weapon-compendium.pick.local-demo.laspistol"]
+        XCTAssertTrue(laspistolSuggestion.waitForExistence(timeout: 5))
+        laspistolSuggestion.tap()
+
+        let weaponNameField = app.textFields["Weapon Name"]
+        XCTAssertTrue(weaponNameField.waitForExistence(timeout: 5))
+        XCTAssertEqual(weaponNameField.value as? String, "Laspistol")
+        weaponNameField.clearAndEnterText("Custom Laspistol")
+
+        let penetrationField = app.textFields["Weapon Penetration"]
+        XCTAssertTrue(penetrationField.waitForExistence(timeout: 5))
+        penetrationField.clearAndEnterText("1")
+
+        app.buttons["Save"].tap()
+        XCTAssertTrue(labeledElement(containing: "Custom Laspistol").waitForExistence(timeout: 5))
+
+        labeledElement(containing: "Custom Laspistol").tap()
+        XCTAssertTrue(app.navigationBars["Edit Weapon"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["Weapon Name"].value as? String, "Custom Laspistol")
+        XCTAssertEqual(app.textFields["Weapon Penetration"].value as? String, "1")
+        app.buttons["Cancel"].tap()
+
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let secondCompendiumSearchField = textInput("weapon-compendium.search")
+        XCTAssertTrue(secondCompendiumSearchField.waitForExistence(timeout: 5))
+        secondCompendiumSearchField.tap()
+        secondCompendiumSearchField.typeText("las")
+
+        let secondLaspistolSuggestion = app.buttons["weapon-compendium.pick.local-demo.laspistol"]
+        XCTAssertTrue(secondLaspistolSuggestion.waitForExistence(timeout: 5))
+        secondLaspistolSuggestion.tap()
+
+        XCTAssertEqual(app.textFields["Weapon Name"].value as? String, "Laspistol")
+        XCTAssertEqual(app.textFields["Weapon Penetration"].value as? String, "0")
+        app.buttons["Cancel"].tap()
+
+        XCTAssertTrue(labeledElement(containing: "Custom Laspistol").waitForExistence(timeout: 5))
+    }
+
     private func assertQuickCheckFinalTarget(_ expectedValue: String) {
         let finalTarget = app.staticTexts["quick-check.final-target"]
         reveal(finalTarget, maxSwipes: 4)

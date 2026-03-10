@@ -1,25 +1,27 @@
-# Batch 42 State
+# Batch 43 State
 
 - status: validated for build, coverage, and focused host runtime sanity
-- scope: deterministic golden/scenario regression protection for the accepted rules foundation only; accepted runtime, persistence, and navigation behavior remain unchanged
-- rules/mechanics state:
-  - `Tests/DHCharListTests/RulesGoldenScenarioTests.swift` now defines a dedicated table-driven golden/scenario suite for the accepted rules layer
-  - the suite locks accepted explainable check outputs through explicit scenarios covering characteristic checks, skill checks, preset modifiers, custom modifiers, session-derived modifiers, and condition-derived modifiers
-  - combat-context-backed scenarios now verify structured active-weapon mapping, pinned checks, temporary modifiers, combat conditions, and combat check preparation without expanding into attack resolution
-  - bounded damage scenarios now verify deterministic raw damage, penetration, armour mitigation, toughness mitigation, wound application, zero-floor behavior, overflow tracking, and structured breakdown ordering
-  - accepted quick mechanics and combat workspace behavior remain unchanged; Batch 42 adds regression nets, not new mechanics features
+- scope: local weapon compendium autocomplete plus detached manual weapon overrides only; accepted runtime, persistence, and combat behavior remain unchanged
+- equipment/compendium state:
+  - `Sources/DHCharList/Application/WeaponCompendium.swift` now defines a bounded safe local demo catalog, structured weapon definitions, deterministic autocomplete search, and explicit source-to-instance copying into detached `Weapon` values
+  - `Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift` now surfaces compendium search and preview inside the existing add-weapon editor path without replacing the accepted manual editing flow
+  - selecting a compendium entry pre-fills the weapon draft, but saving still creates a normal character-owned weapon entry that remains fully editable and no longer references the source definition
+  - the feature intentionally uses bounded demo data only; no OCR, no rulebook parsing, no embedded copyrighted full-rulebook dataset, and no cloud compendium platform were introduced
+  - `Makefile` now provides repo-local reproducibility entry points for `make fmt`, `make lint`, `make typecheck`, `make test`, and `make ci`; `fmt` and `lint` are documented no-op fallbacks because this repo does not define formatter/linter tooling yet
 - validated commands:
+  - `make fmt`
+  - `make lint`
+  - `make typecheck`
+  - `make test`
+  - `make ci`
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `./scripts/run_xcode_coverage.sh`
-  - `./scripts/check_coverage_policy.sh`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b42-rules-golden-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b43-weapon-compendium-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testWeaponCompendiumAutocompleteAddsDetachedEditableCopy -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
 - runtime sanity note:
-  - actual host runtime review was performed through the live coverage run and the focused rerun, including `testCombatWorkspaceActivePlayFlow` and `testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows`
-- coverage note:
-  - truthful package-surface gate passed at `18.45%` current package coverage against the `14.18%` baseline, with the `Rules` area at `95.60%`
+  - actual host runtime review was performed for the Batch 43 path, including compendium search, autocomplete selection, add-to-character, manual edit override, and confirmation that later adds still start from the original catalog definition
 - truthful limitations:
-  - this is not a full rules-engine compatibility harness or snapshot framework
-  - the suite currently locks accepted check, combat-context, and bounded damage behavior only
-  - full attack resolution, critical tables, hit locations, initiative/action economy, psychic automation, and broader combat simulation remain intentionally out of scope
+  - only a bounded safe local demo catalog ships in-repo today
+  - user-supplied compendium import is intentionally deferred
+  - there is no persistent source linkage from catalog definitions to saved character weapon instances
+  - no OCR, rulebook parsing, cloud sync, or full compendium platform is claimed

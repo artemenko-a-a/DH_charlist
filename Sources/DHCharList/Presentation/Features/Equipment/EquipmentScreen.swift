@@ -7,6 +7,7 @@ import SwiftUI
 struct EquipmentScreen: View {
     private let characterID: UUID
     @ObservedObject private var viewModel: CharacterListViewModel
+    private let weaponCatalog = WeaponCompendiumCatalog.demo
 
     @State private var equipment: EquipmentState
     @State private var weaponDraft: WeaponDraft?
@@ -57,6 +58,7 @@ struct EquipmentScreen: View {
         .sheet(item: $weaponDraft) { value in
             WeaponEditorView(
                 draft: value,
+                catalog: weaponCatalog,
                 onCancel: { weaponDraft = nil },
                 onSave: { updated in
                     upsertWeapon(from: updated)
@@ -411,11 +413,20 @@ private struct WeaponRowView: View {
 @available(iOS 17, macOS 14, *)
 private struct WeaponEditorView: View {
     @State private var draft: WeaponDraft
+    @State private var compendiumQuery = ""
+    @State private var selectedDefinitionID: String?
+    private let catalog: WeaponCompendiumCatalog
     let onCancel: () -> Void
     let onSave: (WeaponDraft) -> Void
 
-    init(draft: WeaponDraft, onCancel: @escaping () -> Void, onSave: @escaping (WeaponDraft) -> Void) {
+    init(
+        draft: WeaponDraft,
+        catalog: WeaponCompendiumCatalog,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping (WeaponDraft) -> Void
+    ) {
         _draft = State(initialValue: draft)
+        self.catalog = catalog
         self.onCancel = onCancel
         self.onSave = onSave
     }
@@ -423,6 +434,53 @@ private struct WeaponEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if draft.isNew {
+                    Section {
+                        TextField("Search local compendium", text: $compendiumQuery)
+                            .accessibilityLabel("Weapon Compendium Search")
+                            .accessibilityIdentifier("weapon-compendium.search")
+                            .cogitatorPanelRow()
+
+                        if compendiumQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Search the local compendium to prefill a weapon. Saving still creates a detached editable character copy.")
+                                .foregroundStyle(CogitatorPalette.textSecondary)
+                                .cogitatorPanelRow()
+                        } else if matchingDefinitions.isEmpty {
+                            Text("No local compendium matches")
+                                .foregroundStyle(CogitatorPalette.textSecondary)
+                                .cogitatorPanelRow()
+                        } else {
+                            ForEach(matchingDefinitions) { definition in
+                                Button {
+                                    apply(definition)
+                                } label: {
+                                    WeaponCompendiumRowView(definition: definition)
+                                }
+                                .buttonStyle(.plain)
+                                .cogitatorPanelRow()
+                                .accessibilityIdentifier("weapon-compendium.pick.\(definition.id)")
+                            }
+                        }
+
+                        if let selectedDefinition {
+                            Text("Prefilled from \(catalog.displayName). You can edit every field before saving, and later edits affect only this character-owned weapon.")
+                                .foregroundStyle(CogitatorPalette.amber)
+                                .accessibilityIdentifier("weapon-compendium.selection-status")
+                                .cogitatorPanelRow()
+
+                            Text(selectedDefinition.previewLine)
+                                .font(.caption)
+                                .foregroundStyle(CogitatorPalette.textSecondary)
+                                .cogitatorPanelRow()
+                        }
+                    } header: {
+                        CogitatorSectionHeader("Weapon Compendium", subtitle: catalog.displayName)
+                    } footer: {
+                        Text("This catalog is local and bounded. It does not create a persistent link after you save the weapon.")
+                            .cogitatorSupportingText()
+                    }
+                }
+
                 TextField("Name", text: $draft.name)
                     .accessibilityLabel("Weapon Name")
                     .cogitatorPanelRow()
@@ -467,6 +525,23 @@ private struct WeaponEditorView: View {
             }
         }
     }
+
+    private var matchingDefinitions: [WeaponCompendiumDefinition] {
+        WeaponCompendiumSearch.autocomplete(
+            definitions: catalog.definitions,
+            query: compendiumQuery
+        )
+    }
+
+    private var selectedDefinition: WeaponCompendiumDefinition? {
+        guard let selectedDefinitionID else { return nil }
+        return catalog.definition(id: selectedDefinitionID)
+    }
+
+    private func apply(_ definition: WeaponCompendiumDefinition) {
+        draft.apply(definition)
+        selectedDefinitionID = definition.id
+    }
 }
 
 private struct WeaponDraft: Identifiable {
@@ -507,6 +582,18 @@ private struct WeaponDraft: Identifiable {
         isNew = false
     }
 
+    mutating func apply(_ definition: WeaponCompendiumDefinition) {
+        let copied = definition.makeWeaponInstance(id: id)
+        name = copied.name
+        type = copied.type
+        range = copied.range
+        damage = copied.damage
+        penetration = copied.penetration
+        clip = copied.clip
+        reload = copied.reload
+        traits = copied.traits
+    }
+
     func asWeapon() -> Weapon {
         Weapon(
             id: id,
@@ -519,6 +606,48 @@ private struct WeaponDraft: Identifiable {
             reload: reload.trimmingCharacters(in: .whitespacesAndNewlines),
             traits: traits.trimmingCharacters(in: .whitespacesAndNewlines)
         )
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct WeaponCompendiumRowView: View {
+    let definition: WeaponCompendiumDefinition
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(definition.name)
+                .font(.headline)
+                .foregroundStyle(CogitatorPalette.textPrimary)
+
+            if !definition.previewLine.isEmpty {
+                Text(definition.previewLine)
+                    .font(.subheadline)
+                    .foregroundStyle(CogitatorPalette.amber)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !definition.supportingLine.isEmpty {
+                Text(definition.supportingLine)
+                    .font(.caption)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to prefill the weapon editor from the local compendium.")
+    }
+
+    private var accessibilitySummary: String {
+        [
+            definition.name,
+            definition.previewLine,
+            definition.supportingLine
+        ]
+        .filter { !$0.isEmpty }
+        .joined(separator: ". ")
     }
 }
 

@@ -33,6 +33,8 @@ The project currently includes:
 - notes / talents / traits / mutations / disorders / psychic powers / special abilities editing (with local list-section search/filter)
 - equipment editing:
   - weapons
+  - local weapon compendium autocomplete from a bounded safe catalog
+  - adding from the compendium creates a detached editable character-owned weapon copy
   - armour
   - movement
   - inventory
@@ -163,6 +165,29 @@ Current scope limits:
 - no cloud sharing
 - no editable PDF form mode
 
+## Weapon compendium autocomplete (Batch 43)
+
+The `Equipment` flow now supports a bounded local weapon compendium for faster add-weapon entry without changing the accepted manual weapon editing model.
+
+Where to use it:
+- open a character
+- open `Equipment`
+- choose `Add Weapon`
+- search the local compendium by weapon name and tap a matching entry
+
+Current behavior:
+- the editor prefills key weapon fields from the selected catalog definition
+- saving creates a detached character-owned weapon copy
+- later edits affect only the character weapon instance, not the source definition
+- the accepted manual weapon edit flow remains fully available before and after saving
+
+Current scope limits:
+- the built-in catalog is a bounded safe local demo catalog, not a full rulebook dataset
+- no OCR or rulebook parsing
+- no cloud compendium
+- no persistent source link after insertion
+- user-supplied compendium import is intentionally deferred for now
+
 ## Combat workspace (Batch 30)
 
 `Session Mode` now acts as a practical combat workspace over the accepted character/session data. It keeps state explicit and local-first; it does not add automated combat resolution.
@@ -191,6 +216,20 @@ How to build the package:
 ```bash
 swift build
 ```
+
+Repository task runner:
+```bash
+make fmt
+make lint
+make typecheck
+make test
+make ci
+```
+
+Current fallback note:
+- `fmt` and `lint` are documented no-op fallbacks in this repo because no dedicated formatter/linter configuration is committed yet
+- `typecheck`, `test`, and `ci` run the canonical SwiftPM/Xcode validation commands
+
 ## Coverage workflow (Batch 33)
 
 Coverage gating is now based on the real package source surface in `Sources/DHCharList`.

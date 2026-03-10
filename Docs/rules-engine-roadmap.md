@@ -1,0 +1,245 @@
+# Rules Engine Roadmap
+
+## Status
+
+This document defines the intended staged path from the current helper-based mechanics implementation to a fuller, explainable, testable rules engine.
+
+Important: this is a roadmap, not a claim that the project already has a full rules engine.
+
+## Goals
+
+The long-term goal is to build a rules engine that is:
+
+- local-first
+- deterministic
+- explainable
+- testable
+- UI-independent
+- incrementally extensible
+
+The engine should eventually be able to:
+
+- resolve checks/tests
+- apply structured modifiers and conditions
+- support combat-oriented calculations
+- explain how a result was produced
+- remain compatible with existing character data and accepted app flows
+
+## Non-goals (for now)
+
+The roadmap does **not** imply immediate implementation of:
+
+- a full combat simulator
+- initiative tracking engine
+- full damage/critical/perils engine in one step
+- complete DH2 rules digitization in one batch
+- cloud/shared rules services
+- a giant custom DSL from the start
+
+## Guiding principles
+
+1. **Explainability first**  
+   Every important calculation should eventually be able to explain:
+   - base value
+   - modifier sources
+   - intermediate contributions
+   - final result
+
+2. **UI-independent rules**  
+   Rules logic should not depend on SwiftUI or screen-specific presentation state.
+
+3. **Small bounded sub-engines**  
+   Prefer multiple focused engines over one giant opaque engine.
+
+4. **Manual override remains valid**  
+   Where rules are uncertain, incomplete, or intentionally out of scope, manual input/modifiers remain acceptable.
+
+5. **Rules as data only where justified**  
+   Do not force all logic into a DSL prematurely. Move gradually from code to structured data where it creates real value.
+
+---
+
+# Staged roadmap
+
+## Stage 1 — Rules domain foundation
+**Goal:** extract current mechanics logic into a dedicated rules/mechanics layer.
+
+### Intended outcomes
+- dedicated `Rules` / `Mechanics` layer
+- explicit `CheckRequest`
+- explicit `CheckResult`
+- structured `RuleBreakdown`
+- current quick mechanics helpers routed through this layer
+
+### Notes
+This stage is about formalization, not adding new gameplay scope.
+
+---
+
+## Stage 2 — Modifier and condition normalization
+**Goal:** stop treating modifiers as ad hoc numbers/labels.
+
+### Intended outcomes
+- structured modifier model
+- modifier kind/scope
+- normalized condition model
+- reusable condition/modifier application rules
+
+### Example concepts
+- situational modifiers
+- equipment-based modifiers
+- status-condition modifiers
+- custom manual modifiers
+
+---
+
+## Stage 3 — Explainable check engine
+**Goal:** make characteristic/skill checks fully explainable and reusable.
+
+### Intended outcomes
+- characteristic checks through rules layer
+- skill checks through rules layer
+- modifier presets and custom modifiers
+- transparent breakdown for UI/history/logging
+
+---
+
+## Stage 4 — Combat context model
+**Goal:** formalize combat-relevant context without building a full combat engine.
+
+### Intended outcomes
+- active weapon context
+- combat condition context
+- attack/check preparation context
+- session/combat workspace integration
+
+### Out of scope for this stage
+- damage resolution
+- hit locations
+- initiative
+- full action economy
+
+---
+
+## Stage 5 — Rules data registries
+**Goal:** move stable rules metadata into structured data.
+
+### Intended candidates
+- difficulty presets
+- skill metadata
+- weapon tags/traits metadata
+- status-effect metadata
+- action categories
+
+### Note
+This is not yet a full DSL requirement.
+
+---
+
+## Stage 6 — Damage pipeline foundation
+**Goal:** introduce bounded damage resolution primitives.
+
+### Intended outcomes
+- damage request/result
+- mitigation (armour/toughness) modeling
+- wound application
+- bounded, explicit outputs
+
+### Still out of scope
+- full critical tables
+- full perils/psychic incident engine
+- broad combat automation
+
+---
+
+## Stage 7 — Scenario and golden-rule tests
+**Goal:** make rules behavior regression-resistant and trustworthy.
+
+### Intended test types
+- unit tests
+- golden tests
+- scenario tests
+- compatibility tests against existing saved/imported state
+
+---
+
+## Stage 8 — Broader UI adoption
+**Goal:** make the rules layer the source of truth for relevant app surfaces.
+
+### Intended adoption areas
+- quick mechanics helpers
+- session/combat workspace
+- rule-aware summaries in dossier/export where useful
+- history/session entries where rule-generated summaries add value
+
+---
+
+# Proposed batch sequence
+
+A practical implementation sequence could look like:
+
+- **Batch 36** — Rules domain foundation
+- **Batch 37** — Modifier & condition normalization
+- **Batch 38** — Explainable check engine
+- **Batch 39** — Combat context model
+- **Batch 40** — Rules data registries
+- **Batch 41** — Damage pipeline foundation
+- **Batch 42** — Scenario tests & golden rules suite
+
+This sequence is directional, not immutable.
+
+---
+
+# Architecture expectations
+
+## Rules layer should:
+- be deterministic
+- be testable without UI
+- return structured, explainable results
+- avoid hidden side effects
+- remain compatible with accepted local persistence paths
+
+## Rules layer should not:
+- depend on SwiftUI
+- directly own persistence
+- silently mutate character state without explicit action modeling
+- become a dumping ground for random screen logic
+
+---
+
+# Risks
+
+## 1. Premature full-engine ambition
+Trying to digitize all DH2 rules too early will likely create brittle scope explosion.
+
+## 2. UI/rules entanglement
+If rules logic stays embedded in screens/view models, later engine work becomes much harder.
+
+## 3. Opaque calculation outputs
+A rules engine that cannot explain its results will be difficult to trust and debug.
+
+## 4. Over-engineered DSL too early
+A giant DSL before the bounded engines exist would add complexity without enough validated modeling knowledge.
+
+---
+
+# Success criteria for the roadmap
+
+The roadmap is succeeding if, over time:
+
+- calculations move out of UI and into explicit rules models
+- breakdowns become standard output
+- modifier/condition handling becomes normalized
+- combat-related helpers become more structured without exploding scope
+- CI/tests can validate rules behavior deterministically
+- future rules work becomes easier rather than more chaotic
+
+---
+
+# Current reality boundary
+
+At the time of writing:
+
+- the project has mechanics helpers and combat-oriented helpers
+- the project does **not** yet have a full rules engine
+- this roadmap exists to make future rules work incremental, explainable, and safe

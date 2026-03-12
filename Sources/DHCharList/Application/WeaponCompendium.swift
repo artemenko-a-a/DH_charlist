@@ -177,6 +177,166 @@ public struct WeaponCompendiumDefinition: Identifiable, Codable, Equatable, Send
     }
 }
 
+public protocol WeaponCompendiumRepository: Sendable {
+    func fetchCatalog() async throws -> WeaponCompendiumCatalog?
+    func saveCatalog(_ catalog: WeaponCompendiumCatalog) async throws
+}
+
+public struct WeaponCompendiumUseCases: Sendable {
+    private let repository: any WeaponCompendiumRepository
+
+    public init(repository: any WeaponCompendiumRepository) {
+        self.repository = repository
+    }
+
+    public func currentCatalog() async throws -> WeaponCompendiumCatalog {
+        try await repository.fetchCatalog() ?? .demo
+    }
+
+    @discardableResult
+    public func replaceCatalog(_ catalog: WeaponCompendiumCatalog) async throws -> WeaponCompendiumCatalog {
+        try await repository.saveCatalog(catalog)
+        return catalog
+    }
+}
+
+public struct WeaponCompendiumImportPreviewSummary: Equatable, Sendable {
+    public let importedCatalogName: String
+    public let detectedWeaponCount: Int
+    public let existingCatalogName: String
+    public let existingWeaponCount: Int
+
+    public init(
+        importedCatalogName: String,
+        detectedWeaponCount: Int,
+        existingCatalogName: String,
+        existingWeaponCount: Int
+    ) {
+        self.importedCatalogName = importedCatalogName
+        self.detectedWeaponCount = detectedWeaponCount
+        self.existingCatalogName = existingCatalogName
+        self.existingWeaponCount = existingWeaponCount
+    }
+
+    public var confirmationMessage: String {
+        """
+        Imported catalog “\(importedCatalogName)” contains \(detectedWeaponCount) \(Self.definitionLabel(count: detectedWeaponCount)).
+        This replaces your current local compendium “\(existingCatalogName)” (\(existingWeaponCount) \(Self.definitionLabel(count: existingWeaponCount))); it does not merge.
+        Future autocomplete and add-weapon prefills will use the imported catalog.
+        Existing character-owned weapons stay detached and unchanged.
+        This action is destructive for the current local compendium.
+        """
+    }
+
+    private static func definitionLabel(count: Int) -> String {
+        count == 1 ? "weapon definition" : "weapon definitions"
+    }
+}
+
+public enum WeaponCompendiumImportError: LocalizedError, Equatable {
+    case invalidJSON
+    case unsupportedSchemaVersion(Int)
+    case invalidCatalogID
+    case invalidCatalogDisplayName
+    case invalidDefinitionID(index: Int)
+    case invalidDefinitionName(index: Int)
+    case duplicateDefinitionIDs([String])
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidJSON:
+            return "Weapon compendium import failed: malformed JSON or unsupported file structure."
+        case .unsupportedSchemaVersion(let version):
+            return "Weapon compendium import failed: unsupported schema version \(version)."
+        case .invalidCatalogID:
+            return "Weapon compendium import failed: catalog id is required."
+        case .invalidCatalogDisplayName:
+            return "Weapon compendium import failed: catalog display name is required."
+        case .invalidDefinitionID(let index):
+            return "Weapon compendium import failed: definition #\(index + 1) is missing an id."
+        case .invalidDefinitionName(let index):
+            return "Weapon compendium import failed: definition #\(index + 1) is missing a name."
+        case .duplicateDefinitionIDs(let ids):
+            let joined = ids.joined(separator: ", ")
+            return "Weapon compendium import failed: duplicate definition ids found (\(joined))."
+        }
+    }
+}
+
+public struct WeaponCompendiumJSONImportService: Sendable {
+    private let supportedSchemaVersion = 1
+
+    public init() {}
+
+    public func `import`(_ data: Data) throws -> WeaponCompendiumCatalog {
+        let decoder = JSONDecoder()
+        let envelope: WeaponCompendiumImportEnvelope
+
+        do {
+            envelope = try decoder.decode(WeaponCompendiumImportEnvelope.self, from: data)
+        } catch {
+            throw WeaponCompendiumImportError.invalidJSON
+        }
+
+        guard envelope.schemaVersion == supportedSchemaVersion else {
+            throw WeaponCompendiumImportError.unsupportedSchemaVersion(envelope.schemaVersion)
+        }
+
+        let catalogID = trimmedText(envelope.catalog.id)
+        guard !catalogID.isEmpty else {
+            throw WeaponCompendiumImportError.invalidCatalogID
+        }
+
+        let displayName = trimmedText(envelope.catalog.displayName)
+        guard !displayName.isEmpty else {
+            throw WeaponCompendiumImportError.invalidCatalogDisplayName
+        }
+
+        var seenDefinitionIDs = Set<String>()
+        var duplicateDefinitionIDs = Set<String>()
+        let definitions = try envelope.catalog.definitions.enumerated().map { index, definition in
+            let id = trimmedText(definition.id)
+            guard !id.isEmpty else {
+                throw WeaponCompendiumImportError.invalidDefinitionID(index: index)
+            }
+
+            let normalizedID = id.lowercased()
+            if !seenDefinitionIDs.insert(normalizedID).inserted {
+                duplicateDefinitionIDs.insert(id)
+            }
+
+            let name = trimmedText(definition.name)
+            guard !name.isEmpty else {
+                throw WeaponCompendiumImportError.invalidDefinitionName(index: index)
+            }
+
+            return WeaponCompendiumDefinition(
+                id: id,
+                catalogID: catalogID,
+                name: name,
+                type: trimmedText(definition.type ?? ""),
+                range: trimmedText(definition.range ?? ""),
+                damage: trimmedText(definition.damage ?? ""),
+                penetration: trimmedText(definition.penetration ?? ""),
+                clip: trimmedText(definition.clip ?? ""),
+                reload: trimmedText(definition.reload ?? ""),
+                traits: definition.traits ?? [],
+                notes: trimmedText(definition.notes ?? "")
+            )
+        }
+
+        guard duplicateDefinitionIDs.isEmpty else {
+            throw WeaponCompendiumImportError.duplicateDefinitionIDs(duplicateDefinitionIDs.sorted())
+        }
+
+        return WeaponCompendiumCatalog(
+            id: catalogID,
+            displayName: displayName,
+            definitions: definitions
+        )
+    }
+}
+
 public enum WeaponCompendiumSearch {
     public static func autocomplete(
         definitions: [WeaponCompendiumDefinition],
@@ -231,6 +391,30 @@ public enum WeaponCompendiumSearch {
 private struct SearchMatchCandidate {
     let rank: Int
     let definition: WeaponCompendiumDefinition
+}
+
+private struct WeaponCompendiumImportEnvelope: Codable {
+    let schemaVersion: Int
+    let catalog: WeaponCompendiumImportCatalog
+}
+
+private struct WeaponCompendiumImportCatalog: Codable {
+    let id: String
+    let displayName: String
+    let definitions: [WeaponCompendiumImportDefinition]
+}
+
+private struct WeaponCompendiumImportDefinition: Codable {
+    let id: String
+    let name: String
+    let type: String?
+    let range: String?
+    let damage: String?
+    let penetration: String?
+    let clip: String?
+    let reload: String?
+    let traits: [String]?
+    let notes: String?
 }
 
 private func trimmedText(_ value: String) -> String {

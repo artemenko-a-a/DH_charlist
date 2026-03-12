@@ -165,28 +165,35 @@ Current scope limits:
 - no cloud sharing
 - no editable PDF form mode
 
-## Weapon compendium autocomplete (Batch 43)
+## Weapon compendium autocomplete + local import (Batches 43-44)
 
-The `Equipment` flow now supports a bounded local weapon compendium for faster add-weapon entry without changing the accepted manual weapon editing model.
+The `Equipment` flow now supports a bounded local weapon compendium for faster add-weapon entry plus a local JSON import path for replacing that compendium without changing the accepted manual weapon editing model.
 
 Where to use it:
 - open a character
 - open `Equipment`
 - choose `Add Weapon`
 - search the local compendium by weapon name and tap a matching entry
+- use `Import Local Compendium` to replace the current local catalog from a structured JSON file
 
 Current behavior:
 - the editor prefills key weapon fields from the selected catalog definition
 - saving creates a detached character-owned weapon copy
 - later edits affect only the character weapon instance, not the source definition
 - the accepted manual weapon edit flow remains fully available before and after saving
+- JSON compendium import replaces the current local compendium with explicit destructive confirmation
+- imported catalog entries power future autocomplete/add-weapon flows only
+- existing character-owned weapons remain detached and unchanged after compendium replacement
+- schema details for local import are documented in `Docs/weapon-compendium-format.md`
 
 Current scope limits:
 - the built-in catalog is a bounded safe local demo catalog, not a full rulebook dataset
+- local import is JSON schema v1 only
+- compendium import is replace-all only; there is no merge/conflict UI
 - no OCR or rulebook parsing
 - no cloud compendium
 - no persistent source link after insertion
-- user-supplied compendium import is intentionally deferred for now
+- no embedded copyrighted full-rulebook dataset is committed
 
 ## Combat workspace (Batch 30)
 

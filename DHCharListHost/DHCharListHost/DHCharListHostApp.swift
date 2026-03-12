@@ -25,6 +25,7 @@ private struct HostBootstrapView: View {
     @State private var isReady = false
     @State private var container: AppContainer
     @State private var stagedImportPayload: Data?
+    @State private var stagedWeaponCompendiumImportPayload: Data?
 
     init(launchConfiguration: DHCharListHostLaunchConfiguration) {
         self.launchConfiguration = launchConfiguration
@@ -34,7 +35,11 @@ private struct HostBootstrapView: View {
     var body: some View {
         Group {
             if isReady {
-                DHCharListAppShell(container: container, initialImportPayload: stagedImportPayload)
+                DHCharListAppShell(
+                    container: container,
+                    initialImportPayload: stagedImportPayload,
+                    initialWeaponCompendiumImportPayload: stagedWeaponCompendiumImportPayload
+                )
                     .accessibilityIdentifier("host.app.shell")
             } else {
                 ProgressView("Preparing")
@@ -63,6 +68,10 @@ private struct HostBootstrapView: View {
         if launchConfiguration.shouldStageImportPreview {
             await stageImportPreviewIfNeeded()
         }
+
+        if launchConfiguration.shouldStageWeaponCompendiumImport {
+            stageWeaponCompendiumImportIfNeeded()
+        }
     }
 
     private func resetLocalData() async {
@@ -74,6 +83,8 @@ private struct HostBootstrapView: View {
             for character in try await container.characterUseCases.listCharacters() {
                 try await container.characterUseCases.deleteCharacter(id: character.id)
             }
+
+            _ = try await container.weaponCompendiumUseCases.replaceCatalog(.demo)
         } catch {
             // Intentionally ignore reset failures during test bootstrap.
         }
@@ -112,5 +123,31 @@ private struct HostBootstrapView: View {
             )
         )
         stagedImportPayload = try? container.importExportService.exportCharacters([stagedCharacter])
+    }
+
+    private func stageWeaponCompendiumImportIfNeeded() {
+        stagedWeaponCompendiumImportPayload = """
+        {
+          "schemaVersion": 1,
+          "catalog": {
+            "id": "ui-imported",
+            "displayName": "UI Imported Catalog",
+            "definitions": [
+              {
+                "id": "ui-imported.mnemonic-pistol",
+                "name": "Mnemonic Pistol",
+                "type": "Pistol",
+                "range": "25m",
+                "damage": "1d10+3 E",
+                "penetration": "3",
+                "clip": "12",
+                "reload": "Half",
+                "traits": ["Compact", "Reliable"],
+                "notes": "Deterministic UI import seed"
+              }
+            ]
+          }
+        }
+        """.data(using: .utf8)
     }
 }

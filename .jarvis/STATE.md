@@ -1,27 +1,27 @@
-# Batch 43 State
+# Batch 44 State
 
-- status: validated for build, coverage, and focused host runtime sanity
-- scope: local weapon compendium autocomplete plus detached manual weapon overrides only; accepted runtime, persistence, and combat behavior remain unchanged
-- equipment/compendium state:
-  - `Sources/DHCharList/Application/WeaponCompendium.swift` now defines a bounded safe local demo catalog, structured weapon definitions, deterministic autocomplete search, and explicit source-to-instance copying into detached `Weapon` values
-  - `Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift` now surfaces compendium search and preview inside the existing add-weapon editor path without replacing the accepted manual editing flow
-  - selecting a compendium entry pre-fills the weapon draft, but saving still creates a normal character-owned weapon entry that remains fully editable and no longer references the source definition
-  - the feature intentionally uses bounded demo data only; no OCR, no rulebook parsing, no embedded copyrighted full-rulebook dataset, and no cloud compendium platform were introduced
-  - `Makefile` now provides repo-local reproducibility entry points for `make fmt`, `make lint`, `make typecheck`, `make test`, and `make ci`; `fmt` and `lint` are documented no-op fallbacks because this repo does not define formatter/linter tooling yet
-- validated commands:
+- status: feature-complete; final full-CI validation blocked by simulator-backed coverage boot failure in the current environment
+- scope: local weapon compendium import with explicit replace-all confirmation only; accepted runtime, persistence, and combat behavior remain unchanged
+- compendium import state:
+  - `Sources/DHCharList/Application/WeaponCompendium.swift` now defines explicit compendium import use cases, preview summary messaging, and schema-v1 validation errors for malformed JSON, unsupported schema versions, empty required fields, and duplicate definition ids
+  - `Sources/DHCharList/Infrastructure/Persistence/JSONFileWeaponCompendiumRepository.swift` now persists the local compendium independently from character persistence so compendium replacement affects future autocomplete only
+  - `Sources/DHCharList/App/AppContainer.swift` now wires dedicated compendium repository/use cases/import service dependencies without changing accepted JSON-default or SwiftData-alternative character persistence behavior
+  - `Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift` now exposes `Import Local Compendium`, stages a destructive replace-all preview, requires explicit confirmation, and keeps saved character-owned weapons detached and unchanged
+  - `DHCharListHost/DHCharListHost/DHCharListHostApp.swift` now resets the persisted compendium back to `.demo` inside the existing UI-test reset path so full host suites do not leak compendium state across runs
+- validation that passed:
   - `make fmt`
   - `make lint`
   - `make typecheck`
   - `make test`
-  - `make ci`
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b43-weapon-compendium-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testWeaponCompendiumAutocompleteAddsDetachedEditableCopy -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
-- runtime sanity note:
-  - actual host runtime review was performed for the Batch 43 path, including compendium search, autocomplete selection, add-to-character, manual edit override, and confirmation that later adds still start from the original catalog definition
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b44-weapon-compendium-import.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testWeaponCompendiumImportReplacesLocalCatalogWithoutMutatingSavedWeapons -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `bash ./scripts/check_coverage_policy.sh`
+- validation blockers still present:
+  - `make ci` is not green in this environment because `bash ./scripts/run_xcode_coverage.sh` repeatedly fails while booting a simulator for the coverage run (`Unable to boot the Simulator`, `Failed to start launchd_sim`, `Interrupted system call`) even after adding bounded retry logic and more deterministic simulator-destination selection
+  - direct `bash ./scripts/run_xcode_coverage.sh` repros the same CoreSimulator/launchd_sim boot failure on both attempts in the current environment, so the coverage capture blocker is operational rather than product-behavioral
 - truthful limitations:
-  - only a bounded safe local demo catalog ships in-repo today
-  - user-supplied compendium import is intentionally deferred
-  - there is no persistent source linkage from catalog definitions to saved character weapon instances
-  - no OCR, rulebook parsing, cloud sync, or full compendium platform is claimed
+  - compendium import is JSON schema v1 only and replace-all only
+  - there is no merge/conflict UI, OCR/rulebook parsing, cloud sync, or persistent source linkage from compendium updates to saved character weapons
+  - existing character-owned weapon instances remain detached and unchanged after compendium replacement

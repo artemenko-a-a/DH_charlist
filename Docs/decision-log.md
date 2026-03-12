@@ -190,3 +190,8 @@
    - **Reason:** The current need is faster weapon entry during play, but the batch explicitly forbids embedding copyrighted rulebook datasets, building a full compendium platform, or changing accepted persistence/runtime behavior more than necessary.
    - **Type:** Fact.
    - **Impact:** `WeaponCompendiumCatalog` now provides a safe local demo catalog and autocomplete path in the existing equipment editor. Selecting a compendium entry prefills a new weapon draft, but saving still creates a normal character-owned `Weapon` value that remains fully editable and detached from the source definition. User-supplied compendium import stays intentionally deferred.
+
+35. **Decision:** Implement Batch 44 weapon compendium import as a local JSON schema v1 replace-all flow with explicit destructive confirmation instead of merge/conflict UI or source-link updates to existing weapons.
+   - **Reason:** The current need is user-supplied local catalog population for future autocomplete, while the batch explicitly forbids OCR/rulebook parsing, cloud sync, conflict-resolution UI, and mutation of already-created detached character weapons.
+   - **Type:** Fact.
+   - **Impact:** The app now validates a bounded local compendium file, stages an import preview, and replaces the current local compendium only after explicit confirmation. Imported definitions power future autocomplete/add flows, while existing character-owned weapon instances remain detached and unchanged.

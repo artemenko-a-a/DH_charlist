@@ -2,23 +2,28 @@ import Foundation
 
 #if canImport(SwiftUI)
 import SwiftUI
+import UniformTypeIdentifiers
 
 @available(iOS 17, macOS 14, *)
 struct EquipmentScreen: View {
     private let characterID: UUID
     @ObservedObject private var viewModel: CharacterListViewModel
-    private let weaponCatalog = WeaponCompendiumCatalog.demo
 
     @State private var equipment: EquipmentState
     @State private var weaponDraft: WeaponDraft?
     @State private var armourDraft: ArmourDraft?
     @State private var inventoryDraft: InventoryItemDraft?
     @State private var searchText = ""
+    @State private var isShowingCompendiumImportPicker = false
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
         self.viewModel = viewModel
         _equipment = State(initialValue: viewModel.character(by: characterID)?.equipment ?? .init())
+    }
+
+    private var weaponCatalog: WeaponCompendiumCatalog {
+        viewModel.weaponCompendiumCatalog
     }
 
     var body: some View {
@@ -92,6 +97,48 @@ struct EquipmentScreen: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .fileImporter(
+            isPresented: $isShowingCompendiumImportPicker,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let sourceURL = urls.first else { return }
+                let hadAccess = sourceURL.startAccessingSecurityScopedResource()
+                defer {
+                    if hadAccess {
+                        sourceURL.stopAccessingSecurityScopedResource()
+                    }
+                }
+
+                do {
+                    let data = try Data(contentsOf: sourceURL)
+                    Task { await viewModel.prepareWeaponCompendiumImport(data) }
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
+                }
+            case .failure(let error):
+                if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled {
+                    return
+                }
+                viewModel.errorMessage = error.localizedDescription
+            }
+        }
+        .alert(
+            "Replace Local Compendium?",
+            isPresented: isShowingCompendiumImportConfirmation,
+            presenting: viewModel.pendingWeaponCompendiumImportSummary
+        ) { _ in
+            Button("Replace Local Compendium", role: .destructive) {
+                Task { await viewModel.confirmPendingWeaponCompendiumImport() }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelPendingWeaponCompendiumImport()
+            }
+        } message: { summary in
+            Text(summary.confirmationMessage)
+        }
     }
 
     @ViewBuilder
@@ -125,10 +172,24 @@ struct EquipmentScreen: View {
             }
             .cogitatorPanelRow()
             .accessibilityLabel("Add Weapon")
+
+            Button(action: beginCompendiumImport) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("Import Local Compendium", systemImage: "square.and.arrow.down")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Text("\(weaponCatalog.displayName) • \(weaponCatalog.definitions.count) \(weaponCatalog.definitions.count == 1 ? "definition" : "definitions")")
+                        .font(.caption)
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+            .cogitatorPanelRow()
+            .accessibilityIdentifier("weapon-compendium.import")
+            .accessibilityLabel("Import Local Compendium")
         } header: {
             CogitatorSectionHeader(weaponsSectionTitle, subtitle: "Ordnance Registry")
         } footer: {
-            Text("Tap a weapon to edit it. Swipe left to delete.")
+            Text("Tap a weapon to edit it. Swipe left to delete. Importing replaces the local compendium for future autocomplete only.")
                 .cogitatorSupportingText()
         }
     }
@@ -269,6 +330,14 @@ struct EquipmentScreen: View {
         equipment = character.equipment
     }
 
+    private func beginCompendiumImport() {
+        if let stagedPayload = viewModel.consumeStagedWeaponCompendiumImportPayload() {
+            Task { await viewModel.prepareWeaponCompendiumImport(stagedPayload) }
+        } else {
+            isShowingCompendiumImportPicker = true
+        }
+    }
+
     private func deleteFilteredWeapons(at offsets: IndexSet) {
         let idsToDelete = offsets.compactMap { index in
             filteredWeapons.indices.contains(index) ? filteredWeapons[index].id : nil
@@ -347,6 +416,13 @@ struct EquipmentScreen: View {
         }
 
         return "\(base) (\(matches) of \(total))"
+    }
+
+    private var isShowingCompendiumImportConfirmation: Binding<Bool> {
+        Binding(
+            get: { viewModel.pendingWeaponCompendiumImportSummary != nil },
+            set: { _ in }
+        )
     }
 }
 

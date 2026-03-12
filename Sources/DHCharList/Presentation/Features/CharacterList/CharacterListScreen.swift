@@ -34,27 +34,44 @@ final class CharacterListViewModel: ObservableObject {
         let summary: CharacterImportPreviewSummary
     }
 
+    private struct PendingWeaponCompendiumImport: Sendable {
+        let catalog: WeaponCompendiumCatalog
+        let summary: WeaponCompendiumImportPreviewSummary
+    }
+
     @Published private(set) var characters: [Character] = []
     @Published private(set) var templates: [CharacterTemplate] = []
     @Published private(set) var isLoading = false
     @Published private(set) var pendingImportSummary: CharacterImportPreviewSummary?
+    @Published private(set) var weaponCompendiumCatalog: WeaponCompendiumCatalog = .demo
+    @Published private(set) var pendingWeaponCompendiumImportSummary: WeaponCompendiumImportPreviewSummary?
     @Published var errorMessage: String?
 
     let autosaveCoordinator: ProfileAutosaveCoordinator
     private let useCases: CharacterUseCases
     private let templateUseCases: CharacterTemplateUseCases?
     private let importExportService: any CharacterImportExportService
+    private let weaponCompendiumUseCases: WeaponCompendiumUseCases
+    private let weaponCompendiumImportService: WeaponCompendiumJSONImportService
     private var pendingImport: PendingImport?
+    private var pendingWeaponCompendiumImport: PendingWeaponCompendiumImport?
+    private var stagedWeaponCompendiumImportPayload: Data?
 
     init(
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
+        weaponCompendiumUseCases: WeaponCompendiumUseCases,
+        weaponCompendiumImportService: WeaponCompendiumJSONImportService,
+        initialWeaponCompendiumImportPayload: Data? = nil,
         autosaveCoordinator: ProfileAutosaveCoordinator = .init()
     ) {
         self.useCases = useCases
         self.templateUseCases = templateUseCases
         self.importExportService = importExportService
+        self.weaponCompendiumUseCases = weaponCompendiumUseCases
+        self.weaponCompendiumImportService = weaponCompendiumImportService
+        self.stagedWeaponCompendiumImportPayload = initialWeaponCompendiumImportPayload
         self.autosaveCoordinator = autosaveCoordinator
     }
 
@@ -71,6 +88,14 @@ final class CharacterListViewModel: ObservableObject {
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
+        }
+
+        do {
+            weaponCompendiumCatalog = try await weaponCompendiumUseCases.currentCatalog()
+        } catch {
+            if errorMessage == nil {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 
@@ -345,6 +370,52 @@ final class CharacterListViewModel: ObservableObject {
         pendingImportSummary = nil
     }
 
+    func consumeStagedWeaponCompendiumImportPayload() -> Data? {
+        defer { stagedWeaponCompendiumImportPayload = nil }
+        return stagedWeaponCompendiumImportPayload
+    }
+
+    func prepareWeaponCompendiumImport(_ data: Data) async {
+        do {
+            let importedCatalog = try weaponCompendiumImportService.import(data)
+            let existingCatalog = try await weaponCompendiumUseCases.currentCatalog()
+            let summary = WeaponCompendiumImportPreviewSummary(
+                importedCatalogName: importedCatalog.displayName,
+                detectedWeaponCount: importedCatalog.definitions.count,
+                existingCatalogName: existingCatalog.displayName,
+                existingWeaponCount: existingCatalog.definitions.count
+            )
+            pendingWeaponCompendiumImport = PendingWeaponCompendiumImport(catalog: importedCatalog, summary: summary)
+            pendingWeaponCompendiumImportSummary = summary
+            errorMessage = nil
+        } catch {
+            pendingWeaponCompendiumImport = nil
+            pendingWeaponCompendiumImportSummary = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func confirmPendingWeaponCompendiumImport() async {
+        guard let pendingWeaponCompendiumImport else { return }
+
+        do {
+            let updatedCatalog = try await weaponCompendiumUseCases.replaceCatalog(pendingWeaponCompendiumImport.catalog)
+            weaponCompendiumCatalog = updatedCatalog
+            self.pendingWeaponCompendiumImport = nil
+            pendingWeaponCompendiumImportSummary = nil
+            errorMessage = nil
+        } catch {
+            self.pendingWeaponCompendiumImport = nil
+            pendingWeaponCompendiumImportSummary = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelPendingWeaponCompendiumImport() {
+        pendingWeaponCompendiumImport = nil
+        pendingWeaponCompendiumImportSummary = nil
+    }
+
     func character(by id: UUID) -> Character? {
         characters.first(where: { $0.id == id })
     }
@@ -400,14 +471,20 @@ public struct CharacterListScreen: View {
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
+        weaponCompendiumUseCases: WeaponCompendiumUseCases,
+        weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         persistenceStatus: AppContainer.PersistenceBootstrapStatus,
-        initialImportPayload: Data? = nil
+        initialImportPayload: Data? = nil,
+        initialWeaponCompendiumImportPayload: Data? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: CharacterListViewModel(
                 useCases: useCases,
                 templateUseCases: templateUseCases,
-                importExportService: importExportService
+                importExportService: importExportService,
+                weaponCompendiumUseCases: weaponCompendiumUseCases,
+                weaponCompendiumImportService: weaponCompendiumImportService,
+                initialWeaponCompendiumImportPayload: initialWeaponCompendiumImportPayload
             )
         )
         self.persistenceStatus = persistenceStatus

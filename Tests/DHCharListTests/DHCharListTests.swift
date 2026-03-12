@@ -130,7 +130,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     _ = try await useCases.createCharacter(profile: Profile(name: "Old Character"))
     await viewModel.load()
@@ -153,7 +153,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     _ = try await useCases.createCharacter(profile: Profile(name: "Visible Character"))
     await viewModel.load()
@@ -171,7 +171,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
@@ -191,7 +191,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     _ = try await useCases.createCharacter(profile: Profile(name: "Local Character"))
     await viewModel.load()
@@ -215,7 +215,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     _ = try await useCases.createCharacter(profile: Profile(name: "Old One"))
     _ = try await useCases.createCharacter(profile: Profile(name: "Old Two"))
@@ -240,7 +240,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
@@ -258,7 +258,7 @@ import SwiftData
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
     let useCases = CharacterUseCases(repository: repository)
     let service = CharacterJSONImportExportService()
-    let viewModel = CharacterListViewModel(useCases: useCases, importExportService: service)
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
 
     await viewModel.prepareImportPayload(Data("not json".utf8))
     #expect(viewModel.errorMessage != nil)
@@ -1733,6 +1733,23 @@ private func makeSwiftDataTemplateRepository(testName: String) throws -> SwiftDa
     return SwiftDataCharacterTemplateRepository(modelContext: ModelContext(container))
 }
 #endif
+
+@MainActor
+private func makeCharacterListViewModel(
+    useCases: CharacterUseCases,
+    importExportService: CharacterJSONImportExportService
+) -> CharacterListViewModel {
+    CharacterListViewModel(
+        useCases: useCases,
+        importExportService: importExportService,
+        weaponCompendiumUseCases: WeaponCompendiumUseCases(
+            repository: JSONFileWeaponCompendiumRepository(
+                fileURL: uniqueTestFileURL("viewmodel-weapon-compendium")
+            )
+        ),
+        weaponCompendiumImportService: WeaponCompendiumJSONImportService()
+    )
+}
 
 private func sampleCharacter(name: String) -> Character {
     let weapon = Weapon(

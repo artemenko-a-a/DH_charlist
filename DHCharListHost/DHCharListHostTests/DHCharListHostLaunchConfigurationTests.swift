@@ -9,6 +9,7 @@ final class DHCharListHostLaunchConfigurationTests: XCTestCase {
         XCTAssertFalse(configuration.isUITesting)
         XCTAssertFalse(configuration.shouldResetData)
         XCTAssertFalse(configuration.shouldSeedSmokeData)
+        XCTAssertFalse(configuration.shouldStageWeaponCompendiumImport)
         XCTAssertEqual(configuration.persistence, .jsonFile)
     }
 
@@ -18,13 +19,15 @@ final class DHCharListHostLaunchConfigurationTests: XCTestCase {
             DHCharListHostLaunchConfiguration.uiTestingArgument,
             DHCharListHostLaunchConfiguration.resetDataArgument,
             DHCharListHostLaunchConfiguration.seedSmokeDataArgument,
-            DHCharListHostLaunchConfiguration.stageImportPreviewArgument
+            DHCharListHostLaunchConfiguration.stageImportPreviewArgument,
+            DHCharListHostLaunchConfiguration.stageWeaponCompendiumImportArgument
         ])
 
         XCTAssertTrue(configuration.isUITesting)
         XCTAssertTrue(configuration.shouldResetData)
         XCTAssertTrue(configuration.shouldSeedSmokeData)
         XCTAssertTrue(configuration.shouldStageImportPreview)
+        XCTAssertTrue(configuration.shouldStageWeaponCompendiumImport)
         XCTAssertEqual(configuration.persistence, .jsonFile)
     }
 

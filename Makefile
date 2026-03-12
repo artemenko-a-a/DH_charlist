@@ -16,5 +16,5 @@ test:
 
 ci: fmt lint typecheck test
 	xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build
-	./scripts/run_xcode_coverage.sh
-	./scripts/check_coverage_policy.sh
+	bash ./scripts/run_xcode_coverage.sh
+	bash ./scripts/check_coverage_policy.sh

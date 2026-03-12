@@ -200,3 +200,16 @@ Latest local validation status (2026-03-09):
     - edit at least one prefilled value before saving and verify the saved row reflects the manual override
     - re-open `Add Weapon`, select the same compendium entry again, and verify the original source values are still offered
     - verify the existing saved weapon remains unchanged, proving the character-owned instance is detached from the source definition
+32. Batch 44 local weapon compendium import:
+    - open `Equipment` for an existing character and tap `Import Local Compendium`
+    - choose a local JSON file matching `Docs/weapon-compendium-format.md`
+    - verify the confirmation step explicitly states:
+      - the imported catalog name
+      - detected weapon count
+      - the current local compendium will be replaced
+      - the operation is replace-all, not merge
+      - existing character-owned weapons stay detached and unchanged
+      - the action is destructive
+    - cancel once and verify the current autocomplete catalog remains unchanged
+    - repeat, confirm the destructive replace, and verify imported definitions now appear in `Add Weapon` autocomplete
+    - verify a previously saved character-owned weapon still shows its original manually edited values after the compendium replacement

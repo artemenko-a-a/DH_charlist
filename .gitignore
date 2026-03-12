@@ -1,4 +1,5 @@
 .DS_Store
+.build/
 .tmp-home/
 artifacts/
 DHCharListHost/.DS_Store

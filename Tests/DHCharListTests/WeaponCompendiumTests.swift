@@ -74,6 +74,103 @@ import Testing
     #expect(weapon.traits == "Reliable, Tearing")
 }
 
+@Test func validWeaponCompendiumImportReplacesLocalCatalogAndPowersFutureAutocomplete() async throws {
+    let fileURL = uniqueCompendiumTestFileURL("catalog-import")
+    let repository = JSONFileWeaponCompendiumRepository(fileURL: fileURL)
+    let useCases = WeaponCompendiumUseCases(repository: repository)
+    let service = WeaponCompendiumJSONImportService()
+
+    let importedCatalog = try service.import(
+        compendiumImportData(
+            catalogID: "imported-catalog",
+            displayName: "Imported Cogitator Vault",
+            definitions: [
+                [
+                    "id": "imported-catalog.mnemonic-pistol",
+                    "name": "Mnemonic Pistol",
+                    "type": "Pistol",
+                    "range": "25m",
+                    "damage": "1d10+3 E",
+                    "penetration": "3",
+                    "clip": "12",
+                    "reload": "Half",
+                    "traits": ["Compact", "Reliable"]
+                ]
+            ]
+        )
+    )
+
+    #expect(try await useCases.currentCatalog().id == WeaponCompendiumCatalog.demo.id)
+
+    let replaced = try await useCases.replaceCatalog(importedCatalog)
+    let loaded = try await useCases.currentCatalog()
+    let results = WeaponCompendiumSearch.autocomplete(definitions: loaded.definitions, query: "mnem")
+
+    #expect(replaced == importedCatalog)
+    #expect(loaded == importedCatalog)
+    #expect(results.map(\.name) == ["Mnemonic Pistol"])
+}
+
+@Test func weaponCompendiumImportRejectsMalformedJSON() {
+    let service = WeaponCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(Data("{".utf8))
+        Issue.record("Expected malformed JSON import to fail")
+    } catch let error as WeaponCompendiumImportError {
+        #expect(error == .invalidJSON)
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+}
+
+@Test func weaponCompendiumImportRejectsUnsupportedSchemaVersion() throws {
+    let service = WeaponCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(
+            compendiumImportData(
+                schemaVersion: 2,
+                catalogID: "imported-catalog",
+                displayName: "Imported Cogitator Vault"
+            )
+        )
+        Issue.record("Expected unsupported schema version to fail")
+    } catch let error as WeaponCompendiumImportError {
+        #expect(error == .unsupportedSchemaVersion(2))
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+}
+
+@Test func weaponCompendiumImportRejectsDuplicateDefinitionIDs() throws {
+    let service = WeaponCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(
+            compendiumImportData(
+                catalogID: "imported-catalog",
+                displayName: "Imported Cogitator Vault",
+                definitions: [
+                    [
+                        "id": "imported-catalog.mnemonic-pistol",
+                        "name": "Mnemonic Pistol"
+                    ],
+                    [
+                        "id": "imported-catalog.mnemonic-pistol",
+                        "name": "Mnemonic Pistol Variant"
+                    ]
+                ]
+            )
+        )
+        Issue.record("Expected duplicate definition ids to fail")
+    } catch let error as WeaponCompendiumImportError {
+        #expect(error == .duplicateDefinitionIDs(["imported-catalog.mnemonic-pistol"]))
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+}
+
 @Test func editingWeaponInstanceDoesNotMutateCompendiumDefinition() {
     guard let definition = WeaponCompendiumCatalog.demo.definition(id: "local-demo.laspistol") else {
         Issue.record("Expected demo laspistol definition")
@@ -88,6 +185,37 @@ import Testing
     #expect(definition.name == "Laspistol")
     #expect(definition.penetration == "0")
     #expect(definition.traitsText == "Reliable")
+}
+
+@MainActor
+@Test func cancelPendingWeaponCompendiumImportLeavesCurrentCatalogUnchanged() async throws {
+    let characterRepository = JSONFileCharacterRepository(fileURL: uniqueCompendiumTestFileURL("characters"))
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let compendiumRepository = JSONFileWeaponCompendiumRepository(fileURL: uniqueCompendiumTestFileURL("catalog-cancel"))
+    let compendiumUseCases = WeaponCompendiumUseCases(repository: compendiumRepository)
+    let importService = WeaponCompendiumJSONImportService()
+    let viewModel = CharacterListViewModel(
+        useCases: characterUseCases,
+        importExportService: CharacterJSONImportExportService(),
+        weaponCompendiumUseCases: compendiumUseCases,
+        weaponCompendiumImportService: importService
+    )
+
+    await viewModel.load()
+    let before = try await compendiumUseCases.currentCatalog()
+    let data = try compendiumImportData(
+        catalogID: "imported-catalog",
+        displayName: "Imported Cogitator Vault"
+    )
+
+    await viewModel.prepareWeaponCompendiumImport(data)
+    #expect(viewModel.pendingWeaponCompendiumImportSummary?.importedCatalogName == "Imported Cogitator Vault")
+
+    viewModel.cancelPendingWeaponCompendiumImport()
+
+    let after = try await compendiumUseCases.currentCatalog()
+    #expect(viewModel.pendingWeaponCompendiumImportSummary == nil)
+    #expect(after == before)
 }
 
 @Test func compendiumWeaponInstancePersistsThroughAcceptedEquipmentFlow() async throws {
@@ -117,7 +245,83 @@ import Testing
     #expect(definition.traitsText == "Reliable")
 }
 
+@Test func replacingCompendiumDoesNotMutateExistingCharacterOwnedWeapons() async throws {
+    let characterFileURL = uniqueCompendiumTestFileURL("equipment-detached-after-replace")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterFileURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let compendiumRepository = JSONFileWeaponCompendiumRepository(fileURL: uniqueCompendiumTestFileURL("catalog-replace"))
+    let compendiumUseCases = WeaponCompendiumUseCases(repository: compendiumRepository)
+    let importService = WeaponCompendiumJSONImportService()
+
+    let created = try await characterUseCases.createCharacter(profile: Profile(name: "Detached Weapon Safety"))
+    guard let definition = WeaponCompendiumCatalog.demo.definition(id: "local-demo.laspistol") else {
+        Issue.record("Expected demo laspistol definition")
+        return
+    }
+
+    var detachedWeapon = definition.makeWeaponInstance()
+    detachedWeapon.name = "Legacy Laspistol"
+    detachedWeapon.penetration = "1"
+    _ = try await characterUseCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(weapons: [detachedWeapon])
+    )
+
+    let importedCatalog = try importService.import(
+        compendiumImportData(
+            catalogID: "imported-catalog",
+            displayName: "Imported Cogitator Vault",
+            definitions: [
+                [
+                    "id": "imported-catalog.mnemonic-pistol",
+                    "name": "Mnemonic Pistol",
+                    "penetration": "3"
+                ]
+            ]
+        )
+    )
+    _ = try await compendiumUseCases.replaceCatalog(importedCatalog)
+
+    let persistedCharacter = try await characterRepository.fetch(id: created.id)
+    let currentCatalog = try await compendiumUseCases.currentCatalog()
+
+    #expect(persistedCharacter?.equipment.weapons == [detachedWeapon])
+    #expect(currentCatalog.displayName == "Imported Cogitator Vault")
+    #expect(currentCatalog.definition(id: "imported-catalog.mnemonic-pistol")?.name == "Mnemonic Pistol")
+}
+
 private func uniqueCompendiumTestFileURL(_ suffix: String) -> URL {
     FileManager.default.temporaryDirectory
         .appending(path: "dh-charlist-\(suffix)-\(UUID().uuidString).json")
+}
+
+private func compendiumImportData(
+    schemaVersion: Int = 1,
+    catalogID: String,
+    displayName: String,
+    definitions: [[String: Any]] = [
+        [
+            "id": "imported-catalog.mnemonic-pistol",
+            "name": "Mnemonic Pistol",
+            "type": "Pistol",
+            "range": "25m",
+            "damage": "1d10+3 E",
+            "penetration": "3",
+            "clip": "12",
+            "reload": "Half",
+            "traits": ["Compact", "Reliable"]
+        ]
+    ]
+) throws -> Data {
+    try JSONSerialization.data(
+        withJSONObject: [
+            "schemaVersion": schemaVersion,
+            "catalog": [
+                "id": catalogID,
+                "displayName": displayName,
+                "definitions": definitions
+            ]
+        ],
+        options: [.prettyPrinted, .sortedKeys]
+    )
 }

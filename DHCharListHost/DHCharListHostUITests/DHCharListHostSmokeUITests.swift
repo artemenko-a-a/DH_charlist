@@ -402,6 +402,77 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(labeledElement(containing: "Custom Laspistol").waitForExistence(timeout: 5))
     }
 
+    func testWeaponCompendiumImportReplacesLocalCatalogWithoutMutatingSavedWeapons() {
+        app.launchArguments += ["-dh-ui-stage-weapon-compendium-import"]
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addWeaponButton = app.buttons["Add Weapon"]
+        XCTAssertTrue(addWeaponButton.waitForExistence(timeout: 5))
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let compendiumSearchField = textInput("weapon-compendium.search")
+        XCTAssertTrue(compendiumSearchField.waitForExistence(timeout: 5))
+        compendiumSearchField.tap()
+        compendiumSearchField.typeText("las")
+
+        let laspistolSuggestion = app.buttons["weapon-compendium.pick.local-demo.laspistol"]
+        XCTAssertTrue(laspistolSuggestion.waitForExistence(timeout: 5))
+        laspistolSuggestion.tap()
+
+        let weaponNameField = app.textFields["Weapon Name"]
+        XCTAssertTrue(weaponNameField.waitForExistence(timeout: 5))
+        weaponNameField.clearAndEnterText("Legacy Laspistol")
+
+        let penetrationField = app.textFields["Weapon Penetration"]
+        XCTAssertTrue(penetrationField.waitForExistence(timeout: 5))
+        penetrationField.clearAndEnterText("1")
+
+        app.buttons["Save"].tap()
+        XCTAssertTrue(labeledElement(containing: "Legacy Laspistol").waitForExistence(timeout: 5))
+
+        let importCompendiumButton = app.buttons["weapon-compendium.import"]
+        XCTAssertTrue(importCompendiumButton.waitForExistence(timeout: 5))
+        importCompendiumButton.tap()
+
+        XCTAssertTrue(staticText(containing: "UI Imported Catalog").waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "replaces your current local compendium").waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "stay detached and unchanged").waitForExistence(timeout: 5))
+
+        let replaceCompendiumButton = button(containing: "Replace Local Compendium")
+        XCTAssertTrue(replaceCompendiumButton.waitForExistence(timeout: 5))
+        replaceCompendiumButton.tap()
+
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let importedCompendiumSearchField = textInput("weapon-compendium.search")
+        XCTAssertTrue(importedCompendiumSearchField.waitForExistence(timeout: 5))
+        importedCompendiumSearchField.tap()
+        importedCompendiumSearchField.typeText("mnem")
+
+        let importedSuggestion = app.buttons["weapon-compendium.pick.ui-imported.mnemonic-pistol"]
+        XCTAssertTrue(importedSuggestion.waitForExistence(timeout: 5))
+        importedSuggestion.tap()
+
+        XCTAssertEqual(app.textFields["Weapon Name"].value as? String, "Mnemonic Pistol")
+        XCTAssertEqual(app.textFields["Weapon Penetration"].value as? String, "3")
+        app.buttons["Cancel"].tap()
+
+        labeledElement(containing: "Legacy Laspistol").tap()
+        XCTAssertTrue(app.navigationBars["Edit Weapon"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["Weapon Name"].value as? String, "Legacy Laspistol")
+        XCTAssertEqual(app.textFields["Weapon Penetration"].value as? String, "1")
+        app.buttons["Cancel"].tap()
+    }
+
     private func assertQuickCheckFinalTarget(_ expectedValue: String) {
         let finalTarget = app.staticTexts["quick-check.final-target"]
         reveal(finalTarget, maxSwipes: 4)

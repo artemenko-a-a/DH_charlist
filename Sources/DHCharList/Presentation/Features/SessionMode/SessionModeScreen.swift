@@ -18,6 +18,9 @@ public struct SessionModeScreen: View {
     @State private var temporaryModifierDraft: TemporaryModifierDraft?
     @State private var combatConditionDraft: CombatConditionDraft?
     @State private var quickCheckSelection: QuickMechanicsSelection?
+    @State private var isShowingAttackShortcut = false
+    @State private var isShowingDamageShortcut = false
+    @State private var shownReactionShortcut: CombatReactionShortcutKind?
 
     public init() {
         context = .unscoped
@@ -102,6 +105,45 @@ public struct SessionModeScreen: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $isShowingAttackShortcut) {
+            CombatAttackShortcutView(
+                weapons: availableWeapons,
+                combatContext: sessionCombatContext,
+                characteristics: characterSnapshot?.characteristics ?? .empty,
+                onCancel: { isShowingAttackShortcut = false },
+                onSelectActiveWeapon: { selectedWeaponID in
+                    session.activeWeaponID = selectedWeaponID
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $shownReactionShortcut) { reaction in
+            CombatReactionShortcutView(
+                reaction: reaction,
+                combatContext: sessionCombatContext,
+                characteristics: characterSnapshot?.characteristics ?? .empty,
+                skills: characterSnapshot?.skills ?? [],
+                onCancel: { shownReactionShortcut = nil }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isShowingDamageShortcut) {
+            CombatDamageShortcutView(
+                combatContext: sessionCombatContext,
+                characteristics: characterSnapshot?.characteristics ?? .empty,
+                resources: resources,
+                armour: availableArmour,
+                onCancel: { isShowingDamageShortcut = false },
+                onApply: { updatedWounds in
+                    resources.currentWounds = updatedWounds
+                    isShowingDamageShortcut = false
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     @ViewBuilder
@@ -109,6 +151,8 @@ public struct SessionModeScreen: View {
         Form {
             combatOverviewSection
             activeWeaponSection
+            quickToggleSection
+            encounterShortcutsSection
             quickActionsSection
             movementSection
             combatConditionsSection
@@ -254,6 +298,83 @@ public struct SessionModeScreen: View {
     }
 
     @ViewBuilder
+    private var encounterShortcutsSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
+                    Button {
+                        isShowingAttackShortcut = true
+                    } label: {
+                        Label("Attack", systemImage: "scope")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(availableWeapons.isEmpty)
+                    .accessibilityIdentifier("combat.shortcut.attack")
+
+                    Button {
+                        shownReactionShortcut = .dodge
+                    } label: {
+                        Label("Dodge", systemImage: "figure.run")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("combat.shortcut.dodge")
+
+                    Button {
+                        shownReactionShortcut = .parry
+                    } label: {
+                        Label("Parry", systemImage: "shield")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("combat.shortcut.parry")
+
+                    Button {
+                        isShowingDamageShortcut = true
+                    } label: {
+                        Label("Apply Damage", systemImage: "cross.case")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("combat.shortcut.damage")
+
+                    if isReloadConditionActive {
+                        Button {
+                            toggleReloadCondition()
+                        } label: {
+                            Label("Reload", systemImage: "arrow.clockwise")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(sessionCombatContext.activeWeapon == nil)
+                        .accessibilityIdentifier("combat.shortcut.reload")
+                    } else {
+                        Button {
+                            toggleReloadCondition()
+                        } label: {
+                            Label("Reload", systemImage: "arrow.clockwise")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(sessionCombatContext.activeWeapon == nil)
+                        .accessibilityIdentifier("combat.shortcut.reload")
+                    }
+                }
+
+                Text(encounterShortcutSummary)
+                    .cogitatorSupportingText()
+            }
+            .cogitatorPanelRow()
+        } header: {
+            CogitatorSectionHeader("Encounter Shortcuts", subtitle: "Low-Step Combat Actions")
+        } footer: {
+            Text("Attack, reactions, and incoming damage reuse the accepted combat context, explainable checks, and bounded damage pipeline.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
     private var quickActionsSection: some View {
         Section {
             VStack(alignment: .leading, spacing: 10) {
@@ -294,6 +415,75 @@ public struct SessionModeScreen: View {
             CogitatorSectionHeader("Quick Mechanics", subtitle: "Fast Combat Checks")
         } footer: {
             Text("These actions reuse the accepted quick mechanics helper and current temporary modifiers.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private var quickToggleSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Quick Modifiers")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
+                    ForEach(CombatShortcutRegistry.quickModifierShortcuts) { shortcut in
+                        if isQuickModifierActive(shortcut) {
+                            Button {
+                                toggleQuickModifier(shortcut)
+                            } label: {
+                                Label("\(shortcut.label) \(shortcut.value.signedValueLabel)", systemImage: "checkmark.circle.fill")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .accessibilityIdentifier("combat.toggle.modifier.\(shortcut.id)")
+                        } else {
+                            Button {
+                                toggleQuickModifier(shortcut)
+                            } label: {
+                                Label("\(shortcut.label) \(shortcut.value.signedValueLabel)", systemImage: "circle")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityIdentifier("combat.toggle.modifier.\(shortcut.id)")
+                        }
+                    }
+                }
+
+                Text("Quick Conditions")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
+                    ForEach(CombatShortcutRegistry.quickConditionShortcuts) { shortcut in
+                        if isQuickConditionActive(shortcut) {
+                            Button {
+                                toggleQuickCondition(shortcut)
+                            } label: {
+                                Label(shortcut.label, systemImage: "checkmark.circle.fill")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .accessibilityIdentifier("combat.toggle.condition.\(shortcut.id)")
+                        } else {
+                            Button {
+                                toggleQuickCondition(shortcut)
+                            } label: {
+                                Label(shortcut.label, systemImage: "circle")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityIdentifier("combat.toggle.condition.\(shortcut.id)")
+                        }
+                    }
+                }
+            }
+            .cogitatorPanelRow()
+        } header: {
+            CogitatorSectionHeader("Quick Toggles", subtitle: "Fast Battlefield Context")
+        } footer: {
+            Text("Tap once to add an active shortcut modifier or condition. Tap again to remove it.")
                 .cogitatorSupportingText()
         }
     }
@@ -483,8 +673,33 @@ public struct SessionModeScreen: View {
         characterSnapshot?.equipment.weapons ?? []
     }
 
+    private var availableArmour: [Armour] {
+        characterSnapshot?.equipment.armour ?? []
+    }
+
     private var movementProfile: MovementProfile {
         characterSnapshot?.equipment.movement ?? .init()
+    }
+
+    private var isReloadConditionActive: Bool {
+        session.combatConditions.contains(reloadConditionLabel)
+    }
+
+    private var reloadConditionLabel: String {
+        CombatShortcutRegistry.reloadConditionLabel(for: sessionCombatContext.activeWeapon)
+    }
+
+    private var encounterShortcutSummary: String {
+        if let activeWeapon = sessionCombatContext.activeWeapon {
+            let reloadSummary = activeWeapon.reload.map { "Reload \($0)" } ?? "Reload time unavailable"
+            return "Attack and reload shortcuts are centered on \(activeWeapon.displayName). \(reloadSummary). Active quick modifiers are applied automatically inside shortcut sheets."
+        }
+
+        if availableWeapons.isEmpty {
+            return "Add at least one weapon in Equipment to unlock the guided attack shortcut. Dodge, parry, damage, and quick toggles stay available."
+        }
+
+        return "Pick an active weapon above or inside the attack shortcut. Dodge, parry, and damage shortcuts still reuse the current combat context."
     }
 
     private var quickActionsSummary: String {
@@ -621,6 +836,18 @@ public struct SessionModeScreen: View {
         }
     }
 
+    private func toggleQuickModifier(_ shortcut: CombatModifierShortcut) {
+        if session.temporaryModifiers[shortcut.label] == shortcut.value {
+            session.temporaryModifiers.removeValue(forKey: shortcut.label)
+        } else {
+            session.temporaryModifiers[shortcut.label] = shortcut.value
+        }
+    }
+
+    private func isQuickModifierActive(_ shortcut: CombatModifierShortcut) -> Bool {
+        session.temporaryModifiers[shortcut.label] == shortcut.value
+    }
+
     private func upsertTemporaryModifier(from draft: TemporaryModifierDraft) {
         let cleanedKey = draft.key.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleanedKey.isEmpty, let value = Int(draft.valueText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
@@ -635,6 +862,26 @@ public struct SessionModeScreen: View {
 
     private func deleteCombatConditions(at offsets: IndexSet) {
         session.combatConditions.remove(atOffsets: offsets)
+    }
+
+    private func toggleQuickCondition(_ shortcut: CombatConditionShortcut) {
+        if let existingIndex = session.combatConditions.firstIndex(of: shortcut.label) {
+            session.combatConditions.remove(at: existingIndex)
+        } else {
+            session.combatConditions.append(shortcut.label)
+        }
+    }
+
+    private func isQuickConditionActive(_ shortcut: CombatConditionShortcut) -> Bool {
+        session.combatConditions.contains(shortcut.label)
+    }
+
+    private func toggleReloadCondition() {
+        if let existingIndex = session.combatConditions.firstIndex(of: reloadConditionLabel) {
+            session.combatConditions.remove(at: existingIndex)
+        } else {
+            session.combatConditions.append(reloadConditionLabel)
+        }
     }
 
     private func upsertCombatCondition(from draft: CombatConditionDraft) {
@@ -893,6 +1140,747 @@ private struct CombatConditionDraft: Identifiable {
         id = UUID()
         self.index = index
         self.value = value
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CombatAttackShortcutView: View {
+    let weapons: [Weapon]
+    let combatContext: CombatContext
+    let characteristics: CharacteristicSet
+    let onCancel: () -> Void
+    let onSelectActiveWeapon: (UUID?) -> Void
+
+    @State private var selectedWeaponID: UUID?
+    @State private var situationalModifier = CheckModifier.preset(value: 0)
+    @State private var customModifierText = "0"
+    @State private var rollText = ""
+    @State private var rawDamageText = ""
+    @State private var targetWoundsText = "10"
+    @State private var targetArmourText = "0"
+    @State private var targetToughnessBonusText = "0"
+    @State private var penetrationOverrideText = ""
+
+    init(
+        weapons: [Weapon],
+        combatContext: CombatContext,
+        characteristics: CharacteristicSet,
+        onCancel: @escaping () -> Void,
+        onSelectActiveWeapon: @escaping (UUID?) -> Void
+    ) {
+        self.weapons = weapons
+        self.combatContext = combatContext
+        self.characteristics = characteristics
+        self.onCancel = onCancel
+        self.onSelectActiveWeapon = onSelectActiveWeapon
+        _selectedWeaponID = State(initialValue: combatContext.activeWeapon?.id ?? weapons.first?.id)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                weaponSelectionSection
+                if let attackFlow {
+                    contextSection(flow: attackFlow)
+                    rollSection(flow: attackFlow)
+                    if attackOutcome?.isSuccess == true {
+                        damageSection(flow: attackFlow)
+                    }
+                } else {
+                    unavailableSection
+                }
+            }
+            .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
+            .navigationTitle("Attack Shortcut")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close", action: onCancel)
+                }
+            }
+        }
+        .onChange(of: selectedWeaponID) { _, updated in
+            onSelectActiveWeapon(updated)
+        }
+    }
+
+    @ViewBuilder
+    private var weaponSelectionSection: some View {
+        Section {
+            if weapons.isEmpty {
+                Text("Add a weapon in Equipment before using the attack shortcut.")
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
+            } else {
+                Picker("Weapon", selection: $selectedWeaponID) {
+                    ForEach(weapons) { weapon in
+                        Text(weapon.displayName).tag(Optional(weapon.id))
+                    }
+                }
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.weapon")
+            }
+        } header: {
+            CogitatorSectionHeader("Active Weapon", subtitle: "Confirm or Switch")
+        } footer: {
+            Text("Changing the selection also updates the current active weapon for the surrounding combat workspace.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private func contextSection(flow: CombatEncounterCheckFlow) -> some View {
+        Section {
+            if let activeWeapon = flow.activeWeapon {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(activeWeapon.displayName)
+                        .font(.headline)
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    if !activeWeapon.primarySummary.isEmpty {
+                        Text(activeWeapon.primarySummary.joined(separator: " • "))
+                            .font(.subheadline)
+                            .foregroundStyle(CogitatorPalette.amber)
+                    }
+                    if !activeWeapon.secondarySummary.isEmpty {
+                        Text(activeWeapon.secondarySummary.joined(separator: " • "))
+                            .font(.caption)
+                            .foregroundStyle(CogitatorPalette.textSecondary)
+                    }
+                }
+                .cogitatorPanelRow()
+            }
+
+            LabeledContent("Check", value: flow.result.checkName)
+                .cogitatorReadoutStyle()
+                .cogitatorPanelRow()
+
+            HStack {
+                Text("Final Target")
+                    .foregroundStyle(CogitatorPalette.textPrimary)
+                Spacer()
+                Text(String(flow.result.finalTarget))
+                    .foregroundStyle(CogitatorPalette.amber)
+                    .monospacedDigit()
+                    .accessibilityIdentifier("combat.attack.final-target")
+            }
+            .cogitatorPanelRow()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Situational Modifier")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
+                    ForEach(DifficultyPresetRegistry.standard) { preset in
+                        Button(preset.value.signedValueLabel) {
+                            situationalModifier = preset.normalizedModifier()
+                            customModifierText = String(preset.value)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("combat.attack.modifier.\(preset.value.accessibilitySignedToken)")
+                    }
+                }
+            }
+            .cogitatorPanelRow()
+
+            TextField("Custom Modifier", text: $customModifierText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.custom-modifier")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            Button("Apply Custom Modifier") {
+                if let parsedCustomModifier {
+                    situationalModifier = .manual(value: parsedCustomModifier)
+                }
+            }
+            .disabled(parsedCustomModifier == nil)
+            .cogitatorPanelRow()
+            .accessibilityIdentifier("combat.attack.apply-custom")
+
+            if !flow.autoAppliedModifiers.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Auto-applied active modifiers")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                    ForEach(flow.autoAppliedModifiers) { modifier in
+                        HStack {
+                            Text(modifier.label)
+                                .foregroundStyle(CogitatorPalette.textPrimary)
+                            Spacer()
+                            CogitatorStatusChip(modifier.value.signedValueLabel, level: modifierStatusLevel(modifier.value))
+                        }
+                    }
+                }
+                .cogitatorPanelRow()
+            }
+
+            if !flow.visibleConditions.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Visible conditions")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                    ForEach(flow.visibleConditions) { condition in
+                        Text(condition.label)
+                            .foregroundStyle(CogitatorPalette.textPrimary)
+                    }
+                }
+                .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader("Attack Context", subtitle: flow.subtitle)
+        } footer: {
+            Text("Active session temporary modifiers are applied automatically here; visible conditions stay explicit context.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private func rollSection(flow: CombatEncounterCheckFlow) -> some View {
+        Section {
+            TextField("Roll Result", text: $rollText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.roll")
+#if os(iOS)
+                .keyboardType(.numberPad)
+#endif
+
+            if let attackOutcome {
+                HStack {
+                    Text("Outcome")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    CogitatorStatusChip(
+                        attackOutcome.isSuccess ? "HIT" : "MISS",
+                        level: attackOutcome.isSuccess ? .nominal : .warning
+                    )
+                }
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.outcome")
+
+                LabeledContent("Margin", value: attackOutcome.margin.signedValueLabel)
+                    .cogitatorReadoutStyle()
+                    .cogitatorPanelRow()
+            } else {
+                Text("Enter the final roll to resolve the bounded attack check.")
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader("Roll Resolution", subtitle: "Manual Final Roll")
+        }
+    }
+
+    @ViewBuilder
+    private func damageSection(flow: CombatEncounterCheckFlow) -> some View {
+        Section {
+            TextField("Raw Damage", text: $rawDamageText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.raw-damage")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Target Wounds", text: $targetWoundsText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.target-wounds")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Target Armour", text: $targetArmourText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.target-armour")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Target Toughness Bonus", text: $targetToughnessBonusText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.target-toughness")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Penetration Override", text: $penetrationOverrideText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.attack.penetration")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            if let damageResult {
+                HStack {
+                    Text("Applied Damage")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    Text(String(damageResult.appliedDamage))
+                        .foregroundStyle(CogitatorPalette.warning)
+                        .monospacedDigit()
+                        .accessibilityIdentifier("combat.attack.damage.applied")
+                }
+                .cogitatorPanelRow()
+
+                HStack {
+                    Text("Target Wounds After")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    Text(String(damageResult.woundsAfter))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                        .monospacedDigit()
+                }
+                .cogitatorPanelRow()
+            } else {
+                Text("If the attack hits, enter target mitigation manually and reuse the bounded damage pipeline below.")
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader("Damage Handoff", subtitle: "Bounded Target Damage")
+        }
+    }
+
+    @ViewBuilder
+    private var unavailableSection: some View {
+        Section {
+            Text("A current active weapon is required for the attack shortcut.")
+                .cogitatorSupportingText()
+                .cogitatorPanelRow()
+        } header: {
+            CogitatorSectionHeader("Attack Context", subtitle: "Unavailable")
+        }
+    }
+
+    private var selectedWeapon: Weapon? {
+        guard let selectedWeaponID else { return nil }
+        return weapons.first(where: { $0.id == selectedWeaponID })
+    }
+
+    private var draftCombatContext: CombatContext {
+        combatContext.replacingActiveWeapon(selectedWeapon)
+    }
+
+    private var attackFlow: CombatEncounterCheckFlow? {
+        CombatEncounterResolver.attackFlow(
+            combatContext: draftCombatContext,
+            characteristics: characteristics,
+            additionalModifier: effectiveSituationalModifier
+        )
+    }
+
+    private var attackOutcome: CombatCheckOutcome? {
+        guard let attackFlow, let parsedRoll else { return nil }
+        return CombatEncounterResolver.resolveRoll(for: attackFlow, roll: parsedRoll)
+    }
+
+    private var damageResult: DamageResult? {
+        guard let attackFlow,
+              attackOutcome?.isSuccess == true,
+              let rawDamage = Int(rawDamageText.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let targetWounds = Int(targetWoundsText.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let targetArmour = Int(targetArmourText.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let targetToughnessBonus = Int(targetToughnessBonusText.trimmingCharacters(in: .whitespacesAndNewlines))
+        else {
+            return nil
+        }
+
+        let penetrationOverride = Int(penetrationOverrideText.trimmingCharacters(in: .whitespacesAndNewlines))
+        return CombatEncounterResolver.resolveTargetDamage(
+            for: attackFlow,
+            rawDamage: rawDamage,
+            targetWounds: targetWounds,
+            targetArmour: targetArmour,
+            targetToughnessBonus: targetToughnessBonus,
+            penetrationOverride: penetrationOverride
+        )
+    }
+
+    private var effectiveSituationalModifier: CheckModifier? {
+        situationalModifier.value == 0 ? nil : situationalModifier
+    }
+
+    private var parsedRoll: Int? {
+        Int(rollText.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    private var parsedCustomModifier: Int? {
+        Int(customModifierText.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    private func modifierStatusLevel(_ value: Int) -> CogitatorStatusLevel {
+        if value <= -30 {
+            return .critical
+        }
+        if value < 0 {
+            return .warning
+        }
+        if value == 0 {
+            return .caution
+        }
+        return .nominal
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CombatReactionShortcutView: View {
+    let reaction: CombatReactionShortcutKind
+    let combatContext: CombatContext
+    let characteristics: CharacteristicSet
+    let skills: [Skill]
+    let onCancel: () -> Void
+
+    @State private var situationalModifier = CheckModifier.preset(value: 0)
+    @State private var customModifierText = "0"
+    @State private var rollText = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                contextSection
+                rollSection
+            }
+            .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
+            .navigationTitle("\(reaction.title) Shortcut")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close", action: onCancel)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var contextSection: some View {
+        Section {
+            LabeledContent("Check", value: flow.result.checkName)
+                .cogitatorReadoutStyle()
+                .cogitatorPanelRow()
+
+            HStack {
+                Text("Final Target")
+                    .foregroundStyle(CogitatorPalette.textPrimary)
+                Spacer()
+                Text(String(flow.result.finalTarget))
+                    .foregroundStyle(CogitatorPalette.amber)
+                    .monospacedDigit()
+                    .accessibilityIdentifier("combat.reaction.final-target")
+            }
+            .cogitatorPanelRow()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Situational Modifier")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
+                    ForEach(DifficultyPresetRegistry.standard) { preset in
+                        Button(preset.value.signedValueLabel) {
+                            situationalModifier = preset.normalizedModifier()
+                            customModifierText = String(preset.value)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("combat.reaction.modifier.\(preset.value.accessibilitySignedToken)")
+                    }
+                }
+            }
+            .cogitatorPanelRow()
+
+            TextField("Custom Modifier", text: $customModifierText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.reaction.custom-modifier")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            Button("Apply Custom Modifier") {
+                if let parsedCustomModifier {
+                    situationalModifier = .manual(value: parsedCustomModifier)
+                }
+            }
+            .disabled(parsedCustomModifier == nil)
+            .cogitatorPanelRow()
+
+            if !flow.autoAppliedModifiers.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Auto-applied active modifiers")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                    ForEach(flow.autoAppliedModifiers) { modifier in
+                        HStack {
+                            Text(modifier.label)
+                                .foregroundStyle(CogitatorPalette.textPrimary)
+                            Spacer()
+                            CogitatorStatusChip(modifier.value.signedValueLabel, level: modifierStatusLevel(modifier.value))
+                        }
+                    }
+                }
+                .cogitatorPanelRow()
+            }
+
+            if !flow.pinnedChecks.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Pinned checks")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                    ForEach(flow.pinnedChecks) { pinnedCheck in
+                        Text(pinnedCheck.label)
+                            .foregroundStyle(CogitatorPalette.textPrimary)
+                    }
+                }
+                .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader(reaction.title, subtitle: reaction.subtitle)
+        } footer: {
+            Text("Defensive reactions reuse the explainable check engine and current combat context.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private var rollSection: some View {
+        Section {
+            TextField("Roll Result", text: $rollText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.reaction.roll")
+#if os(iOS)
+                .keyboardType(.numberPad)
+#endif
+
+            if let outcome {
+                HStack {
+                    Text("Outcome")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    CogitatorStatusChip(
+                        outcome.isSuccess ? "SUCCESS" : "FAIL",
+                        level: outcome.isSuccess ? .nominal : .warning
+                    )
+                }
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.reaction.outcome")
+
+                LabeledContent("Margin", value: outcome.margin.signedValueLabel)
+                    .cogitatorReadoutStyle()
+                    .cogitatorPanelRow()
+            } else {
+                Text("Enter the final defensive roll to resolve the shortcut.")
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader("Roll Resolution", subtitle: "Manual Final Roll")
+        }
+    }
+
+    private var flow: CombatEncounterCheckFlow {
+        CombatEncounterResolver.reactionFlow(
+            reaction,
+            combatContext: combatContext,
+            characteristics: characteristics,
+            skills: skills,
+            additionalModifier: effectiveSituationalModifier
+        )
+    }
+
+    private var outcome: CombatCheckOutcome? {
+        guard let parsedRoll = Int(rollText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            return nil
+        }
+        return CombatEncounterResolver.resolveRoll(for: flow, roll: parsedRoll)
+    }
+
+    private var effectiveSituationalModifier: CheckModifier? {
+        situationalModifier.value == 0 ? nil : situationalModifier
+    }
+
+    private var parsedCustomModifier: Int? {
+        Int(customModifierText.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    private func modifierStatusLevel(_ value: Int) -> CogitatorStatusLevel {
+        if value <= -30 {
+            return .critical
+        }
+        if value < 0 {
+            return .warning
+        }
+        if value == 0 {
+            return .caution
+        }
+        return .nominal
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct CombatDamageShortcutView: View {
+    let combatContext: CombatContext
+    let characteristics: CharacteristicSet
+    let resources: ResourceState
+    let armour: [Armour]
+    let onCancel: () -> Void
+    let onApply: (Int) -> Void
+
+    @State private var selectedArmourID: UUID?
+    @State private var rawDamageText = "0"
+    @State private var armourPointsText = "0"
+    @State private var penetrationText = "0"
+
+    init(
+        combatContext: CombatContext,
+        characteristics: CharacteristicSet,
+        resources: ResourceState,
+        armour: [Armour],
+        onCancel: @escaping () -> Void,
+        onApply: @escaping (Int) -> Void
+    ) {
+        self.combatContext = combatContext
+        self.characteristics = characteristics
+        self.resources = resources
+        self.armour = armour
+        self.onCancel = onCancel
+        self.onApply = onApply
+        let defaultArmour = armour.max(by: { $0.armourPoints < $1.armourPoints })
+        _selectedArmourID = State(initialValue: defaultArmour?.id)
+        _armourPointsText = State(initialValue: String(defaultArmour?.armourPoints ?? 0))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                inputSection
+                breakdownSection
+            }
+            .cogitatorScreenChrome()
+            .cogitatorFormRhythm()
+            .navigationTitle("Apply Damage")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close", action: onCancel)
+                }
+            }
+        }
+        .onChange(of: selectedArmourID) { _, updated in
+            guard let updated, let selectedArmour = armour.first(where: { $0.id == updated }) else { return }
+            armourPointsText = String(selectedArmour.armourPoints)
+        }
+    }
+
+    @ViewBuilder
+    private var inputSection: some View {
+        Section {
+            LabeledContent("Current Wounds", value: String(resources.currentWounds))
+                .cogitatorReadoutStyle()
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.current-wounds")
+
+            LabeledContent("Toughness Bonus", value: String(characteristics.bonus.toughness))
+                .cogitatorReadoutStyle()
+                .cogitatorPanelRow()
+
+            if !armour.isEmpty {
+                Picker("Armour Reference", selection: $selectedArmourID) {
+                    Text("Manual").tag(Optional<UUID>.none)
+                    ForEach(armour) { armourEntry in
+                        Text("\(armourEntry.location) (\(armourEntry.armourPoints))").tag(Optional(armourEntry.id))
+                    }
+                }
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.armour-reference")
+            }
+
+            TextField("Raw Damage", text: $rawDamageText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.raw")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Armour Points", text: $armourPointsText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.armour")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+
+            TextField("Penetration", text: $penetrationText)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.penetration")
+#if os(iOS)
+                .keyboardType(.numbersAndPunctuation)
+#endif
+        } header: {
+            CogitatorSectionHeader("Incoming Damage", subtitle: "Bounded Self-Application")
+        } footer: {
+            Text("This shortcut applies the accepted damage pipeline to the current character only.")
+                .cogitatorSupportingText()
+        }
+    }
+
+    @ViewBuilder
+    private var breakdownSection: some View {
+        Section {
+            if let damageResult {
+                HStack {
+                    Text("Applied Damage")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    Text(String(damageResult.appliedDamage))
+                        .foregroundStyle(CogitatorPalette.warning)
+                        .monospacedDigit()
+                        .accessibilityIdentifier("combat.damage.applied")
+                }
+                .cogitatorPanelRow()
+
+                HStack {
+                    Text("Wounds After")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Spacer()
+                    Text(String(damageResult.woundsAfter))
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                        .monospacedDigit()
+                        .accessibilityIdentifier("combat.damage.wounds-after")
+                }
+                .cogitatorPanelRow()
+
+                Button("Apply to Current Wounds") {
+                    onApply(damageResult.woundsAfter)
+                }
+                .buttonStyle(.borderedProminent)
+                .cogitatorPanelRow()
+                .accessibilityIdentifier("combat.damage.apply")
+            } else {
+                Text("Enter raw damage and mitigation to preview the bounded wound application result.")
+                    .cogitatorSupportingText()
+                    .cogitatorPanelRow()
+            }
+        } header: {
+            CogitatorSectionHeader("Damage Breakdown", subtitle: "Explainable Mitigation")
+        }
+    }
+
+    private var damageResult: DamageResult? {
+        guard let rawDamage = Int(rawDamageText.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let armourPoints = Int(armourPointsText.trimmingCharacters(in: .whitespacesAndNewlines)),
+              let penetration = Int(penetrationText.trimmingCharacters(in: .whitespacesAndNewlines))
+        else {
+            return nil
+        }
+
+        let request = DamageRequest(
+            source: .manual(label: "Incoming Damage"),
+            rawDamage: rawDamage,
+            woundsBefore: resources.currentWounds,
+            mitigation: DamageMitigation(
+                armour: armourPoints,
+                penetration: penetration,
+                toughnessBonus: characteristics.bonus.toughness
+            ),
+            combatContext: combatContext
+        )
+        return DamageResolver.resolve(request)
     }
 }
 

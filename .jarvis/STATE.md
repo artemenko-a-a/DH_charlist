@@ -1,23 +1,21 @@
-# Batch 46 State
+# Batch 47 State
 
-- status: validated and repo-phase complete
+- status: implemented; final validation in progress
 - scope:
-  - add a local JSON armour compendium import flow on top of the accepted Batch 45 armour catalog
-  - replace the current local armour compendium only after explicit destructive confirmation
-  - keep existing character-owned armour entries detached and unchanged after compendium replacement
+  - add fast combat action shortcuts on top of the accepted Session Mode / combat workspace
+  - add a bounded guided attack flow that reuses the accepted explainable check engine and damage pipeline
+  - add bounded defensive reaction shortcuts plus quick combat modifier/condition toggles for active play
   - preserve accepted JSON-backed and SwiftData-backed character persistence behavior
 - implemented:
-  - `Sources/DHCharList/Application/ArmourCompendium.swift` now includes schema-v1 armour compendium import models, validation, preview summary, and import service wiring
-  - `AppContainer`, `DHCharListAppShell`, and `CharacterListScreen` now compose armour compendium import staging/confirmation state alongside the accepted weapon compendium flow
-  - `EquipmentScreen` now exposes `Import Local Armour Compendium`, shows replace-all confirmation text, and applies imported armour catalogs to future autocomplete/add-armour flows only
-  - `DHCharListHost` launch configuration and host app now support deterministic staged armour-compendium import payloads for focused UI/runtime validation
-  - package and host UI tests cover valid import, malformed/duplicate rejection, cancel safety, replacement-backed autocomplete, and detached existing-armour safety
+  - `Sources/DHCharList/Rules/CombatActionShortcuts.swift` now defines bounded combat shortcut models, a shared encounter resolver, and explainable attack/reaction/damage handoff helpers
+  - `SessionModeScreen` now exposes encounter shortcut buttons, quick combat toggles, and bounded sheets for attack, reaction, and damage flows without replacing the accepted workspace
+  - host UI smoke coverage now exercises the new encounter shortcut flow, and legacy quick-mechanics/combat smokes were hardened to match the current sheet/editor controls
+  - package tests cover shortcut construction, bounded attack flow behavior, reaction shortcut behavior, quick toggle metadata, and damage handoff through the accepted rules layer
 - validation:
-  - green repo gates: `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`
-  - explicit required checks passed: `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - focused host UI sanity passed: `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b46-armour-import-rerun5.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testArmourCompendiumImportReplacesLocalCatalogWithoutMutatingSavedArmour`
+  - package checks and focused host UI sanity have passed locally
+  - fresh truthful coverage and `make ci` are the remaining repo-phase gates to re-run after the final smoke/doc updates
 - truthful limitations:
-  - no merge/conflict UI
-  - no OCR/rulebook parsing
-  - no cloud compendium sync
-  - no persistent linkage from imported compendium definitions to saved armour entries
+  - no initiative tracker
+  - no multiple-hit or rate-of-fire simulator
+  - no hit-location or critical-table automation
+  - no full opposed-roll or action-economy engine

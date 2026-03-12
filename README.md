@@ -224,11 +224,16 @@ What it surfaces:
 - pinned checks and temporary modifiers in the same workspace
 - short combat condition/status notes
 - one-tap quick mechanics shortcuts for common combat-facing checks
+- encounter shortcuts for attack, dodge, parry, reload, and bounded damage application
+- quick toggles for common combat modifiers and conditions during active play
 
 Current workspace behavior:
 - active weapon selection persists as session-scoped state and clears safely if the referenced weapon is removed later
 - combat conditions are lightweight user-managed notes, not a rules-driven status engine
 - quick mechanics access from `Session Mode` remains transparent and uses the same modifier breakdown as Batch 29
+- guided attack flow stays bounded and manual-first: confirm weapon/context, apply modifiers, enter roll, then optionally route raw damage through the accepted damage pipeline
+- dodge and parry shortcuts reuse the same explainable check engine rather than a separate combat-only path
+- reload and quick-toggle actions are explicit conveniences only; there is still no action-economy enforcement or full combat simulation
 - iPhone layouts prioritize the combat summary and shortcuts first, while keeping the full workspace usable on iPad
 
 ## How to run tests

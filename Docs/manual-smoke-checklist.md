@@ -226,3 +226,12 @@ Latest local validation status (2026-03-09):
     - cancel once and verify the current armour autocomplete catalog remains unchanged
     - repeat, confirm the destructive replace, and verify imported definitions now appear in `Add Armour` autocomplete
     - verify a previously saved character-owned armour entry still shows its original manually edited values after the compendium replacement
+34. Batch 47 combat action shortcuts + encounter flow:
+    - open `Session Mode` for an existing character with at least one weapon equipped
+    - verify the workspace now exposes explicit shortcut buttons for `Attack`, `Dodge`, `Parry`, `Apply Damage`, and `Reload`
+    - tap at least one quick modifier toggle and one quick condition toggle; verify each can be turned on and off without leaving the screen
+    - launch `Attack`, confirm the active weapon is shown, apply a preset or custom modifier, enter a roll, and verify the check outcome is visible and uses the accepted explainable check path
+    - if the attack hits, enter raw damage plus target mitigation inputs and verify the bounded damage readout appears before dismissing the sheet
+    - launch `Apply Damage`, enter incoming raw damage, armour, and toughness context, then apply it; verify current wounds update in the workspace
+    - launch `Dodge` and `Parry`, enter rolls, and verify the reaction sheets show bounded check outcomes without claiming full opposed-roll resolution
+    - verify `Reload` and the quick toggles remain explicit convenience actions only; there should still be no initiative tracker, hit-location flow, or critical table automation

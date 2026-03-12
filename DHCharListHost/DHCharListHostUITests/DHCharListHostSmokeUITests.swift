@@ -220,6 +220,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
 
         let sessionQuickMechanicsButton = app.buttons["quick-mechanics.session"]
+        reveal(sessionQuickMechanicsButton, maxSwipes: 3)
         XCTAssertTrue(sessionQuickMechanicsButton.waitForExistence(timeout: 5))
         sessionQuickMechanicsButton.tap()
         XCTAssertTrue(app.navigationBars["Quick Check"].waitForExistence(timeout: 5))
@@ -326,6 +327,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         }
 
         let reopenQuickCheck = app.buttons["quick-mechanics.session"]
+        reveal(reopenQuickCheck, maxSwipes: 4)
         XCTAssertTrue(reopenQuickCheck.waitForExistence(timeout: 5))
         reopenQuickCheck.tap()
         XCTAssertTrue(app.navigationBars["Quick Check"].waitForExistence(timeout: 5))
@@ -339,6 +341,178 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(activeCondition.waitForExistence(timeout: 5))
 
         app.buttons["Done"].tap()
+    }
+
+    func testCombatEncounterShortcutsFlow() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addWeaponButton = app.buttons["Add Weapon"]
+        XCTAssertTrue(addWeaponButton.waitForExistence(timeout: 5))
+        addWeaponButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Weapon"].waitForExistence(timeout: 5))
+
+        let weaponNameField = app.textFields["Weapon Name"]
+        XCTAssertTrue(weaponNameField.waitForExistence(timeout: 5))
+        weaponNameField.tap()
+        weaponNameField.typeText("Laspistol")
+        app.buttons["Save"].tap()
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let sessionSection = app.staticTexts["Session Mode"]
+        reveal(sessionSection, maxSwipes: 3)
+        XCTAssertTrue(sessionSection.waitForExistence(timeout: 5))
+        sessionSection.tap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+
+        let increaseWounds = app.buttons["combat.wounds.increment"]
+        XCTAssertTrue(increaseWounds.waitForExistence(timeout: 5))
+        for _ in 0..<6 {
+            increaseWounds.tap()
+        }
+        let woundsValue = app.staticTexts["combat.wounds.value"]
+        XCTAssertTrue(woundsValue.waitForExistence(timeout: 5))
+        XCTAssertEqual(woundsValue.label, "6")
+
+        let activeWeaponButton = app.buttons["Set Active Weapon Laspistol"]
+        reveal(activeWeaponButton, maxSwipes: 3)
+        XCTAssertTrue(activeWeaponButton.waitForExistence(timeout: 5))
+        activeWeaponButton.tap()
+
+        let aimToggle = app.buttons["combat.toggle.modifier.aim"]
+        reveal(aimToggle, maxSwipes: 3)
+        XCTAssertTrue(aimToggle.waitForExistence(timeout: 5))
+        aimToggle.tap()
+
+        let pinnedToggle = app.buttons["combat.toggle.condition.pinned-down"]
+        reveal(pinnedToggle, maxSwipes: 3)
+        XCTAssertTrue(pinnedToggle.waitForExistence(timeout: 5))
+        pinnedToggle.tap()
+
+        let attackShortcut = app.buttons["combat.shortcut.attack"]
+        reveal(attackShortcut, maxSwipes: 3)
+        XCTAssertTrue(attackShortcut.waitForExistence(timeout: 5))
+        attackShortcut.tap()
+        XCTAssertTrue(app.navigationBars["Attack Shortcut"].waitForExistence(timeout: 5))
+
+        let attackCustomModifier = textInput("combat.attack.custom-modifier")
+        reveal(attackCustomModifier, maxSwipes: 3)
+        XCTAssertTrue(attackCustomModifier.waitForExistence(timeout: 5))
+        attackCustomModifier.tap()
+        attackCustomModifier.clearAndEnterText("30")
+
+        let applyAttackCustomModifier = app.buttons["combat.attack.apply-custom"]
+        XCTAssertTrue(applyAttackCustomModifier.waitForExistence(timeout: 5))
+        applyAttackCustomModifier.tap()
+
+        let attackRoll = textInput("combat.attack.roll")
+        reveal(attackRoll, maxSwipes: 3)
+        XCTAssertTrue(attackRoll.waitForExistence(timeout: 5))
+        attackRoll.tap()
+        attackRoll.typeText("20")
+
+        let attackRawDamage = textInput("combat.attack.raw-damage")
+        reveal(attackRawDamage, maxSwipes: 3)
+        XCTAssertTrue(attackRawDamage.waitForExistence(timeout: 5))
+        attackRawDamage.tap()
+        attackRawDamage.typeText("9")
+
+        let targetWounds = textInput("combat.attack.target-wounds")
+        XCTAssertTrue(targetWounds.waitForExistence(timeout: 5))
+        targetWounds.tap()
+        targetWounds.clearAndEnterText("7")
+
+        let targetArmour = textInput("combat.attack.target-armour")
+        XCTAssertTrue(targetArmour.waitForExistence(timeout: 5))
+        targetArmour.tap()
+        targetArmour.clearAndEnterText("2")
+
+        let targetToughness = textInput("combat.attack.target-toughness")
+        XCTAssertTrue(targetToughness.waitForExistence(timeout: 5))
+        targetToughness.tap()
+        targetToughness.clearAndEnterText("3")
+
+        let appliedDamage = app.staticTexts["combat.attack.damage.applied"]
+        reveal(appliedDamage, maxSwipes: 3)
+        XCTAssertTrue(appliedDamage.waitForExistence(timeout: 5))
+
+        app.buttons["Close"].tap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+
+        let damageShortcut = app.buttons["combat.shortcut.damage"]
+        reveal(damageShortcut, maxSwipes: 3)
+        XCTAssertTrue(damageShortcut.waitForExistence(timeout: 5))
+        damageShortcut.tap()
+        XCTAssertTrue(app.navigationBars["Apply Damage"].waitForExistence(timeout: 5))
+
+        let incomingRawDamage = textInput("combat.damage.raw")
+        XCTAssertTrue(incomingRawDamage.waitForExistence(timeout: 5))
+        incomingRawDamage.tap()
+        incomingRawDamage.clearAndEnterText("8")
+
+        let incomingArmour = textInput("combat.damage.armour")
+        XCTAssertTrue(incomingArmour.waitForExistence(timeout: 5))
+        incomingArmour.tap()
+        incomingArmour.clearAndEnterText("1")
+
+        let incomingPenetration = textInput("combat.damage.penetration")
+        XCTAssertTrue(incomingPenetration.waitForExistence(timeout: 5))
+        incomingPenetration.tap()
+        incomingPenetration.clearAndEnterText("0")
+
+        let applyIncomingDamage = app.buttons["combat.damage.apply"]
+        reveal(applyIncomingDamage, maxSwipes: 2)
+        XCTAssertTrue(applyIncomingDamage.waitForExistence(timeout: 5))
+        applyIncomingDamage.tap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+
+        let dodgeShortcut = app.buttons["combat.shortcut.dodge"]
+        reveal(dodgeShortcut, maxSwipes: 3)
+        XCTAssertTrue(dodgeShortcut.waitForExistence(timeout: 5))
+        dodgeShortcut.tap()
+        XCTAssertTrue(app.navigationBars["Dodge Shortcut"].waitForExistence(timeout: 5))
+
+        let dodgeCustomModifier = textInput("combat.reaction.custom-modifier")
+        reveal(dodgeCustomModifier, maxSwipes: 3)
+        XCTAssertTrue(dodgeCustomModifier.waitForExistence(timeout: 5))
+        dodgeCustomModifier.tap()
+        dodgeCustomModifier.clearAndEnterText("30")
+        app.buttons["Apply Custom Modifier"].tap()
+
+        let dodgeRoll = textInput("combat.reaction.roll")
+        reveal(dodgeRoll, maxSwipes: 3)
+        XCTAssertTrue(dodgeRoll.waitForExistence(timeout: 5))
+        dodgeRoll.tap()
+        dodgeRoll.typeText("5")
+        app.buttons["Close"].tap()
+        XCTAssertTrue(app.navigationBars["Session"].waitForExistence(timeout: 5))
+
+        let parryShortcut = app.buttons["combat.shortcut.parry"]
+        reveal(parryShortcut, maxSwipes: 3)
+        XCTAssertTrue(parryShortcut.waitForExistence(timeout: 5))
+        parryShortcut.tap()
+        XCTAssertTrue(app.navigationBars["Parry Shortcut"].waitForExistence(timeout: 5))
+
+        let parryCustomModifier = textInput("combat.reaction.custom-modifier")
+        reveal(parryCustomModifier, maxSwipes: 3)
+        XCTAssertTrue(parryCustomModifier.waitForExistence(timeout: 5))
+        parryCustomModifier.tap()
+        parryCustomModifier.clearAndEnterText("40")
+        app.buttons["Apply Custom Modifier"].tap()
+
+        let parryRoll = textInput("combat.reaction.roll")
+        reveal(parryRoll, maxSwipes: 3)
+        XCTAssertTrue(parryRoll.waitForExistence(timeout: 5))
+        parryRoll.tap()
+        parryRoll.typeText("10")
+        app.buttons["Close"].tap()
     }
 
     func testWeaponCompendiumAutocompleteAddsDetachedEditableCopy() {
@@ -618,7 +792,11 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         if textField.exists {
             return textField
         }
-        return app.textViews[identifier]
+        let textView = app.textViews[identifier]
+        if textView.exists {
+            return textView
+        }
+        return textField
     }
 
     private func staticText(containing snippet: String) -> XCUIElement {

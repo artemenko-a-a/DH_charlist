@@ -1,24 +1,23 @@
-# Batch 45 State
+# Batch 46 State
 
 - status: validated and repo-phase complete
 - scope:
-  - add a bounded local armour compendium/catalog alongside the accepted weapon compendium flow
-  - support armour autocomplete in the existing `Equipment` -> `Add Armour` editor path
-  - keep saved armour entries as detached character-owned copies with no persistent source linkage
+  - add a local JSON armour compendium import flow on top of the accepted Batch 45 armour catalog
+  - replace the current local armour compendium only after explicit destructive confirmation
+  - keep existing character-owned armour entries detached and unchanged after compendium replacement
   - preserve accepted JSON-backed and SwiftData-backed character persistence behavior
 - implemented:
-  - `Sources/DHCharList/Application/ArmourCompendium.swift` defines structured armour catalog types, safe demo definitions, deterministic autocomplete, and explicit source-to-instance copying into `Character.Equipment.Armour`
-  - `Sources/DHCharList/Infrastructure/Persistence/JSONFileArmourCompendiumRepository.swift` persists the local armour catalog as a separate local JSON file
-  - `AppContainer` now composes `ArmourCompendiumUseCases`, and the app shell/character list flow loads the active armour catalog for the equipment screen
-  - `EquipmentScreen` now offers armour compendium search/pick/prefill inside the existing `Add Armour` flow while keeping the accepted manual armour editor intact
-  - inserted armour stays detached from the source definition; later compendium changes do not mutate saved character-owned armour
-  - bounded safe demo armour definitions are included for local-first use without embedding full copyrighted rulebook content
+  - `Sources/DHCharList/Application/ArmourCompendium.swift` now includes schema-v1 armour compendium import models, validation, preview summary, and import service wiring
+  - `AppContainer`, `DHCharListAppShell`, and `CharacterListScreen` now compose armour compendium import staging/confirmation state alongside the accepted weapon compendium flow
+  - `EquipmentScreen` now exposes `Import Local Armour Compendium`, shows replace-all confirmation text, and applies imported armour catalogs to future autocomplete/add-armour flows only
+  - `DHCharListHost` launch configuration and host app now support deterministic staged armour-compendium import payloads for focused UI/runtime validation
+  - package and host UI tests cover valid import, malformed/duplicate rejection, cancel safety, replacement-backed autocomplete, and detached existing-armour safety
 - validation:
   - green repo gates: `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`
   - explicit required checks passed: `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - focused host UI sanity passed: `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b45-armour-compendium-sanity-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testArmourCompendiumAutocompleteAddsDetachedEditableCopy`
+  - focused host UI sanity passed: `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b46-armour-import-rerun5.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testArmourCompendiumImportReplacesLocalCatalogWithoutMutatingSavedArmour`
 - truthful limitations:
-  - no armour compendium import yet
+  - no merge/conflict UI
   - no OCR/rulebook parsing
   - no cloud compendium sync
-  - no persistent linkage from compendium definitions to saved armour entries
+  - no persistent linkage from imported compendium definitions to saved armour entries

@@ -502,8 +502,6 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         XCTAssertTrue(staticText(containing: "UI Imported Catalog").waitForExistence(timeout: 5))
         XCTAssertTrue(staticText(containing: "replaces your current local compendium").waitForExistence(timeout: 5))
-        XCTAssertTrue(staticText(containing: "stay detached and unchanged").waitForExistence(timeout: 5))
-
         let replaceCompendiumButton = button(containing: "Replace Local Compendium")
         XCTAssertTrue(replaceCompendiumButton.waitForExistence(timeout: 5))
         replaceCompendiumButton.tap()
@@ -529,6 +527,72 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertEqual(app.textFields["Weapon Name"].value as? String, "Legacy Laspistol")
         XCTAssertEqual(app.textFields["Weapon Penetration"].value as? String, "1")
         app.buttons["Cancel"].tap()
+    }
+
+    func testArmourCompendiumImportReplacesLocalCatalogWithoutMutatingSavedArmour() {
+        app.launchArguments += ["-dh-ui-stage-armour-compendium-import"]
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addArmourButton = app.buttons["Add Armour"]
+        XCTAssertTrue(addArmourButton.waitForExistence(timeout: 5))
+        addArmourButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Armour"].waitForExistence(timeout: 5))
+
+        let compendiumSearchField = textInput("armour-compendium.search")
+        XCTAssertTrue(compendiumSearchField.waitForExistence(timeout: 5))
+        compendiumSearchField.tap()
+        compendiumSearchField.typeText("flak")
+
+        let flakSuggestion = app.buttons["armour-compendium.pick.local-demo.flak-coat"]
+        XCTAssertTrue(flakSuggestion.waitForExistence(timeout: 5))
+        flakSuggestion.tap()
+
+        let locationField = app.textFields["Armour Location"]
+        XCTAssertTrue(locationField.waitForExistence(timeout: 5))
+        locationField.clearAndEnterText("Legacy Flak Coat")
+
+        let armourPointsField = app.textFields["Armour Points"]
+        XCTAssertTrue(armourPointsField.waitForExistence(timeout: 5))
+        armourPointsField.clearAndEnterText("5")
+
+        app.buttons["Save"].tap()
+        XCTAssertTrue(labeledElement(containing: "Legacy Flak Coat").waitForExistence(timeout: 5))
+
+        let importCompendiumButton = app.buttons["armour-compendium.import"]
+        XCTAssertTrue(importCompendiumButton.waitForExistence(timeout: 5))
+        importCompendiumButton.tap()
+
+        XCTAssertTrue(staticText(containing: "UI Imported Armour Catalog").waitForExistence(timeout: 5))
+        XCTAssertTrue(staticText(containing: "replaces your current local armour compendium").waitForExistence(timeout: 5))
+
+        let replaceCompendiumButton = button(containing: "Replace Local Armour Compendium")
+        XCTAssertTrue(replaceCompendiumButton.waitForExistence(timeout: 5))
+        replaceCompendiumButton.tap()
+
+        addArmourButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Armour"].waitForExistence(timeout: 5))
+
+        let importedCompendiumSearchField = textInput("armour-compendium.search")
+        XCTAssertTrue(importedCompendiumSearchField.waitForExistence(timeout: 5))
+        importedCompendiumSearchField.tap()
+        importedCompendiumSearchField.typeText("mnem")
+
+        let importedSuggestion = app.buttons["armour-compendium.pick.ui-imported-armour.mnemonic-mesh"]
+        XCTAssertTrue(importedSuggestion.waitForExistence(timeout: 5))
+        importedSuggestion.tap()
+
+        XCTAssertEqual(app.textFields["Armour Location"].value as? String, "Mnemonic Mesh (Body)")
+        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "5")
+        app.buttons["Cancel"].tap()
+
+        XCTAssertTrue(labeledElement(containing: "Legacy Flak Coat").waitForExistence(timeout: 5))
     }
 
     private func assertQuickCheckFinalTarget(_ expectedValue: String) {

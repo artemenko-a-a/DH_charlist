@@ -25,6 +25,7 @@ private struct HostBootstrapView: View {
     @State private var isReady = false
     @State private var container: AppContainer
     @State private var stagedImportPayload: Data?
+    @State private var stagedArmourCompendiumImportPayload: Data?
     @State private var stagedWeaponCompendiumImportPayload: Data?
 
     init(launchConfiguration: DHCharListHostLaunchConfiguration) {
@@ -38,6 +39,7 @@ private struct HostBootstrapView: View {
                 DHCharListAppShell(
                     container: container,
                     initialImportPayload: stagedImportPayload,
+                    initialArmourCompendiumImportPayload: stagedArmourCompendiumImportPayload,
                     initialWeaponCompendiumImportPayload: stagedWeaponCompendiumImportPayload
                 )
                     .accessibilityIdentifier("host.app.shell")
@@ -67,6 +69,10 @@ private struct HostBootstrapView: View {
 
         if launchConfiguration.shouldStageImportPreview {
             await stageImportPreviewIfNeeded()
+        }
+
+        if launchConfiguration.shouldStageArmourCompendiumImport {
+            stageArmourCompendiumImportIfNeeded()
         }
 
         if launchConfiguration.shouldStageWeaponCompendiumImport {
@@ -145,6 +151,31 @@ private struct HostBootstrapView: View {
                 "reload": "Half",
                 "traits": ["Compact", "Reliable"],
                 "notes": "Deterministic UI import seed"
+              }
+            ]
+          }
+        }
+        """.data(using: .utf8)
+    }
+
+    private func stageArmourCompendiumImportIfNeeded() {
+        stagedArmourCompendiumImportPayload = """
+        {
+          "schemaVersion": 1,
+          "catalog": {
+            "id": "ui-imported-armour",
+            "displayName": "UI Imported Armour Catalog",
+            "definitions": [
+              {
+                "id": "ui-imported-armour.mnemonic-mesh",
+                "name": "Mnemonic Mesh",
+                "category": "Body Armour",
+                "coverage": ["Body"],
+                "armourPoints": 5,
+                "weight": "4kg",
+                "availability": "Rare",
+                "traits": ["Flexible"],
+                "notes": "Deterministic UI armour import seed"
               }
             ]
           }

@@ -7,21 +7,25 @@ import SwiftUI
 public struct DHCharListIOSAppHost: App {
     private let container: AppContainer
     private let initialImportPayload: Data?
+    private let initialArmourCompendiumImportPayload: Data?
     private let initialWeaponCompendiumImportPayload: Data?
 
     public init() {
         self.container = .live()
         self.initialImportPayload = nil
+        self.initialArmourCompendiumImportPayload = nil
         self.initialWeaponCompendiumImportPayload = nil
     }
 
     public init(
         container: AppContainer,
         initialImportPayload: Data? = nil,
+        initialArmourCompendiumImportPayload: Data? = nil,
         initialWeaponCompendiumImportPayload: Data? = nil
     ) {
         self.container = container
         self.initialImportPayload = initialImportPayload
+        self.initialArmourCompendiumImportPayload = initialArmourCompendiumImportPayload
         self.initialWeaponCompendiumImportPayload = initialWeaponCompendiumImportPayload
     }
 
@@ -30,6 +34,7 @@ public struct DHCharListIOSAppHost: App {
             DHCharListAppShell(
                 container: container,
                 initialImportPayload: initialImportPayload,
+                initialArmourCompendiumImportPayload: initialArmourCompendiumImportPayload,
                 initialWeaponCompendiumImportPayload: initialWeaponCompendiumImportPayload
             )
         }
@@ -41,15 +46,18 @@ public struct DHCharListAppShell: View {
     @State private var selectedTab: Int = 0
     private let container: AppContainer
     private let initialImportPayload: Data?
+    private let initialArmourCompendiumImportPayload: Data?
     private let initialWeaponCompendiumImportPayload: Data?
 
     public init(
         container: AppContainer = .live(),
         initialImportPayload: Data? = nil,
+        initialArmourCompendiumImportPayload: Data? = nil,
         initialWeaponCompendiumImportPayload: Data? = nil
     ) {
         self.container = container
         self.initialImportPayload = initialImportPayload
+        self.initialArmourCompendiumImportPayload = initialArmourCompendiumImportPayload
         self.initialWeaponCompendiumImportPayload = initialWeaponCompendiumImportPayload
     }
 
@@ -60,10 +68,12 @@ public struct DHCharListAppShell: View {
                 templateUseCases: container.templateUseCases,
                 importExportService: container.importExportService,
                 armourCompendiumUseCases: container.armourCompendiumUseCases,
+                armourCompendiumImportService: container.armourCompendiumImportService,
                 weaponCompendiumUseCases: container.weaponCompendiumUseCases,
                 weaponCompendiumImportService: container.weaponCompendiumImportService,
                 persistenceStatus: container.persistenceStatus,
                 initialImportPayload: initialImportPayload,
+                initialArmourCompendiumImportPayload: initialArmourCompendiumImportPayload,
                 initialWeaponCompendiumImportPayload: initialWeaponCompendiumImportPayload
             )
                 .tabItem { Label("Characters", systemImage: "person.3") }

@@ -213,3 +213,16 @@ Latest local validation status (2026-03-09):
     - cancel once and verify the current autocomplete catalog remains unchanged
     - repeat, confirm the destructive replace, and verify imported definitions now appear in `Add Weapon` autocomplete
     - verify a previously saved character-owned weapon still shows its original manually edited values after the compendium replacement
+33. Batch 46 local armour compendium import:
+    - open `Equipment` for an existing character and tap `Import Local Armour Compendium`
+    - choose a local JSON file matching `Docs/armour-compendium-format.md`
+    - verify the confirmation step explicitly states:
+      - the imported catalog name
+      - detected armour definition count
+      - the current local armour compendium will be replaced
+      - the operation is replace-all, not merge
+      - existing character-owned armour stays detached and unchanged
+      - the action is destructive
+    - cancel once and verify the current armour autocomplete catalog remains unchanged
+    - repeat, confirm the destructive replace, and verify imported definitions now appear in `Add Armour` autocomplete
+    - verify a previously saved character-owned armour entry still shows its original manually edited values after the compendium replacement

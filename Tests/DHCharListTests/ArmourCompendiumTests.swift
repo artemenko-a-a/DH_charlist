@@ -88,22 +88,24 @@ import Testing
     let fileURL = uniqueArmourCompendiumTestFileURL("catalog-replace")
     let repository = JSONFileArmourCompendiumRepository(fileURL: fileURL)
     let useCases = ArmourCompendiumUseCases(repository: repository)
-    let importedCatalog = ArmourCompendiumCatalog(
-        id: "imported-armour-catalog",
-        displayName: "Imported Armour Vault",
-        definitions: [
-            ArmourCompendiumDefinition(
-                id: "imported-armour-catalog.mnemonic-mesh",
-                catalogID: "imported-armour-catalog",
-                name: "Mnemonic Mesh",
-                category: "Body Armour",
-                coverage: ["Body"],
-                armourPoints: 5,
-                weight: "4kg",
-                availability: "Rare",
-                traits: ["Flexible"]
-            )
-        ]
+    let service = ArmourCompendiumJSONImportService()
+    let importedCatalog = try service.import(
+        armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "imported-armour-catalog.mnemonic-mesh",
+                    "name": "Mnemonic Mesh",
+                    "category": "Body Armour",
+                    "coverage": ["Body"],
+                    "armourPoints": 5,
+                    "weight": "4kg",
+                    "availability": "Rare",
+                    "traits": ["Flexible"]
+                ]
+            ]
+        )
     )
 
     #expect(try await useCases.currentCatalog().id == ArmourCompendiumCatalog.demo.id)
@@ -115,6 +117,189 @@ import Testing
     #expect(replaced == importedCatalog)
     #expect(loaded == importedCatalog)
     #expect(results.map(\.name) == ["Mnemonic Mesh"])
+}
+
+@Test func armourCompendiumImportRejectsMalformedJSON() {
+    let service = ArmourCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(Data("{".utf8))
+        Issue.record("Expected malformed JSON import to fail")
+    } catch let error as ArmourCompendiumImportError {
+        #expect(error == .invalidJSON)
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+}
+
+@Test func armourCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() {
+    let summary = ArmourCompendiumImportPreviewSummary(
+        importedCatalogName: "Imported Armour Vault",
+        detectedArmourCount: 1,
+        existingCatalogName: "Local Demo Armour Catalog",
+        existingArmourCount: 2
+    )
+
+    #expect(summary.confirmationMessage.contains("Imported catalog"))
+    #expect(summary.confirmationMessage.contains("1 armour definition"))
+    #expect(summary.confirmationMessage.contains("2 armour definitions"))
+    #expect(summary.confirmationMessage.contains("it does not merge"))
+    #expect(summary.confirmationMessage.contains("Existing character-owned armour stays detached and unchanged"))
+    #expect(summary.confirmationMessage.contains("destructive"))
+}
+
+@Test func armourCompendiumImportRejectsUnsupportedSchemaVersion() throws {
+    let service = ArmourCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(
+            armourCompendiumImportData(
+                schemaVersion: 2,
+                catalogID: "imported-armour-catalog",
+                displayName: "Imported Armour Vault"
+            )
+        )
+        Issue.record("Expected unsupported schema version to fail")
+    } catch let error as ArmourCompendiumImportError {
+        #expect(error == .unsupportedSchemaVersion(2))
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
+}
+
+@Test func armourCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() throws {
+    let service = ArmourCompendiumJSONImportService()
+
+    func expectImportError(
+        _ data: Data,
+        equals expected: ArmourCompendiumImportError,
+        description expectedDescription: String
+    ) {
+        do {
+            _ = try service.import(data)
+            Issue.record("Expected armour compendium import to fail with \(expected)")
+        } catch let error as ArmourCompendiumImportError {
+            #expect(error == expected)
+            #expect(error.errorDescription == expectedDescription)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "   ",
+            displayName: "Imported Armour Vault"
+        ),
+        equals: .invalidCatalogID,
+        description: "Armour compendium import failed: catalog id is required."
+    )
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "   "
+        ),
+        equals: .invalidCatalogDisplayName,
+        description: "Armour compendium import failed: catalog display name is required."
+    )
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "   ",
+                    "name": "Mnemonic Mesh",
+                    "armourPoints": 5
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionID(index: 0),
+        description: "Armour compendium import failed: definition #1 is missing an id."
+    )
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "imported-armour-catalog.mnemonic-mesh",
+                    "name": "   ",
+                    "armourPoints": 5
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionName(index: 0),
+        description: "Armour compendium import failed: definition #1 is missing a name."
+    )
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "imported-armour-catalog.mnemonic-mesh",
+                    "name": "Mnemonic Mesh"
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionArmourPoints(index: 0),
+        description: "Armour compendium import failed: definition #1 is missing valid armour points."
+    )
+
+    expectImportError(
+        try armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "imported-armour-catalog.mnemonic-mesh",
+                    "name": "Mnemonic Mesh",
+                    "armourPoints": -1
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionArmourPoints(index: 0),
+        description: "Armour compendium import failed: definition #1 is missing valid armour points."
+    )
+}
+
+@Test func armourCompendiumImportRejectsDuplicateDefinitionIDs() throws {
+    let service = ArmourCompendiumJSONImportService()
+
+    do {
+        _ = try service.import(
+            armourCompendiumImportData(
+                catalogID: "imported-armour-catalog",
+                displayName: "Imported Armour Vault",
+                definitions: [
+                    [
+                        "id": "imported-armour-catalog.mnemonic-mesh",
+                        "name": "Mnemonic Mesh",
+                        "armourPoints": 5
+                    ],
+                    [
+                        "id": "imported-armour-catalog.mnemonic-mesh",
+                        "name": "Mnemonic Mesh Variant",
+                        "armourPoints": 6
+                    ]
+                ]
+            )
+        )
+        Issue.record("Expected duplicate definition ids to fail")
+    } catch let error as ArmourCompendiumImportError {
+        #expect(error == .duplicateDefinitionIDs(["imported-armour-catalog.mnemonic-mesh"]))
+        #expect(
+            error.errorDescription ==
+                "Armour compendium import failed: duplicate definition ids found (imported-armour-catalog.mnemonic-mesh)."
+        )
+    } catch {
+        Issue.record("Unexpected error: \(error)")
+    }
 }
 
 @Test func editingArmourInstanceDoesNotMutateCompendiumDefinition() {
@@ -130,6 +315,43 @@ import Testing
     #expect(definition.name == "Flak Coat")
     #expect(definition.coverageText == "Body, Arms")
     #expect(definition.armourPoints == 4)
+}
+
+@MainActor
+@Test func cancelPendingArmourCompendiumImportLeavesCurrentCatalogUnchanged() async throws {
+    let characterRepository = JSONFileCharacterRepository(fileURL: uniqueArmourCompendiumTestFileURL("characters"))
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let compendiumRepository = JSONFileArmourCompendiumRepository(fileURL: uniqueArmourCompendiumTestFileURL("catalog-cancel"))
+    let compendiumUseCases = ArmourCompendiumUseCases(repository: compendiumRepository)
+    let importService = ArmourCompendiumJSONImportService()
+    let viewModel = CharacterListViewModel(
+        useCases: characterUseCases,
+        importExportService: CharacterJSONImportExportService(),
+        armourCompendiumUseCases: compendiumUseCases,
+        armourCompendiumImportService: importService,
+        weaponCompendiumUseCases: WeaponCompendiumUseCases(
+            repository: JSONFileWeaponCompendiumRepository(
+                fileURL: uniqueArmourCompendiumTestFileURL("weapon-catalog-cancel")
+            )
+        ),
+        weaponCompendiumImportService: WeaponCompendiumJSONImportService()
+    )
+
+    await viewModel.load()
+    let before = try await compendiumUseCases.currentCatalog()
+    let data = try armourCompendiumImportData(
+        catalogID: "imported-armour-catalog",
+        displayName: "Imported Armour Vault"
+    )
+
+    await viewModel.prepareArmourCompendiumImport(data)
+    #expect(viewModel.pendingArmourCompendiumImportSummary?.importedCatalogName == "Imported Armour Vault")
+
+    viewModel.cancelPendingArmourCompendiumImport()
+
+    let after = try await compendiumUseCases.currentCatalog()
+    #expect(viewModel.pendingArmourCompendiumImportSummary == nil)
+    #expect(after == before)
 }
 
 @Test func compendiumArmourInstancePersistsThroughAcceptedEquipmentFlow() async throws {
@@ -159,7 +381,84 @@ import Testing
     #expect(definition.armourPoints == 4)
 }
 
+@Test func replacingCompendiumDoesNotMutateExistingCharacterOwnedArmour() async throws {
+    let characterFileURL = uniqueArmourCompendiumTestFileURL("equipment-detached-after-replace")
+    let characterRepository = JSONFileCharacterRepository(fileURL: characterFileURL)
+    let characterUseCases = CharacterUseCases(repository: characterRepository)
+    let compendiumRepository = JSONFileArmourCompendiumRepository(fileURL: uniqueArmourCompendiumTestFileURL("catalog-replace-detached"))
+    let compendiumUseCases = ArmourCompendiumUseCases(repository: compendiumRepository)
+    let importService = ArmourCompendiumJSONImportService()
+
+    let created = try await characterUseCases.createCharacter(profile: Profile(name: "Detached Armour Safety"))
+    guard let definition = ArmourCompendiumCatalog.demo.definition(id: "local-demo.flak-coat") else {
+        Issue.record("Expected demo flak coat definition")
+        return
+    }
+
+    var detachedArmour = definition.makeArmourInstance()
+    detachedArmour.location = "Legacy Flak Coat"
+    detachedArmour.armourPoints = 5
+    _ = try await characterUseCases.updateEquipment(
+        characterID: created.id,
+        equipment: EquipmentState(armour: [detachedArmour])
+    )
+
+    let importedCatalog = try importService.import(
+        armourCompendiumImportData(
+            catalogID: "imported-armour-catalog",
+            displayName: "Imported Armour Vault",
+            definitions: [
+                [
+                    "id": "imported-armour-catalog.mnemonic-mesh",
+                    "name": "Mnemonic Mesh",
+                    "category": "Body Armour",
+                    "coverage": ["Body"],
+                    "armourPoints": 5
+                ]
+            ]
+        )
+    )
+    _ = try await compendiumUseCases.replaceCatalog(importedCatalog)
+
+    let persistedCharacter = try await characterRepository.fetch(id: created.id)
+    let currentCatalog = try await compendiumUseCases.currentCatalog()
+
+    #expect(persistedCharacter?.equipment.armour == [detachedArmour])
+    #expect(currentCatalog.displayName == "Imported Armour Vault")
+    #expect(currentCatalog.definition(id: "imported-armour-catalog.mnemonic-mesh")?.name == "Mnemonic Mesh")
+}
+
 private func uniqueArmourCompendiumTestFileURL(_ suffix: String) -> URL {
     FileManager.default.temporaryDirectory
         .appending(path: "dh-charlist-armour-\(suffix)-\(UUID().uuidString).json")
+}
+
+private func armourCompendiumImportData(
+    schemaVersion: Int = 1,
+    catalogID: String,
+    displayName: String,
+    definitions: [[String: Any]] = [
+        [
+            "id": "imported-armour-catalog.mnemonic-mesh",
+            "name": "Mnemonic Mesh",
+            "category": "Body Armour",
+            "coverage": ["Body"],
+            "armourPoints": 5,
+            "weight": "4kg",
+            "availability": "Rare",
+            "traits": ["Flexible"]
+        ]
+    ]
+) throws -> Data {
+    try JSONSerialization.data(
+        withJSONObject: [
+            "schemaVersion": schemaVersion,
+            "catalog": [
+                "id": catalogID,
+                "displayName": displayName,
+                "definitions": definitions
+            ]
+        ],
+        options: [.prettyPrinted, .sortedKeys]
+    )
 }

@@ -39,11 +39,17 @@ final class CharacterListViewModel: ObservableObject {
         let summary: WeaponCompendiumImportPreviewSummary
     }
 
+    private struct PendingArmourCompendiumImport: Sendable {
+        let catalog: ArmourCompendiumCatalog
+        let summary: ArmourCompendiumImportPreviewSummary
+    }
+
     @Published private(set) var characters: [Character] = []
     @Published private(set) var templates: [CharacterTemplate] = []
     @Published private(set) var isLoading = false
     @Published private(set) var pendingImportSummary: CharacterImportPreviewSummary?
     @Published private(set) var armourCompendiumCatalog: ArmourCompendiumCatalog = .demo
+    @Published private(set) var pendingArmourCompendiumImportSummary: ArmourCompendiumImportPreviewSummary?
     @Published private(set) var weaponCompendiumCatalog: WeaponCompendiumCatalog = .demo
     @Published private(set) var pendingWeaponCompendiumImportSummary: WeaponCompendiumImportPreviewSummary?
     @Published var errorMessage: String?
@@ -53,10 +59,13 @@ final class CharacterListViewModel: ObservableObject {
     private let templateUseCases: CharacterTemplateUseCases?
     private let importExportService: any CharacterImportExportService
     private let armourCompendiumUseCases: ArmourCompendiumUseCases
+    private let armourCompendiumImportService: ArmourCompendiumJSONImportService
     private let weaponCompendiumUseCases: WeaponCompendiumUseCases
     private let weaponCompendiumImportService: WeaponCompendiumJSONImportService
     private var pendingImport: PendingImport?
+    private var pendingArmourCompendiumImport: PendingArmourCompendiumImport?
     private var pendingWeaponCompendiumImport: PendingWeaponCompendiumImport?
+    private var stagedArmourCompendiumImportPayload: Data?
     private var stagedWeaponCompendiumImportPayload: Data?
 
     init(
@@ -64,8 +73,10 @@ final class CharacterListViewModel: ObservableObject {
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
         armourCompendiumUseCases: ArmourCompendiumUseCases,
+        armourCompendiumImportService: ArmourCompendiumJSONImportService,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
+        initialArmourCompendiumImportPayload: Data? = nil,
         initialWeaponCompendiumImportPayload: Data? = nil,
         autosaveCoordinator: ProfileAutosaveCoordinator = .init()
     ) {
@@ -73,8 +84,10 @@ final class CharacterListViewModel: ObservableObject {
         self.templateUseCases = templateUseCases
         self.importExportService = importExportService
         self.armourCompendiumUseCases = armourCompendiumUseCases
+        self.armourCompendiumImportService = armourCompendiumImportService
         self.weaponCompendiumUseCases = weaponCompendiumUseCases
         self.weaponCompendiumImportService = weaponCompendiumImportService
+        self.stagedArmourCompendiumImportPayload = initialArmourCompendiumImportPayload
         self.stagedWeaponCompendiumImportPayload = initialWeaponCompendiumImportPayload
         self.autosaveCoordinator = autosaveCoordinator
     }
@@ -387,6 +400,52 @@ final class CharacterListViewModel: ObservableObject {
         return stagedWeaponCompendiumImportPayload
     }
 
+    func consumeStagedArmourCompendiumImportPayload() -> Data? {
+        defer { stagedArmourCompendiumImportPayload = nil }
+        return stagedArmourCompendiumImportPayload
+    }
+
+    func prepareArmourCompendiumImport(_ data: Data) async {
+        do {
+            let importedCatalog = try armourCompendiumImportService.import(data)
+            let existingCatalog = try await armourCompendiumUseCases.currentCatalog()
+            let summary = ArmourCompendiumImportPreviewSummary(
+                importedCatalogName: importedCatalog.displayName,
+                detectedArmourCount: importedCatalog.definitions.count,
+                existingCatalogName: existingCatalog.displayName,
+                existingArmourCount: existingCatalog.definitions.count
+            )
+            pendingArmourCompendiumImport = PendingArmourCompendiumImport(catalog: importedCatalog, summary: summary)
+            pendingArmourCompendiumImportSummary = summary
+            errorMessage = nil
+        } catch {
+            pendingArmourCompendiumImport = nil
+            pendingArmourCompendiumImportSummary = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func confirmPendingArmourCompendiumImport() async {
+        guard let pendingArmourCompendiumImport else { return }
+
+        do {
+            let updatedCatalog = try await armourCompendiumUseCases.replaceCatalog(pendingArmourCompendiumImport.catalog)
+            armourCompendiumCatalog = updatedCatalog
+            self.pendingArmourCompendiumImport = nil
+            pendingArmourCompendiumImportSummary = nil
+            errorMessage = nil
+        } catch {
+            self.pendingArmourCompendiumImport = nil
+            pendingArmourCompendiumImportSummary = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelPendingArmourCompendiumImport() {
+        pendingArmourCompendiumImport = nil
+        pendingArmourCompendiumImportSummary = nil
+    }
+
     func prepareWeaponCompendiumImport(_ data: Data) async {
         do {
             let importedCatalog = try weaponCompendiumImportService.import(data)
@@ -484,10 +543,12 @@ public struct CharacterListScreen: View {
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
         armourCompendiumUseCases: ArmourCompendiumUseCases,
+        armourCompendiumImportService: ArmourCompendiumJSONImportService,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         persistenceStatus: AppContainer.PersistenceBootstrapStatus,
         initialImportPayload: Data? = nil,
+        initialArmourCompendiumImportPayload: Data? = nil,
         initialWeaponCompendiumImportPayload: Data? = nil
     ) {
         _viewModel = StateObject(
@@ -496,8 +557,10 @@ public struct CharacterListScreen: View {
                 templateUseCases: templateUseCases,
                 importExportService: importExportService,
                 armourCompendiumUseCases: armourCompendiumUseCases,
+                armourCompendiumImportService: armourCompendiumImportService,
                 weaponCompendiumUseCases: weaponCompendiumUseCases,
                 weaponCompendiumImportService: weaponCompendiumImportService,
+                initialArmourCompendiumImportPayload: initialArmourCompendiumImportPayload,
                 initialWeaponCompendiumImportPayload: initialWeaponCompendiumImportPayload
             )
         )

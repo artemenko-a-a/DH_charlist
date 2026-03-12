@@ -6,6 +6,7 @@ struct DHCharListHostLaunchConfiguration {
     static let resetDataArgument = "-dh-ui-reset-data"
     static let seedSmokeDataArgument = "-dh-ui-seed-smoke"
     static let stageImportPreviewArgument = "-dh-ui-stage-import-preview"
+    static let stageArmourCompendiumImportArgument = "-dh-ui-stage-armour-compendium-import"
     static let stageWeaponCompendiumImportArgument = "-dh-ui-stage-weapon-compendium-import"
     static let persistenceJSONArgument = "-dh-ui-persistence-json"
     static let persistenceSwiftDataArgument = "-dh-ui-persistence-swiftdata"
@@ -14,6 +15,7 @@ struct DHCharListHostLaunchConfiguration {
     let shouldResetData: Bool
     let shouldSeedSmokeData: Bool
     let shouldStageImportPreview: Bool
+    let shouldStageArmourCompendiumImport: Bool
     let shouldStageWeaponCompendiumImport: Bool
     let persistence: AppContainer.PersistenceBackend
 
@@ -28,6 +30,7 @@ struct DHCharListHostLaunchConfiguration {
         let shouldResetData = argumentSet.contains(resetDataArgument)
         let shouldSeedSmokeData = argumentSet.contains(seedSmokeDataArgument)
         let shouldStageImportPreview = argumentSet.contains(stageImportPreviewArgument)
+        let shouldStageArmourCompendiumImport = argumentSet.contains(stageArmourCompendiumImportArgument)
         let shouldStageWeaponCompendiumImport = argumentSet.contains(stageWeaponCompendiumImportArgument)
 
         let persistence: AppContainer.PersistenceBackend
@@ -42,6 +45,7 @@ struct DHCharListHostLaunchConfiguration {
             shouldResetData: shouldResetData,
             shouldSeedSmokeData: shouldSeedSmokeData,
             shouldStageImportPreview: shouldStageImportPreview,
+            shouldStageArmourCompendiumImport: shouldStageArmourCompendiumImport,
             shouldStageWeaponCompendiumImport: shouldStageWeaponCompendiumImport,
             persistence: persistence
         )

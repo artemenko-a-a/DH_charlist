@@ -44,6 +44,7 @@ public struct AppContainer: Sendable {
     public let templateUseCases: CharacterTemplateUseCases
     public let importExportService: any CharacterImportExportService
     public let armourCompendiumUseCases: ArmourCompendiumUseCases
+    public let armourCompendiumImportService: ArmourCompendiumJSONImportService
     public let weaponCompendiumUseCases: WeaponCompendiumUseCases
     public let weaponCompendiumImportService: WeaponCompendiumJSONImportService
     public let persistenceStatus: PersistenceBootstrapStatus
@@ -53,6 +54,7 @@ public struct AppContainer: Sendable {
         templateUseCases: CharacterTemplateUseCases,
         importExportService: any CharacterImportExportService,
         armourCompendiumUseCases: ArmourCompendiumUseCases,
+        armourCompendiumImportService: ArmourCompendiumJSONImportService,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         persistenceStatus: PersistenceBootstrapStatus
@@ -61,6 +63,7 @@ public struct AppContainer: Sendable {
         self.templateUseCases = templateUseCases
         self.importExportService = importExportService
         self.armourCompendiumUseCases = armourCompendiumUseCases
+        self.armourCompendiumImportService = armourCompendiumImportService
         self.weaponCompendiumUseCases = weaponCompendiumUseCases
         self.weaponCompendiumImportService = weaponCompendiumImportService
         self.persistenceStatus = persistenceStatus
@@ -78,6 +81,7 @@ public struct AppContainer: Sendable {
         swiftDataFactory: SwiftDataRepositoryFactory? = nil
     ) -> AppContainer {
         let importExportService = CharacterJSONImportExportService()
+        let armourCompendiumImportService = ArmourCompendiumJSONImportService()
         let weaponCompendiumImportService = WeaponCompendiumJSONImportService()
         let bootstrap = makePersistenceBootstrap(
             persistence: persistence,
@@ -100,6 +104,7 @@ public struct AppContainer: Sendable {
             ),
             importExportService: importExportService,
             armourCompendiumUseCases: ArmourCompendiumUseCases(repository: armourCompendiumRepository),
+            armourCompendiumImportService: armourCompendiumImportService,
             weaponCompendiumUseCases: WeaponCompendiumUseCases(repository: weaponCompendiumRepository),
             weaponCompendiumImportService: weaponCompendiumImportService,
             persistenceStatus: bootstrap.status

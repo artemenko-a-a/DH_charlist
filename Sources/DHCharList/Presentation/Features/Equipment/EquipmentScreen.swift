@@ -14,7 +14,8 @@ struct EquipmentScreen: View {
     @State private var armourDraft: ArmourDraft?
     @State private var inventoryDraft: InventoryItemDraft?
     @State private var searchText = ""
-    @State private var isShowingCompendiumImportPicker = false
+    @State private var isShowingWeaponCompendiumImportPicker = false
+    @State private var isShowingArmourCompendiumImportPicker = false
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -103,7 +104,7 @@ struct EquipmentScreen: View {
             .presentationDragIndicator(.visible)
         }
         .fileImporter(
-            isPresented: $isShowingCompendiumImportPicker,
+            isPresented: $isShowingWeaponCompendiumImportPicker,
             allowedContentTypes: [.json],
             allowsMultipleSelection: false
         ) { result in
@@ -130,9 +131,37 @@ struct EquipmentScreen: View {
                 viewModel.errorMessage = error.localizedDescription
             }
         }
+        .fileImporter(
+            isPresented: $isShowingArmourCompendiumImportPicker,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let sourceURL = urls.first else { return }
+                let hadAccess = sourceURL.startAccessingSecurityScopedResource()
+                defer {
+                    if hadAccess {
+                        sourceURL.stopAccessingSecurityScopedResource()
+                    }
+                }
+
+                do {
+                    let data = try Data(contentsOf: sourceURL)
+                    Task { await viewModel.prepareArmourCompendiumImport(data) }
+                } catch {
+                    viewModel.errorMessage = error.localizedDescription
+                }
+            case .failure(let error):
+                if let cocoaError = error as? CocoaError, cocoaError.code == .userCancelled {
+                    return
+                }
+                viewModel.errorMessage = error.localizedDescription
+            }
+        }
         .alert(
             "Replace Local Compendium?",
-            isPresented: isShowingCompendiumImportConfirmation,
+            isPresented: isShowingWeaponCompendiumImportConfirmation,
             presenting: viewModel.pendingWeaponCompendiumImportSummary
         ) { _ in
             Button("Replace Local Compendium", role: .destructive) {
@@ -140,6 +169,20 @@ struct EquipmentScreen: View {
             }
             Button("Cancel", role: .cancel) {
                 viewModel.cancelPendingWeaponCompendiumImport()
+            }
+        } message: { summary in
+            Text(summary.confirmationMessage)
+        }
+        .alert(
+            "Replace Local Armour Compendium?",
+            isPresented: isShowingArmourCompendiumImportConfirmation,
+            presenting: viewModel.pendingArmourCompendiumImportSummary
+        ) { _ in
+            Button("Replace Local Armour Compendium", role: .destructive) {
+                Task { await viewModel.confirmPendingArmourCompendiumImport() }
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.cancelPendingArmourCompendiumImport()
             }
         } message: { summary in
             Text(summary.confirmationMessage)
@@ -230,10 +273,24 @@ struct EquipmentScreen: View {
             }
             .cogitatorPanelRow()
             .accessibilityLabel("Add Armour")
+
+            Button(action: beginArmourCompendiumImport) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("Import Local Armour Compendium", systemImage: "square.and.arrow.down")
+                        .foregroundStyle(CogitatorPalette.textPrimary)
+                    Text("\(armourCatalog.displayName) • \(armourCatalog.definitions.count) \(armourCatalog.definitions.count == 1 ? "definition" : "definitions")")
+                        .font(.caption)
+                        .foregroundStyle(CogitatorPalette.textSecondary)
+                }
+            }
+            .buttonStyle(.plain)
+            .cogitatorPanelRow()
+            .accessibilityIdentifier("armour-compendium.import")
+            .accessibilityLabel("Import Local Armour Compendium")
         } header: {
             CogitatorSectionHeader(armourSectionTitle, subtitle: "Protection Matrix")
         } footer: {
-            Text("Use one entry per body location. New entries can be prefixed from the local armour compendium and then edited freely.")
+            Text("Use one entry per body location. New entries can be prefixed from the local armour compendium and then edited freely. Importing replaces the local armour compendium for future autocomplete only.")
                 .cogitatorSupportingText()
         }
     }
@@ -333,7 +390,15 @@ struct EquipmentScreen: View {
         if let stagedPayload = viewModel.consumeStagedWeaponCompendiumImportPayload() {
             Task { await viewModel.prepareWeaponCompendiumImport(stagedPayload) }
         } else {
-            isShowingCompendiumImportPicker = true
+            isShowingWeaponCompendiumImportPicker = true
+        }
+    }
+
+    private func beginArmourCompendiumImport() {
+        if let stagedPayload = viewModel.consumeStagedArmourCompendiumImportPayload() {
+            Task { await viewModel.prepareArmourCompendiumImport(stagedPayload) }
+        } else {
+            isShowingArmourCompendiumImportPicker = true
         }
     }
 
@@ -417,9 +482,16 @@ struct EquipmentScreen: View {
         return "\(base) (\(matches) of \(total))"
     }
 
-    private var isShowingCompendiumImportConfirmation: Binding<Bool> {
+    private var isShowingWeaponCompendiumImportConfirmation: Binding<Bool> {
         Binding(
             get: { viewModel.pendingWeaponCompendiumImportSummary != nil },
+            set: { _ in }
+        )
+    }
+
+    private var isShowingArmourCompendiumImportConfirmation: Binding<Bool> {
+        Binding(
+            get: { viewModel.pendingArmourCompendiumImportSummary != nil },
             set: { _ in }
         )
     }

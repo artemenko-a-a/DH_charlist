@@ -1747,6 +1747,7 @@ private func makeCharacterListViewModel(
                 fileURL: uniqueTestFileURL("viewmodel-armour-compendium")
             )
         ),
+        armourCompendiumImportService: ArmourCompendiumJSONImportService(),
         weaponCompendiumUseCases: WeaponCompendiumUseCases(
             repository: JSONFileWeaponCompendiumRepository(
                 fileURL: uniqueTestFileURL("viewmodel-weapon-compendium")

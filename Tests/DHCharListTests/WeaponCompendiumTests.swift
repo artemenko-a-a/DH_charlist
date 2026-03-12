@@ -308,6 +308,7 @@ import Testing
                 fileURL: uniqueCompendiumTestFileURL("armour-catalog-cancel")
             )
         ),
+        armourCompendiumImportService: ArmourCompendiumJSONImportService(),
         weaponCompendiumUseCases: compendiumUseCases,
         weaponCompendiumImportService: importService
     )

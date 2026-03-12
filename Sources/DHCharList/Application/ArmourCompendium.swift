@@ -177,6 +177,149 @@ public struct ArmourCompendiumUseCases: Sendable {
     }
 }
 
+public struct ArmourCompendiumImportPreviewSummary: Equatable, Sendable {
+    public let importedCatalogName: String
+    public let detectedArmourCount: Int
+    public let existingCatalogName: String
+    public let existingArmourCount: Int
+
+    public init(
+        importedCatalogName: String,
+        detectedArmourCount: Int,
+        existingCatalogName: String,
+        existingArmourCount: Int
+    ) {
+        self.importedCatalogName = importedCatalogName
+        self.detectedArmourCount = detectedArmourCount
+        self.existingCatalogName = existingCatalogName
+        self.existingArmourCount = existingArmourCount
+    }
+
+    public var confirmationMessage: String {
+        """
+        Imported catalog “\(importedCatalogName)” contains \(detectedArmourCount) \(Self.definitionLabel(count: detectedArmourCount)).
+        This replaces your current local armour compendium “\(existingCatalogName)” (\(existingArmourCount) \(Self.definitionLabel(count: existingArmourCount))); it does not merge.
+        Future autocomplete and add-armour prefills will use the imported catalog.
+        Existing character-owned armour stays detached and unchanged.
+        This action is destructive for the current local armour compendium.
+        """
+    }
+
+    private static func definitionLabel(count: Int) -> String {
+        count == 1 ? "armour definition" : "armour definitions"
+    }
+}
+
+public enum ArmourCompendiumImportError: LocalizedError, Equatable {
+    case invalidJSON
+    case unsupportedSchemaVersion(Int)
+    case invalidCatalogID
+    case invalidCatalogDisplayName
+    case invalidDefinitionID(index: Int)
+    case invalidDefinitionName(index: Int)
+    case invalidDefinitionArmourPoints(index: Int)
+    case duplicateDefinitionIDs([String])
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidJSON:
+            return "Armour compendium import failed: malformed JSON or unsupported file structure."
+        case .unsupportedSchemaVersion(let version):
+            return "Armour compendium import failed: unsupported schema version \(version)."
+        case .invalidCatalogID:
+            return "Armour compendium import failed: catalog id is required."
+        case .invalidCatalogDisplayName:
+            return "Armour compendium import failed: catalog display name is required."
+        case .invalidDefinitionID(let index):
+            return "Armour compendium import failed: definition #\(index + 1) is missing an id."
+        case .invalidDefinitionName(let index):
+            return "Armour compendium import failed: definition #\(index + 1) is missing a name."
+        case .invalidDefinitionArmourPoints(let index):
+            return "Armour compendium import failed: definition #\(index + 1) is missing valid armour points."
+        case .duplicateDefinitionIDs(let ids):
+            let joined = ids.joined(separator: ", ")
+            return "Armour compendium import failed: duplicate definition ids found (\(joined))."
+        }
+    }
+}
+
+public struct ArmourCompendiumJSONImportService: Sendable {
+    private let supportedSchemaVersion = 1
+
+    public init() {}
+
+    public func `import`(_ data: Data) throws -> ArmourCompendiumCatalog {
+        let decoder = JSONDecoder()
+        let envelope: ArmourCompendiumImportEnvelope
+
+        do {
+            envelope = try decoder.decode(ArmourCompendiumImportEnvelope.self, from: data)
+        } catch {
+            throw ArmourCompendiumImportError.invalidJSON
+        }
+
+        guard envelope.schemaVersion == supportedSchemaVersion else {
+            throw ArmourCompendiumImportError.unsupportedSchemaVersion(envelope.schemaVersion)
+        }
+
+        let catalogID = compendiumTrimmedText(envelope.catalog.id)
+        guard !catalogID.isEmpty else {
+            throw ArmourCompendiumImportError.invalidCatalogID
+        }
+
+        let displayName = compendiumTrimmedText(envelope.catalog.displayName)
+        guard !displayName.isEmpty else {
+            throw ArmourCompendiumImportError.invalidCatalogDisplayName
+        }
+
+        var seenDefinitionIDs = Set<String>()
+        var duplicateDefinitionIDs = Set<String>()
+        let definitions = try envelope.catalog.definitions.enumerated().map { index, definition in
+            let id = compendiumTrimmedText(definition.id)
+            guard !id.isEmpty else {
+                throw ArmourCompendiumImportError.invalidDefinitionID(index: index)
+            }
+
+            let normalizedID = id.lowercased()
+            if !seenDefinitionIDs.insert(normalizedID).inserted {
+                duplicateDefinitionIDs.insert(id)
+            }
+
+            let name = compendiumTrimmedText(definition.name)
+            guard !name.isEmpty else {
+                throw ArmourCompendiumImportError.invalidDefinitionName(index: index)
+            }
+
+            guard let armourPoints = definition.armourPoints, armourPoints >= 0 else {
+                throw ArmourCompendiumImportError.invalidDefinitionArmourPoints(index: index)
+            }
+
+            return ArmourCompendiumDefinition(
+                id: id,
+                catalogID: catalogID,
+                name: name,
+                category: compendiumTrimmedText(definition.category ?? ""),
+                coverage: (definition.coverage ?? []).map(compendiumTrimmedText).filter { !$0.isEmpty },
+                armourPoints: armourPoints,
+                weight: compendiumTrimmedText(definition.weight ?? ""),
+                availability: compendiumTrimmedText(definition.availability ?? ""),
+                traits: (definition.traits ?? []).map(compendiumTrimmedText).filter { !$0.isEmpty },
+                notes: compendiumTrimmedText(definition.notes ?? "")
+            )
+        }
+
+        guard duplicateDefinitionIDs.isEmpty else {
+            throw ArmourCompendiumImportError.duplicateDefinitionIDs(duplicateDefinitionIDs.sorted())
+        }
+
+        return ArmourCompendiumCatalog(
+            id: catalogID,
+            displayName: displayName,
+            definitions: definitions
+        )
+    }
+}
+
 public enum ArmourCompendiumSearch {
     public static func autocomplete(
         definitions: [ArmourCompendiumDefinition],
@@ -231,6 +374,29 @@ public enum ArmourCompendiumSearch {
 private struct SearchMatchCandidate {
     let rank: Int
     let definition: ArmourCompendiumDefinition
+}
+
+private struct ArmourCompendiumImportEnvelope: Codable {
+    let schemaVersion: Int
+    let catalog: ArmourCompendiumImportCatalog
+}
+
+private struct ArmourCompendiumImportCatalog: Codable {
+    let id: String
+    let displayName: String
+    let definitions: [ArmourCompendiumImportDefinition]
+}
+
+private struct ArmourCompendiumImportDefinition: Codable {
+    let id: String
+    let name: String
+    let category: String?
+    let coverage: [String]?
+    let armourPoints: Int?
+    let weight: String?
+    let availability: String?
+    let traits: [String]?
+    let notes: String?
 }
 
 private func compendiumTrimmedText(_ value: String) -> String {

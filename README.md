@@ -167,9 +167,9 @@ Current scope limits:
 - no cloud sharing
 - no editable PDF form mode
 
-## Local equipment compendium flows (Batches 43-45)
+## Local equipment compendium flows (Batches 43-46)
 
-The `Equipment` flow now supports bounded local compendium assistance for both weapons and armour. Weapons also support a local JSON replace-all import path; armour currently uses the local bundled/demo catalog plus accepted manual editing.
+The `Equipment` flow now supports bounded local compendium assistance for both weapons and armour. Both compendiums support a local JSON replace-all import path.
 
 Weapon flow:
 - open a character
@@ -192,17 +192,21 @@ Armour flow:
 - open `Equipment`
 - choose `Add Armour`
 - search the local compendium by armour name and tap a matching entry
+- use `Import Local Armour Compendium` to replace the current local armour catalog from a structured JSON file
 
 Armour behavior:
 - the editor prefills location and armour points from the selected catalog definition
 - saving creates a detached character-owned armour copy
 - the copied armour stays plain character-owned data; there is no persistent source link back to the compendium definition
 - the accepted manual armour editor remains the place to adjust values before saving
+- JSON compendium import replaces the current local armour compendium with explicit destructive confirmation
+- imported catalog entries power future autocomplete/add-armour flows only
+- existing character-owned armour remains detached and unchanged after compendium replacement
+- schema details for local armour import are documented in `Docs/armour-compendium-format.md`
 
 Current scope limits:
 - the built-in weapon and armour catalogs are bounded safe local demo catalogs, not full rulebook datasets
-- local import is currently available for weapons only, using JSON schema v1 replace-all semantics
-- armour compendium import is intentionally deferred for now
+- local import uses JSON schema v1 replace-all semantics for both weapons and armour
 - compendium import is replace-all only; there is no merge/conflict UI
 - no OCR or rulebook parsing
 - no cloud compendium

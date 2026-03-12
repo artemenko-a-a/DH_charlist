@@ -1,13 +1,15 @@
-# Batch 44 State
+# Batch 44 Corrective Pass State
 
-- status: feature-complete; final full-CI validation blocked by simulator-backed coverage boot failure in the current environment
-- scope: local weapon compendium import with explicit replace-all confirmation only; accepted runtime, persistence, and combat behavior remain unchanged
-- compendium import state:
-  - `Sources/DHCharList/Application/WeaponCompendium.swift` now defines explicit compendium import use cases, preview summary messaging, and schema-v1 validation errors for malformed JSON, unsupported schema versions, empty required fields, and duplicate definition ids
-  - `Sources/DHCharList/Infrastructure/Persistence/JSONFileWeaponCompendiumRepository.swift` now persists the local compendium independently from character persistence so compendium replacement affects future autocomplete only
-  - `Sources/DHCharList/App/AppContainer.swift` now wires dedicated compendium repository/use cases/import service dependencies without changing accepted JSON-default or SwiftData-alternative character persistence behavior
-  - `Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift` now exposes `Import Local Compendium`, stages a destructive replace-all preview, requires explicit confirmation, and keeps saved character-owned weapons detached and unchanged
-  - `DHCharListHost/DHCharListHost/DHCharListHostApp.swift` now resets the persisted compendium back to `.demo` inside the existing UI-test reset path so full host suites do not leak compendium state across runs
+- status: complete and validated; full repo-phase validation is green in this environment
+- scope: infra-only stabilization of simulator-backed coverage capture plus test-only restoration of truthful `Application` coverage; accepted product/runtime/persistence behavior remains unchanged
+- infra fix:
+  - `scripts/run_xcode_coverage.sh` now extracts the concrete simulator device id from the selected destination and explicitly preboots that same device with `xcrun simctl boot` + `xcrun simctl bootstatus -b` before launching the coverage `xcodebuild test`
+  - bounded retry attempts now reset the selected device with `xcrun simctl shutdown` before re-booting it, so stale CoreSimulator state is handled explicitly instead of reusing a half-booted simulator
+  - this removed the cold-start failure mode previously observed as `Unable to boot the Simulator`, `Failed to start launchd_sim`, and `Interrupted system call`
+- coverage follow-up:
+  - the fresh truthful coverage run exposed a real `Application`-area regression rather than another infra fault
+  - `Tests/DHCharListTests/WeaponCompendiumTests.swift` now adds package-only regression coverage for replace-all preview wording, required-field diagnostics, duplicate-id diagnostics, and blank preview/supporting-line branches in `WeaponCompendium.swift`
+  - truthful coverage gate remains unchanged and now passes with `Application` at `96.04%`
 - validation that passed:
   - `make fmt`
   - `make lint`
@@ -15,13 +17,9 @@
   - `make test`
   - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
   - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
-  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b44-weapon-compendium-import.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testWeaponCompendiumImportReplacesLocalCatalogWithoutMutatingSavedWeapons -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testCombatWorkspaceActivePlayFlow`
+  - `bash ./scripts/run_xcode_coverage.sh`
   - `bash ./scripts/check_coverage_policy.sh`
-- validation blockers still present:
-  - `make ci` is not green in this environment because `bash ./scripts/run_xcode_coverage.sh` repeatedly fails while booting a simulator for the coverage run (`Unable to boot the Simulator`, `Failed to start launchd_sim`, `Interrupted system call`) even after adding bounded retry logic and more deterministic simulator-destination selection
-  - direct `bash ./scripts/run_xcode_coverage.sh` repros the same CoreSimulator/launchd_sim boot failure on both attempts in the current environment, so the coverage capture blocker is operational rather than product-behavioral
+  - `make ci`
 - truthful limitations:
-  - compendium import is JSON schema v1 only and replace-all only
-  - there is no merge/conflict UI, OCR/rulebook parsing, cloud sync, or persistent source linkage from compendium updates to saved character weapons
-  - existing character-owned weapon instances remain detached and unchanged after compendium replacement
+  - the fix hardens local simulator-backed coverage capture; it does not redesign CI or loosen coverage semantics
+  - Batch 44 product scope remains unchanged: compendium import is JSON schema v1 and replace-all only, with no merge/conflict UI, OCR/rulebook parsing, cloud sync, or persistent linkage from compendium updates to saved character weapons

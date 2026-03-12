@@ -75,7 +75,32 @@ print('platform=iOS Simulator,OS=latest')
 " 2>/dev/null || echo "platform=iOS Simulator,OS=latest"
 }
 
+_extract_simulator_device_id() {
+    local destination="$1"
+    if [[ "$destination" == id=* ]]; then
+        echo "${destination#id=}"
+    fi
+}
+
+_prepare_simulator_device() {
+    local device_id="$1"
+    local mode="${2:-boot}"
+
+    if [[ -z "$device_id" ]]; then
+        return 0
+    fi
+
+    if [[ "$mode" == "reset" ]]; then
+        xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true
+    fi
+
+    xcrun simctl boot "$device_id" >/dev/null 2>&1 || true
+    xcrun simctl bootstatus "$device_id" -b
+}
+
 DESTINATION="${COVERAGE_DESTINATION:-$(_pick_simulator_destination)}"
+SIMULATOR_DEVICE_ID="$(_extract_simulator_device_id "$DESTINATION" || true)"
+SIMULATOR_DEVICE_ID="${SIMULATOR_DEVICE_ID:-}"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 RUN_DIR="$OUTPUT_ROOT/$TIMESTAMP"
 RESULT_BUNDLE_PATH="$RUN_DIR/TestResults.xcresult"
@@ -134,6 +159,16 @@ for (( attempt = 1; attempt <= XCODEBUILD_MAX_ATTEMPTS; attempt++ )); do
 
     echo "Coverage xcodebuild attempt $attempt/$XCODEBUILD_MAX_ATTEMPTS"
     echo "Running: ${ATTEMPT_COMMAND[*]}"
+
+    if [[ -n "$SIMULATOR_DEVICE_ID" ]]; then
+        if [[ $attempt -eq 1 ]]; then
+            echo "Preparing simulator device $SIMULATOR_DEVICE_ID before coverage run..."
+            _prepare_simulator_device "$SIMULATOR_DEVICE_ID" "boot"
+        else
+            echo "Resetting simulator device $SIMULATOR_DEVICE_ID before retry..."
+            _prepare_simulator_device "$SIMULATOR_DEVICE_ID" "reset"
+        fi
+    fi
 
     set +e
     if [[ "$ISOLATE_XCODE_HOME" == "1" ]]; then

@@ -74,6 +74,24 @@ import Testing
     #expect(weapon.traits == "Reliable, Tearing")
 }
 
+@Test func weaponCompendiumDefinitionPreviewOmitsBlankSupportingFields() {
+    let definition = WeaponCompendiumDefinition(
+        id: "blank-support",
+        catalogID: "test",
+        name: "Blank Support",
+        type: "  ",
+        range: " ",
+        damage: "",
+        penetration: "\n",
+        clip: " ",
+        reload: "",
+        traits: [" ", ""]
+    )
+
+    #expect(definition.previewLine.isEmpty)
+    #expect(definition.supportingLine.isEmpty)
+}
+
 @Test func validWeaponCompendiumImportReplacesLocalCatalogAndPowersFutureAutocomplete() async throws {
     let fileURL = uniqueCompendiumTestFileURL("catalog-import")
     let repository = JSONFileWeaponCompendiumRepository(fileURL: fileURL)
@@ -124,6 +142,22 @@ import Testing
     }
 }
 
+@Test func weaponCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() {
+    let summary = WeaponCompendiumImportPreviewSummary(
+        importedCatalogName: "Imported Cogitator Vault",
+        detectedWeaponCount: 1,
+        existingCatalogName: "Local Demo Catalog",
+        existingWeaponCount: 2
+    )
+
+    #expect(summary.confirmationMessage.contains("Imported catalog"))
+    #expect(summary.confirmationMessage.contains("1 weapon definition"))
+    #expect(summary.confirmationMessage.contains("2 weapon definitions"))
+    #expect(summary.confirmationMessage.contains("it does not merge"))
+    #expect(summary.confirmationMessage.contains("Existing character-owned weapons stay detached and unchanged"))
+    #expect(summary.confirmationMessage.contains("destructive"))
+}
+
 @Test func weaponCompendiumImportRejectsUnsupportedSchemaVersion() throws {
     let service = WeaponCompendiumJSONImportService()
 
@@ -141,6 +175,74 @@ import Testing
     } catch {
         Issue.record("Unexpected error: \(error)")
     }
+}
+
+@Test func weaponCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() throws {
+    let service = WeaponCompendiumJSONImportService()
+
+    func expectImportError(
+        _ data: Data,
+        equals expected: WeaponCompendiumImportError,
+        description expectedDescription: String
+    ) {
+        do {
+            _ = try service.import(data)
+            Issue.record("Expected compendium import to fail with \(expected)")
+        } catch let error as WeaponCompendiumImportError {
+            #expect(error == expected)
+            #expect(error.errorDescription == expectedDescription)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
+    expectImportError(
+        try compendiumImportData(
+            catalogID: "   ",
+            displayName: "Imported Cogitator Vault"
+        ),
+        equals: .invalidCatalogID,
+        description: "Weapon compendium import failed: catalog id is required."
+    )
+
+    expectImportError(
+        try compendiumImportData(
+            catalogID: "imported-catalog",
+            displayName: "   "
+        ),
+        equals: .invalidCatalogDisplayName,
+        description: "Weapon compendium import failed: catalog display name is required."
+    )
+
+    expectImportError(
+        try compendiumImportData(
+            catalogID: "imported-catalog",
+            displayName: "Imported Cogitator Vault",
+            definitions: [
+                [
+                    "id": "   ",
+                    "name": "Mnemonic Pistol"
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionID(index: 0),
+        description: "Weapon compendium import failed: definition #1 is missing an id."
+    )
+
+    expectImportError(
+        try compendiumImportData(
+            catalogID: "imported-catalog",
+            displayName: "Imported Cogitator Vault",
+            definitions: [
+                [
+                    "id": "imported-catalog.mnemonic-pistol",
+                    "name": "   "
+                ]
+            ]
+        ),
+        equals: .invalidDefinitionName(index: 0),
+        description: "Weapon compendium import failed: definition #1 is missing a name."
+    )
 }
 
 @Test func weaponCompendiumImportRejectsDuplicateDefinitionIDs() throws {
@@ -166,6 +268,10 @@ import Testing
         Issue.record("Expected duplicate definition ids to fail")
     } catch let error as WeaponCompendiumImportError {
         #expect(error == .duplicateDefinitionIDs(["imported-catalog.mnemonic-pistol"]))
+        #expect(
+            error.errorDescription ==
+                "Weapon compendium import failed: duplicate definition ids found (imported-catalog.mnemonic-pistol)."
+        )
     } catch {
         Issue.record("Unexpected error: \(error)")
     }

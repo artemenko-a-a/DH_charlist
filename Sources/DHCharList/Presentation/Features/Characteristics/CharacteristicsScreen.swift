@@ -11,6 +11,7 @@ struct CharacteristicsScreen: View {
     @State private var characteristics: CharacteristicSet
     @State private var resources: ResourceState
     @State private var quickCheckSelection: QuickMechanicsSelection?
+    @State private var showingXPSpend = false
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
         self.characterID = characterID
@@ -67,6 +68,20 @@ struct CharacteristicsScreen: View {
                 Text("Experience Available updates from total minus spent.")
                     .cogitatorSupportingText()
             }
+
+            Section {
+                Button {
+                    showingXPSpend = true
+                } label: {
+                    Label("Validate XP Spend", systemImage: "seal.text.page")
+                }
+                .accessibilityIdentifier("xp-spend.open")
+            } header: {
+                CogitatorSectionHeader("Advancement", subtitle: "Bounded XP and prerequisite validation")
+            } footer: {
+                Text("Use this to validate and apply explicit characteristic or skill advances without entering a full character builder flow.")
+                    .cogitatorSupportingText()
+            }
         }
         .formContentWidth()
         .formStyle(.grouped)
@@ -97,6 +112,20 @@ struct CharacteristicsScreen: View {
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingXPSpend) {
+            if let snapshot = characterSnapshot {
+                XPSpendScreen(character: snapshot) { request in
+                    let updated = await viewModel.applyXPSpend(request)
+                    if let updated {
+                        characteristics = updated.characteristics
+                        resources = updated.resources
+                    }
+                    return updated
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 
@@ -148,6 +177,7 @@ struct CharacteristicsScreen: View {
                 .foregroundStyle(CogitatorPalette.textPrimary)
                 .accessibilityLabel(title)
                 .accessibilityValue(String(value.wrappedValue))
+                .accessibilityIdentifier("characteristics.resource.\(title.accessibilityResourceToken)")
 #if os(iOS)
                 .keyboardType(.numberPad)
 #endif
@@ -166,6 +196,23 @@ struct CharacteristicsScreen: View {
             return .caution
         }
         return .nominal
+    }
+
+    private var characterSnapshot: Character? {
+        guard var character = viewModel.character(by: characterID) else {
+            return nil
+        }
+        character.characteristics = characteristics
+        character.resources = resources
+        return character
+    }
+}
+
+private extension String {
+    var accessibilityResourceToken: String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "-")
     }
 }
 #endif

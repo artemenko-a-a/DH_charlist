@@ -278,6 +278,38 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    @discardableResult
+    func applyXPSpend(_ request: XPSpendRequest) async -> Character? {
+        let result = XPProgressionResolver.apply(request)
+
+        guard result.isValid, var updatedCharacter = result.appliedCharacter else {
+            errorMessage = result.validationErrors.map(\.message).joined(separator: "\n")
+            return nil
+        }
+
+        if let title = result.historyTitle, let body = result.historyBody {
+            updatedCharacter.history.append(
+                CharacterHistoryEntry(
+                    characterID: updatedCharacter.id,
+                    title: title,
+                    type: .advancement,
+                    body: body,
+                    tags: ["advancement", "xp"]
+                )
+            )
+        }
+
+        do {
+            try await useCases.upsertCharacter(updatedCharacter)
+            replaceInMemory(updatedCharacter)
+            errorMessage = nil
+            return updatedCharacter
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
     func addHistoryEntry(
         characterID: UUID,
         type: CharacterHistoryEntryType,

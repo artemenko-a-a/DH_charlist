@@ -103,7 +103,7 @@ private struct HostBootstrapView: View {
                 return
             }
 
-            _ = try await container.characterUseCases.createCharacter(
+            let character = try await container.characterUseCases.createCharacter(
                 profile: Profile(
                     name: "Smoke Acolyte",
                     homeWorld: "Hive World",
@@ -112,6 +112,11 @@ private struct HostBootstrapView: View {
                     aptitudes: ["Perception", "Intelligence"],
                     description: "Deterministic UI smoke seed"
                 )
+            )
+
+            _ = try await container.characterUseCases.updateResources(
+                characterID: character.id,
+                resources: ResourceState(experienceSpent: 0, experienceTotal: 500)
             )
         } catch {
             // Intentionally ignore seed failures; tests will fail visibly if data is missing.

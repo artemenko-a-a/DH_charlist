@@ -1,21 +1,21 @@
-# Batch 47 State
+# Batch 48 State
 
-- status: implemented; final validation in progress
+- status: implemented; final repo-phase validation in progress
 - scope:
-  - add fast combat action shortcuts on top of the accepted Session Mode / combat workspace
-  - add a bounded guided attack flow that reuses the accepted explainable check engine and damage pipeline
-  - add bounded defensive reaction shortcuts plus quick combat modifier/condition toggles for active play
-  - preserve accepted JSON-backed and SwiftData-backed character persistence behavior
+  - add a bounded XP spending and prerequisite-validation foundation on top of the accepted rules layer
+  - support explicit characteristic and existing-skill advances without introducing a full character builder
+  - keep accepted JSON-backed and SwiftData-backed persistence behavior intact
 - implemented:
-  - `Sources/DHCharList/Rules/CombatActionShortcuts.swift` now defines bounded combat shortcut models, a shared encounter resolver, and explainable attack/reaction/damage handoff helpers
-  - `SessionModeScreen` now exposes encounter shortcut buttons, quick combat toggles, and bounded sheets for attack, reaction, and damage flows without replacing the accepted workspace
-  - host UI smoke coverage now exercises the new encounter shortcut flow, and legacy quick-mechanics/combat smokes were hardened to match the current sheet/editor controls
-  - package tests cover shortcut construction, bounded attack flow behavior, reaction shortcut behavior, quick toggle metadata, and damage handoff through the accepted rules layer
+  - `Sources/DHCharList/Rules/XPProgression.swift` now defines explicit XP spend request/result/breakdown models, bounded upgrade types, explainable prerequisite evaluation, and a safe apply path
+  - `CharacteristicsScreen` now exposes a minimal `Spend XP` flow, and `XPSpendScreen` provides bounded upgrade selection, manual prerequisite entry, explainable validation output, and an apply action
+  - `CharacterListViewModel.applyXPSpend(_:)` now persists a valid spend through the accepted save path and records a concise advancement history entry
+  - package tests and a focused host UI sanity test now cover valid spends, invalid spends, prerequisite failures, apply behavior, and visible advancement history
 - validation:
-  - package checks and focused host UI sanity have passed locally
-  - fresh truthful coverage and `make ci` are the remaining repo-phase gates to re-run after the final smoke/doc updates
+  - focused host runtime sanity has passed locally
+  - package checks, fresh truthful coverage, and `make ci` are being re-run as the final repo-phase gates
 - truthful limitations:
-  - no initiative tracker
-  - no multiple-hit or rate-of-fire simulator
-  - no hit-location or critical-table automation
-  - no full opposed-roll or action-economy engine
+  - no full character builder
+  - no giant prerequisite DSL
+  - no talent-tree engine
+  - no campaign economy manager
+  - no respec or character rebuild wizard

@@ -227,6 +227,40 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         app.buttons["Done"].tap()
     }
 
+    func testXPSpendingValidationAppliesBoundedAdvancement() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let characteristicsSection = app.staticTexts["Characteristics & Resources"]
+        XCTAssertTrue(characteristicsSection.waitForExistence(timeout: 5))
+        characteristicsSection.tap()
+        XCTAssertTrue(app.navigationBars["Characteristics"].waitForExistence(timeout: 5))
+
+        let openXPSpend = app.buttons["xp-spend.open"]
+        reveal(openXPSpend, maxSwipes: 3)
+        XCTAssertTrue(openXPSpend.waitForExistence(timeout: 5))
+        openXPSpend.tap()
+
+        XCTAssertTrue(app.navigationBars["XP Spending"].waitForExistence(timeout: 5))
+
+        let applyButton = app.buttons["xp-spend.apply"]
+        XCTAssertTrue(applyButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(applyButton.isEnabled)
+        applyButton.tap()
+
+        XCTAssertTrue(app.navigationBars["Characteristics"].waitForExistence(timeout: 8))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let historySection = app.staticTexts["Campaign Log & History"]
+        reveal(historySection, maxSwipes: 3)
+        XCTAssertTrue(historySection.waitForExistence(timeout: 5))
+        historySection.tap()
+
+        XCTAssertTrue(app.navigationBars["Campaign Log"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Advancement: Weapon Skill +5"].waitForExistence(timeout: 8))
+    }
+
     func testCombatWorkspaceActivePlayFlow() {
         launchForSmoke()
         openCharacterDetail()

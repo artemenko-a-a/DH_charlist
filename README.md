@@ -236,6 +236,47 @@ Current workspace behavior:
 - reload and quick-toggle actions are explicit conveniences only; there is still no action-economy enforcement or full combat simulation
 - iPhone layouts prioritize the combat summary and shortcuts first, while keeping the full workspace usable on iPad
 
+## XP progression validation (Batch 48)
+
+The app now includes a bounded XP-spend and prerequisite-validation foundation rather than a full progression builder.
+
+Where to open it:
+- open a character
+- open `Characteristics & Resources`
+- use the `Spend XP` action in the `Advancement` section
+
+What it supports today:
+- characteristic advances
+- existing skill training advances
+- explicit manual XP cost entry
+- explainable prerequisite checks for:
+  - available XP
+  - minimum characteristic
+  - required skill training
+  - required aptitude
+  - required talent
+  - required trait
+
+What it shows:
+- upgrade summary
+- XP cost
+- currently available XP
+- projected remaining XP
+- which prerequisites passed or failed
+- clear validation errors when a spend is not allowed
+
+Current apply behavior:
+- applying a valid spend updates the character through the accepted save path
+- XP is deducted by increasing `experienceSpent`
+- a concise `advancement` history entry is recorded for the character
+
+Current scope limits:
+- no full character builder
+- no giant prerequisite DSL
+- no talent-tree engine
+- no respec/rebuild flow
+- no campaign economy manager
+
 ## How to run tests
 
 ```bash
@@ -352,7 +393,7 @@ Current architectural state
     •    Composition/bootstrap chooses the persistence implementation.
     •    JSON-backed path is the default validated runtime-safe path.
     •    SwiftData path is implemented as a validated alternative.
-    •    Current mechanics checks and bounded damage primitives live in a dedicated `Rules` layer and resolve through explicit request/result/breakdown models, normalized modifier/condition inputs, bounded typed rules registries for stable metadata, and a combat-context adapter for the accepted Session Mode / combat workspace flows.
+    •    Current mechanics checks, bounded damage primitives, and bounded XP/progression validation live in a dedicated `Rules` layer and resolve through explicit request/result/breakdown models, normalized modifier/condition inputs, bounded typed rules registries for stable metadata, a combat-context adapter for the accepted Session Mode / combat workspace flows, and explicit XP spend/prerequisite models for current progression checks.
 
 Notes
 

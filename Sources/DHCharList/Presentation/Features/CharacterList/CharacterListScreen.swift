@@ -43,6 +43,7 @@ final class CharacterListViewModel: ObservableObject {
     @Published private(set) var templates: [CharacterTemplate] = []
     @Published private(set) var isLoading = false
     @Published private(set) var pendingImportSummary: CharacterImportPreviewSummary?
+    @Published private(set) var armourCompendiumCatalog: ArmourCompendiumCatalog = .demo
     @Published private(set) var weaponCompendiumCatalog: WeaponCompendiumCatalog = .demo
     @Published private(set) var pendingWeaponCompendiumImportSummary: WeaponCompendiumImportPreviewSummary?
     @Published var errorMessage: String?
@@ -51,6 +52,7 @@ final class CharacterListViewModel: ObservableObject {
     private let useCases: CharacterUseCases
     private let templateUseCases: CharacterTemplateUseCases?
     private let importExportService: any CharacterImportExportService
+    private let armourCompendiumUseCases: ArmourCompendiumUseCases
     private let weaponCompendiumUseCases: WeaponCompendiumUseCases
     private let weaponCompendiumImportService: WeaponCompendiumJSONImportService
     private var pendingImport: PendingImport?
@@ -61,6 +63,7 @@ final class CharacterListViewModel: ObservableObject {
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
+        armourCompendiumUseCases: ArmourCompendiumUseCases,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         initialWeaponCompendiumImportPayload: Data? = nil,
@@ -69,6 +72,7 @@ final class CharacterListViewModel: ObservableObject {
         self.useCases = useCases
         self.templateUseCases = templateUseCases
         self.importExportService = importExportService
+        self.armourCompendiumUseCases = armourCompendiumUseCases
         self.weaponCompendiumUseCases = weaponCompendiumUseCases
         self.weaponCompendiumImportService = weaponCompendiumImportService
         self.stagedWeaponCompendiumImportPayload = initialWeaponCompendiumImportPayload
@@ -88,6 +92,14 @@ final class CharacterListViewModel: ObservableObject {
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
+        }
+
+        do {
+            armourCompendiumCatalog = try await armourCompendiumUseCases.currentCatalog()
+        } catch {
+            if errorMessage == nil {
+                errorMessage = error.localizedDescription
+            }
         }
 
         do {
@@ -471,6 +483,7 @@ public struct CharacterListScreen: View {
         useCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases? = nil,
         importExportService: any CharacterImportExportService,
+        armourCompendiumUseCases: ArmourCompendiumUseCases,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         persistenceStatus: AppContainer.PersistenceBootstrapStatus,
@@ -482,6 +495,7 @@ public struct CharacterListScreen: View {
                 useCases: useCases,
                 templateUseCases: templateUseCases,
                 importExportService: importExportService,
+                armourCompendiumUseCases: armourCompendiumUseCases,
                 weaponCompendiumUseCases: weaponCompendiumUseCases,
                 weaponCompendiumImportService: weaponCompendiumImportService,
                 initialWeaponCompendiumImportPayload: initialWeaponCompendiumImportPayload

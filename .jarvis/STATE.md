@@ -1,25 +1,24 @@
-# Batch 44 Corrective Pass State
+# Batch 45 State
 
-- status: complete and validated; full repo-phase validation is green in this environment
-- scope: infra-only stabilization of simulator-backed coverage capture plus test-only restoration of truthful `Application` coverage; accepted product/runtime/persistence behavior remains unchanged
-- infra fix:
-  - `scripts/run_xcode_coverage.sh` now extracts the concrete simulator device id from the selected destination and explicitly preboots that same device with `xcrun simctl boot` + `xcrun simctl bootstatus -b` before launching the coverage `xcodebuild test`
-  - bounded retry attempts now reset the selected device with `xcrun simctl shutdown` before re-booting it, so stale CoreSimulator state is handled explicitly instead of reusing a half-booted simulator
-  - this removed the cold-start failure mode previously observed as `Unable to boot the Simulator`, `Failed to start launchd_sim`, and `Interrupted system call`
-- coverage follow-up:
-  - the fresh truthful coverage run exposed a real `Application`-area regression rather than another infra fault
-  - `Tests/DHCharListTests/WeaponCompendiumTests.swift` now adds package-only regression coverage for replace-all preview wording, required-field diagnostics, duplicate-id diagnostics, and blank preview/supporting-line branches in `WeaponCompendium.swift`
-  - truthful coverage gate remains unchanged and now passes with `Application` at `96.04%`
-- validation that passed:
-  - `make fmt`
-  - `make lint`
-  - `make typecheck`
-  - `make test`
-  - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-  - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
-  - `bash ./scripts/run_xcode_coverage.sh`
-  - `bash ./scripts/check_coverage_policy.sh`
-  - `make ci`
+- status: validated and repo-phase complete
+- scope:
+  - add a bounded local armour compendium/catalog alongside the accepted weapon compendium flow
+  - support armour autocomplete in the existing `Equipment` -> `Add Armour` editor path
+  - keep saved armour entries as detached character-owned copies with no persistent source linkage
+  - preserve accepted JSON-backed and SwiftData-backed character persistence behavior
+- implemented:
+  - `Sources/DHCharList/Application/ArmourCompendium.swift` defines structured armour catalog types, safe demo definitions, deterministic autocomplete, and explicit source-to-instance copying into `Character.Equipment.Armour`
+  - `Sources/DHCharList/Infrastructure/Persistence/JSONFileArmourCompendiumRepository.swift` persists the local armour catalog as a separate local JSON file
+  - `AppContainer` now composes `ArmourCompendiumUseCases`, and the app shell/character list flow loads the active armour catalog for the equipment screen
+  - `EquipmentScreen` now offers armour compendium search/pick/prefill inside the existing `Add Armour` flow while keeping the accepted manual armour editor intact
+  - inserted armour stays detached from the source definition; later compendium changes do not mutate saved character-owned armour
+  - bounded safe demo armour definitions are included for local-first use without embedding full copyrighted rulebook content
+- validation:
+  - green repo gates: `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`
+  - explicit required checks passed: `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`, `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
+  - focused host UI sanity passed: `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b45-armour-compendium-sanity-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testArmourCompendiumAutocompleteAddsDetachedEditableCopy`
 - truthful limitations:
-  - the fix hardens local simulator-backed coverage capture; it does not redesign CI or loosen coverage semantics
-  - Batch 44 product scope remains unchanged: compendium import is JSON schema v1 and replace-all only, with no merge/conflict UI, OCR/rulebook parsing, cloud sync, or persistent linkage from compendium updates to saved character weapons
+  - no armour compendium import yet
+  - no OCR/rulebook parsing
+  - no cloud compendium sync
+  - no persistent linkage from compendium definitions to saved armour entries

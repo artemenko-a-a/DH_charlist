@@ -84,6 +84,7 @@ private struct HostBootstrapView: View {
                 try await container.characterUseCases.deleteCharacter(id: character.id)
             }
 
+            _ = try await container.armourCompendiumUseCases.replaceCatalog(.demo)
             _ = try await container.weaponCompendiumUseCases.replaceCatalog(.demo)
         } catch {
             // Intentionally ignore reset failures during test bootstrap.

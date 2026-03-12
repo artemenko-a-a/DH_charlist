@@ -59,6 +59,7 @@ public struct DHCharListAppShell: View {
                 useCases: container.characterUseCases,
                 templateUseCases: container.templateUseCases,
                 importExportService: container.importExportService,
+                armourCompendiumUseCases: container.armourCompendiumUseCases,
                 weaponCompendiumUseCases: container.weaponCompendiumUseCases,
                 weaponCompendiumImportService: container.weaponCompendiumImportService,
                 persistenceStatus: container.persistenceStatus,

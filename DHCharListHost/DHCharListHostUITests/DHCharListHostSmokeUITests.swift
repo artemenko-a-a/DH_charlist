@@ -402,6 +402,64 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(labeledElement(containing: "Custom Laspistol").waitForExistence(timeout: 5))
     }
 
+    func testArmourCompendiumAutocompleteAddsDetachedEditableCopy() {
+        launchForSmoke()
+        openCharacterDetail()
+        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
+
+        let equipmentSection = app.staticTexts["Equipment"]
+        XCTAssertTrue(equipmentSection.waitForExistence(timeout: 5))
+        equipmentSection.tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+
+        let addArmourButton = app.buttons["Add Armour"]
+        XCTAssertTrue(addArmourButton.waitForExistence(timeout: 5))
+        addArmourButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Armour"].waitForExistence(timeout: 5))
+
+        let compendiumSearchField = textInput("armour-compendium.search")
+        XCTAssertTrue(compendiumSearchField.waitForExistence(timeout: 5))
+        compendiumSearchField.tap()
+        compendiumSearchField.typeText("flak")
+
+        let flakSuggestion = app.buttons["armour-compendium.pick.local-demo.flak-coat"]
+        XCTAssertTrue(flakSuggestion.waitForExistence(timeout: 5))
+        flakSuggestion.tap()
+
+        let locationField = app.textFields["Armour Location"]
+        XCTAssertTrue(locationField.waitForExistence(timeout: 5))
+        XCTAssertEqual(locationField.value as? String, "Flak Coat (Body, Arms)")
+        locationField.clearAndEnterText("Custom Flak Coat")
+
+        let armourPointsField = app.textFields["Armour Points"]
+        XCTAssertTrue(armourPointsField.waitForExistence(timeout: 5))
+        XCTAssertEqual(armourPointsField.value as? String, "4")
+        armourPointsField.clearAndEnterText("5")
+
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.navigationBars["Equipment"].waitForExistence(timeout: 5))
+        let customArmourRow = button(containing: "Custom Flak Coat")
+        XCTAssertTrue(customArmourRow.waitForExistence(timeout: 5))
+
+        addArmourButton.tap()
+        XCTAssertTrue(app.navigationBars["Add Armour"].waitForExistence(timeout: 5))
+
+        let secondCompendiumSearchField = textInput("armour-compendium.search")
+        XCTAssertTrue(secondCompendiumSearchField.waitForExistence(timeout: 5))
+        secondCompendiumSearchField.tap()
+        secondCompendiumSearchField.typeText("flak")
+
+        let secondFlakSuggestion = app.buttons["armour-compendium.pick.local-demo.flak-coat"]
+        XCTAssertTrue(secondFlakSuggestion.waitForExistence(timeout: 5))
+        secondFlakSuggestion.tap()
+
+        XCTAssertEqual(app.textFields["Armour Location"].value as? String, "Flak Coat (Body, Arms)")
+        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "4")
+        app.buttons["Cancel"].tap()
+
+        XCTAssertTrue(labeledElement(containing: "Custom Flak Coat").waitForExistence(timeout: 5))
+    }
+
     func testWeaponCompendiumImportReplacesLocalCatalogWithoutMutatingSavedWeapons() {
         app.launchArguments += ["-dh-ui-stage-weapon-compendium-import"]
         launchForSmoke()

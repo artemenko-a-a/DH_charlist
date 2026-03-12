@@ -26,6 +26,10 @@ struct EquipmentScreen: View {
         viewModel.weaponCompendiumCatalog
     }
 
+    private var armourCatalog: ArmourCompendiumCatalog {
+        viewModel.armourCompendiumCatalog
+    }
+
     var body: some View {
         Form {
             weaponsSection
@@ -76,6 +80,7 @@ struct EquipmentScreen: View {
         .sheet(item: $armourDraft) { value in
             ArmourEditorView(
                 draft: value,
+                catalog: armourCatalog,
                 onCancel: { armourDraft = nil },
                 onSave: { updated in
                     upsertArmour(from: updated)
@@ -210,16 +215,10 @@ struct EquipmentScreen: View {
                     Button {
                         armourDraft = ArmourDraft(armour: armour)
                     } label: {
-                        HStack {
-                            Text(armour.location.isEmpty ? "Unnamed Location" : armour.location)
-                            Spacer()
-                            CogitatorStatusChip("AP \(armour.armourPoints)", level: .caution)
-                        }
+                        ArmourRowView(armour: armour)
                     }
                     .buttonStyle(.plain)
                     .cogitatorPanelRow()
-                    .accessibilityLabel("\(armour.location.isEmpty ? "Unnamed Location" : armour.location), armour points \(armour.armourPoints)")
-                    .accessibilityHint("Double tap to edit armour.")
                 }
                 .onDelete(perform: deleteFilteredArmourEntries)
             }
@@ -234,7 +233,7 @@ struct EquipmentScreen: View {
         } header: {
             CogitatorSectionHeader(armourSectionTitle, subtitle: "Protection Matrix")
         } footer: {
-            Text("Use one entry per body location.")
+            Text("Use one entry per body location. New entries can be prefixed from the local armour compendium and then edited freely.")
                 .cogitatorSupportingText()
         }
     }
@@ -728,13 +727,44 @@ private struct WeaponCompendiumRowView: View {
 }
 
 @available(iOS 17, macOS 14, *)
+private struct ArmourRowView: View {
+    let armour: Armour
+
+    var body: some View {
+        HStack {
+            Text(armour.location.isEmpty ? "Unnamed Location" : armour.location)
+                .foregroundStyle(CogitatorPalette.textPrimary)
+            Spacer()
+            CogitatorStatusChip("AP \(armour.armourPoints)", level: .caution)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to edit armour.")
+    }
+
+    private var accessibilitySummary: String {
+        let location = armour.location.isEmpty ? "Unnamed Location" : armour.location
+        return "\(location). Armour points \(armour.armourPoints)."
+    }
+}
+
+@available(iOS 17, macOS 14, *)
 private struct ArmourEditorView: View {
     @State private var draft: ArmourDraft
+    @State private var compendiumQuery = ""
+    @State private var selectedDefinitionID: String?
+    private let catalog: ArmourCompendiumCatalog
     let onCancel: () -> Void
     let onSave: (ArmourDraft) -> Void
 
-    init(draft: ArmourDraft, onCancel: @escaping () -> Void, onSave: @escaping (ArmourDraft) -> Void) {
+    init(
+        draft: ArmourDraft,
+        catalog: ArmourCompendiumCatalog,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping (ArmourDraft) -> Void
+    ) {
         _draft = State(initialValue: draft)
+        self.catalog = catalog
         self.onCancel = onCancel
         self.onSave = onSave
     }
@@ -742,6 +772,55 @@ private struct ArmourEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if draft.isNew {
+                    Section {
+                        TextField("Search local compendium", text: $compendiumQuery)
+                            .accessibilityLabel("Armour Compendium Search")
+                            .accessibilityIdentifier("armour-compendium.search")
+                            .cogitatorPanelRow()
+
+                        if compendiumQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Search the local compendium to prefill current armour fields. Saving still creates a detached editable character-owned armour entry.")
+                                .foregroundStyle(CogitatorPalette.textSecondary)
+                                .cogitatorPanelRow()
+                        } else if matchingDefinitions.isEmpty {
+                            Text("No local compendium matches")
+                                .foregroundStyle(CogitatorPalette.textSecondary)
+                                .cogitatorPanelRow()
+                        } else {
+                            ForEach(matchingDefinitions) { definition in
+                                Button {
+                                    apply(definition)
+                                } label: {
+                                    ArmourCompendiumRowView(definition: definition)
+                                }
+                                .buttonStyle(.plain)
+                                .cogitatorPanelRow()
+                                .accessibilityIdentifier("armour-compendium.pick.\(definition.id)")
+                            }
+                        }
+
+                        if let selectedDefinition {
+                            Text("Prefilled from \(catalog.displayName). You can edit the saved armour entry freely, and later edits affect only this character-owned copy.")
+                                .foregroundStyle(CogitatorPalette.amber)
+                                .accessibilityIdentifier("armour-compendium.selection-status")
+                                .cogitatorPanelRow()
+
+                            if !selectedDefinition.previewLine.isEmpty {
+                                Text(selectedDefinition.previewLine)
+                                    .font(.caption)
+                                    .foregroundStyle(CogitatorPalette.textSecondary)
+                                    .cogitatorPanelRow()
+                            }
+                        }
+                    } header: {
+                        CogitatorSectionHeader("Armour Compendium", subtitle: catalog.displayName)
+                    } footer: {
+                        Text("This catalog is local and bounded. It does not create a persistent link after you save the armour entry.")
+                            .cogitatorSupportingText()
+                    }
+                }
+
                 TextField("Location", text: $draft.location)
                     .accessibilityLabel("Armour Location")
                     .cogitatorPanelRow()
@@ -769,34 +848,103 @@ private struct ArmourEditorView: View {
             }
         }
     }
+
+    private var matchingDefinitions: [ArmourCompendiumDefinition] {
+        ArmourCompendiumSearch.autocomplete(
+            definitions: catalog.definitions,
+            query: compendiumQuery
+        )
+    }
+
+    private var selectedDefinition: ArmourCompendiumDefinition? {
+        guard let selectedDefinitionID else { return nil }
+        return catalog.definition(id: selectedDefinitionID)
+    }
+
+    private func apply(_ definition: ArmourCompendiumDefinition) {
+        draft.apply(definition)
+        selectedDefinitionID = definition.id
+    }
 }
 
 private struct ArmourDraft: Identifiable {
     let id: UUID
+    let armourID: UUID
     var location: String
     var armourPoints: Int
     let isNew: Bool
 
     init() {
+        let generatedArmourID = UUID()
         id = UUID()
+        armourID = generatedArmourID
         location = ""
         armourPoints = 0
         isNew = true
     }
 
     init(armour: Armour) {
-        id = armour.id
+        id = UUID()
+        armourID = armour.id
         location = armour.location
         armourPoints = armour.armourPoints
         isNew = false
     }
 
+    mutating func apply(_ definition: ArmourCompendiumDefinition) {
+        let copied = definition.makeArmourInstance(id: armourID)
+        location = copied.location
+        armourPoints = copied.armourPoints
+    }
+
     func asArmour() -> Armour {
         Armour(
-            id: id,
+            id: armourID,
             location: location.trimmingCharacters(in: .whitespacesAndNewlines),
             armourPoints: armourPoints
         )
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private struct ArmourCompendiumRowView: View {
+    let definition: ArmourCompendiumDefinition
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(definition.name)
+                .font(.headline)
+                .foregroundStyle(CogitatorPalette.textPrimary)
+
+            if !definition.previewLine.isEmpty {
+                Text(definition.previewLine)
+                    .font(.subheadline)
+                    .foregroundStyle(CogitatorPalette.amber)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if !definition.supportingLine.isEmpty {
+                Text(definition.supportingLine)
+                    .font(.caption)
+                    .foregroundStyle(CogitatorPalette.textSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap to prefill the armour editor from the local compendium.")
+    }
+
+    private var accessibilitySummary: String {
+        [
+            definition.name,
+            definition.previewLine,
+            definition.supportingLine
+        ]
+        .filter { !$0.isEmpty }
+        .joined(separator: ". ")
     }
 }
 

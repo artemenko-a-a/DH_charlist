@@ -36,6 +36,8 @@ The project currently includes:
   - local weapon compendium autocomplete from a bounded safe catalog
   - adding from the compendium creates a detached editable character-owned weapon copy
   - armour
+  - local armour compendium autocomplete from a bounded safe catalog
+  - adding from the compendium creates a detached editable character-owned armour copy
   - movement
   - inventory
   - local in-screen search/filter for weapons/armour/inventory
@@ -165,30 +167,42 @@ Current scope limits:
 - no cloud sharing
 - no editable PDF form mode
 
-## Weapon compendium autocomplete + local import (Batches 43-44)
+## Local equipment compendium flows (Batches 43-45)
 
-The `Equipment` flow now supports a bounded local weapon compendium for faster add-weapon entry plus a local JSON import path for replacing that compendium without changing the accepted manual weapon editing model.
+The `Equipment` flow now supports bounded local compendium assistance for both weapons and armour. Weapons also support a local JSON replace-all import path; armour currently uses the local bundled/demo catalog plus accepted manual editing.
 
-Where to use it:
+Weapon flow:
 - open a character
 - open `Equipment`
 - choose `Add Weapon`
 - search the local compendium by weapon name and tap a matching entry
-- use `Import Local Compendium` to replace the current local catalog from a structured JSON file
+- use `Import Local Compendium` to replace the current local weapon catalog from a structured JSON file
 
-Current behavior:
+Weapon behavior:
 - the editor prefills key weapon fields from the selected catalog definition
 - saving creates a detached character-owned weapon copy
 - later edits affect only the character weapon instance, not the source definition
-- the accepted manual weapon edit flow remains fully available before and after saving
-- JSON compendium import replaces the current local compendium with explicit destructive confirmation
+- JSON compendium import replaces the current local weapon compendium with explicit destructive confirmation
 - imported catalog entries power future autocomplete/add-weapon flows only
 - existing character-owned weapons remain detached and unchanged after compendium replacement
-- schema details for local import are documented in `Docs/weapon-compendium-format.md`
+- schema details for local weapon import are documented in `Docs/weapon-compendium-format.md`
+
+Armour flow:
+- open a character
+- open `Equipment`
+- choose `Add Armour`
+- search the local compendium by armour name and tap a matching entry
+
+Armour behavior:
+- the editor prefills location and armour points from the selected catalog definition
+- saving creates a detached character-owned armour copy
+- the copied armour stays plain character-owned data; there is no persistent source link back to the compendium definition
+- the accepted manual armour editor remains the place to adjust values before saving
 
 Current scope limits:
-- the built-in catalog is a bounded safe local demo catalog, not a full rulebook dataset
-- local import is JSON schema v1 only
+- the built-in weapon and armour catalogs are bounded safe local demo catalogs, not full rulebook datasets
+- local import is currently available for weapons only, using JSON schema v1 replace-all semantics
+- armour compendium import is intentionally deferred for now
 - compendium import is replace-all only; there is no merge/conflict UI
 - no OCR or rulebook parsing
 - no cloud compendium

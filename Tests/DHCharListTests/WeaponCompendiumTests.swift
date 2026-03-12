@@ -303,6 +303,11 @@ import Testing
     let viewModel = CharacterListViewModel(
         useCases: characterUseCases,
         importExportService: CharacterJSONImportExportService(),
+        armourCompendiumUseCases: ArmourCompendiumUseCases(
+            repository: JSONFileArmourCompendiumRepository(
+                fileURL: uniqueCompendiumTestFileURL("armour-catalog-cancel")
+            )
+        ),
         weaponCompendiumUseCases: compendiumUseCases,
         weaponCompendiumImportService: importService
     )

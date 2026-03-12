@@ -43,6 +43,7 @@ public struct AppContainer: Sendable {
     public let characterUseCases: CharacterUseCases
     public let templateUseCases: CharacterTemplateUseCases
     public let importExportService: any CharacterImportExportService
+    public let armourCompendiumUseCases: ArmourCompendiumUseCases
     public let weaponCompendiumUseCases: WeaponCompendiumUseCases
     public let weaponCompendiumImportService: WeaponCompendiumJSONImportService
     public let persistenceStatus: PersistenceBootstrapStatus
@@ -51,6 +52,7 @@ public struct AppContainer: Sendable {
         characterUseCases: CharacterUseCases,
         templateUseCases: CharacterTemplateUseCases,
         importExportService: any CharacterImportExportService,
+        armourCompendiumUseCases: ArmourCompendiumUseCases,
         weaponCompendiumUseCases: WeaponCompendiumUseCases,
         weaponCompendiumImportService: WeaponCompendiumJSONImportService,
         persistenceStatus: PersistenceBootstrapStatus
@@ -58,6 +60,7 @@ public struct AppContainer: Sendable {
         self.characterUseCases = characterUseCases
         self.templateUseCases = templateUseCases
         self.importExportService = importExportService
+        self.armourCompendiumUseCases = armourCompendiumUseCases
         self.weaponCompendiumUseCases = weaponCompendiumUseCases
         self.weaponCompendiumImportService = weaponCompendiumImportService
         self.persistenceStatus = persistenceStatus
@@ -82,6 +85,9 @@ public struct AppContainer: Sendable {
             importExportService: importExportService,
             swiftDataFactory: swiftDataFactory
         )
+        let armourCompendiumRepository = JSONFileArmourCompendiumRepository(
+            fileURL: documentsDirectory.appending(path: "dh_armour_compendium.json")
+        )
         let weaponCompendiumRepository = JSONFileWeaponCompendiumRepository(
             fileURL: documentsDirectory.appending(path: "dh_weapon_compendium.json")
         )
@@ -93,6 +99,7 @@ public struct AppContainer: Sendable {
                 templateRepository: bootstrap.templateRepository
             ),
             importExportService: importExportService,
+            armourCompendiumUseCases: ArmourCompendiumUseCases(repository: armourCompendiumRepository),
             weaponCompendiumUseCases: WeaponCompendiumUseCases(repository: weaponCompendiumRepository),
             weaponCompendiumImportService: weaponCompendiumImportService,
             persistenceStatus: bootstrap.status

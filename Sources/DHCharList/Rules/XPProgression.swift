@@ -117,9 +117,29 @@ struct SkillAdvance: Equatable, Sendable {
     }
 }
 
+struct TalentUnlock: Equatable, Sendable {
+    let talentID: String
+    let talentName: String
+    let cost: Int
+    let prerequisites: [XPSpendPrerequisite]
+
+    init(
+        talentID: String,
+        talentName: String,
+        cost: Int,
+        prerequisites: [XPSpendPrerequisite] = []
+    ) {
+        self.talentID = talentID
+        self.talentName = talentName
+        self.cost = cost
+        self.prerequisites = prerequisites
+    }
+}
+
 enum XPSpendUpgrade: Equatable, Sendable {
     case characteristicAdvance(CharacteristicAdvance)
     case skillAdvance(SkillAdvance)
+    case talentUnlock(TalentUnlock)
 
     var cost: Int {
         switch self {
@@ -127,6 +147,8 @@ enum XPSpendUpgrade: Equatable, Sendable {
             advance.cost
         case .skillAdvance(let advance):
             advance.cost
+        case .talentUnlock(let unlock):
+            unlock.cost
         }
     }
 
@@ -136,6 +158,8 @@ enum XPSpendUpgrade: Equatable, Sendable {
             advance.prerequisites
         case .skillAdvance(let advance):
             advance.prerequisites
+        case .talentUnlock(let unlock):
+            unlock.prerequisites
         }
     }
 
@@ -145,6 +169,8 @@ enum XPSpendUpgrade: Equatable, Sendable {
             "\(advance.characteristic.label) \(advance.delta > 0 ? "+\(advance.delta)" : "\(advance.delta)")"
         case .skillAdvance(let advance):
             "\(advance.skillName.trimmedOrPlaceholder("Unnamed Skill")) to \(advance.targetTraining.label)"
+        case .talentUnlock(let unlock):
+            "Talent: \(unlock.talentName.trimmedOrPlaceholder("Unnamed Talent"))"
         }
     }
 }
@@ -258,6 +284,22 @@ enum XPProgressionResolver {
                 return [.invalidUpgrade("Skill advances must move to a higher training level than the character already has.")]
             }
             return []
+
+        case .talentUnlock(let unlock):
+            guard unlock.cost >= 0 else {
+                return [.invalidUpgrade("XP cost cannot be negative.")]
+            }
+            let talentName = unlock.talentName.trimmedOrPlaceholder("Unnamed Talent")
+            guard talentName != "Unnamed Talent" else {
+                return [.invalidUpgrade("Talent unlocks require a talent name.")]
+            }
+            let alreadyKnown = request.character.notes.talents.contains {
+                normalizedProgressionToken($0) == normalizedProgressionToken(talentName)
+            }
+            guard alreadyKnown == false else {
+                return [.invalidUpgrade("Talent unlocks must add a talent the character does not already know.")]
+            }
+            return []
         }
     }
 
@@ -335,6 +377,16 @@ enum XPProgressionResolver {
                 return
             }
             character.skills[index].training = advance.targetTraining
+
+        case .talentUnlock(let unlock):
+            let talentName = unlock.talentName.trimmedOrPlaceholder("Unnamed Talent")
+            let alreadyKnown = character.notes.talents.contains {
+                normalizedProgressionToken($0) == normalizedProgressionToken(talentName)
+            }
+            guard alreadyKnown == false else {
+                return
+            }
+            character.notes.talents.append(talentName)
         }
     }
 

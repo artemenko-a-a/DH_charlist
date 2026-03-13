@@ -31,7 +31,10 @@ struct XPSpendScreen: View {
     @State private var characteristicDelta: Int = 5
     @State private var selectedSkillID: UUID?
     @State private var targetTraining: SkillTrainingLevel = .known
-    @State private var xpCost: Int = 100
+    @State private var xpCost: Int = CharacteristicAdvanceCatalogRegistry
+        .entry(for: .weaponSkill)
+        .costModel
+        .defaultCost
     @State private var requiredAptitudesText = ""
     @State private var requiredTalent = ""
     @State private var requiredTrait = ""
@@ -281,12 +284,13 @@ struct XPSpendScreen: View {
         switch upgradeKind {
         case .characteristic:
             return .characteristicAdvance(
-                CharacteristicAdvance(
-                    characteristic: selectedCharacteristic,
-                    delta: characteristicDelta,
-                    cost: max(0, xpCost),
-                    prerequisites: manualPrerequisites
-                )
+                CharacteristicAdvanceCatalogRegistry
+                    .entry(for: selectedCharacteristic)
+                    .makeAdvance(
+                        deltaOverride: characteristicDelta,
+                        costOverride: max(0, xpCost),
+                        extraPrerequisites: manualPrerequisites
+                    )
             )
 
         case .skill:
@@ -294,13 +298,13 @@ struct XPSpendScreen: View {
                 ?? sortedSkills.first
                 ?? Skill(name: "Unavailable Skill", characteristic: .intelligence)
             return .skillAdvance(
-                SkillAdvance(
-                    skillID: selectedSkill.id,
-                    skillName: selectedSkill.displayName,
-                    targetTraining: targetTraining,
-                    cost: max(0, xpCost),
-                    prerequisites: manualPrerequisites
-                )
+                SkillAdvanceCatalogRegistry
+                    .entry(for: selectedSkill, targetTraining: targetTraining)
+                    .makeAdvance(
+                        skill: selectedSkill,
+                        costOverride: max(0, xpCost),
+                        extraPrerequisites: manualPrerequisites
+                    )
             )
         }
     }

@@ -1,21 +1,30 @@
-# Batch 48 State
+# Batch 49 State
 
-- status: implemented; final repo-phase validation in progress
+- status: implemented and repo-phase validated
 - scope:
-  - add a bounded XP spending and prerequisite-validation foundation on top of the accepted rules layer
-  - support explicit characteristic and existing-skill advances without introducing a full character builder
+  - add bounded typed registries for spendable talents and advances on top of the accepted progression/rules foundation
+  - route current bounded progression validation away from scattered upgrade constants and toward explicit catalog metadata
   - keep accepted JSON-backed and SwiftData-backed persistence behavior intact
 - implemented:
-  - `Sources/DHCharList/Rules/XPProgression.swift` now defines explicit XP spend request/result/breakdown models, bounded upgrade types, explainable prerequisite evaluation, and a safe apply path
-  - `CharacteristicsScreen` now exposes a minimal `Spend XP` flow, and `XPSpendScreen` provides bounded upgrade selection, manual prerequisite entry, explainable validation output, and an apply action
-  - `CharacterListViewModel.applyXPSpend(_:)` now persists a valid spend through the accepted save path and records a concise advancement history entry
-  - package tests and a focused host UI sanity test now cover valid spends, invalid spends, prerequisite failures, apply behavior, and visible advancement history
+  - `Sources/DHCharList/Rules/ProgressionRegistries.swift` now defines bounded talent, characteristic-advance, and skill-advance catalog entries with stable ids, costs, and prerequisite metadata
+  - `Sources/DHCharList/Rules/XPProgression.swift` now supports registry-backed talent unlock validation/apply behavior alongside registry-backed characteristic and skill advances
+  - `XPSpendScreen` now builds its bounded characteristic/skill spend requests from the shared advance registries instead of local hardcoded cost defaults
+  - package tests now cover talent registry correctness, advance registry correctness, registry-backed validation, and registry-backed apply/history behavior
 - validation:
-  - focused host runtime sanity has passed locally
-  - package checks, fresh truthful coverage, and `make ci` are being re-run as the final repo-phase gates
+  - `make fmt`
+  - `make lint`
+  - `make typecheck`
+  - `make test`
+  - `make ci`
+  - `swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+  - `swift build --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build`
+  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS Simulator' build`
+  - `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=F5CF78D3-E801-4B76-B69D-04FB1CED7680' -resultBundlePath /tmp/dh-b49-xp-registry-rerun.xcresult -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testXPSpendingValidationAppliesBoundedAdvancement`
+  - `bash ./scripts/run_xcode_coverage.sh`
+  - `bash ./scripts/check_coverage_policy.sh`
 - truthful limitations:
   - no full character builder
   - no giant prerequisite DSL
-  - no talent-tree engine
-  - no campaign economy manager
-  - no respec or character rebuild wizard
+  - no talent-tree UI
+  - no broad progression platform
+  - no bulk copyrighted progression dataset

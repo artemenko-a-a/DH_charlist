@@ -110,6 +110,103 @@ import Testing
     #expect(result.appliedCharacter?.resources.experienceSpent == 300)
 }
 
+@Test func registryBackedCharacteristicAdvanceUsesStructuredCatalogDefaults() {
+    let character = progressionSampleCharacter(name: "Registry Characteristic")
+    let upgrade = CharacteristicAdvanceCatalogRegistry
+        .entry(for: .agility)
+        .makeAdvance(extraPrerequisites: [.minimumCharacteristic(.agility, 40)])
+
+    let result = XPProgressionResolver.apply(
+        XPSpendRequest(character: character, upgrade: .characteristicAdvance(upgrade))
+    )
+
+    #expect(result.isValid)
+    #expect(result.cost == 100)
+    #expect(result.appliedCharacter?.characteristics.agility == 46)
+    #expect(result.appliedCharacter?.resources.experienceSpent == 200)
+    #expect(result.breakdown.prerequisiteEvaluations.map(\.isSatisfied) == [true, true])
+}
+
+@Test func registryBackedTalentUnlockAppliesAndProducesExplainableHistory() throws {
+    let character = progressionSampleCharacter(name: "Talent Unlock")
+    let rapidReload = try #require(TalentCatalogRegistry.lookup(id: "rapid-reload"))
+    let request = XPSpendRequest(
+        character: character,
+        upgrade: .talentUnlock(rapidReload.makeUnlock())
+    )
+
+    let result = XPProgressionResolver.apply(request)
+
+    #expect(result.isValid)
+    #expect(result.cost == 100)
+    #expect(result.appliedCharacter?.notes.talents == ["Meditation", "Rapid Reload"])
+    #expect(result.appliedCharacter?.resources.experienceSpent == 200)
+    #expect(result.historyTitle == "Advancement: Talent: Rapid Reload")
+    #expect(result.historyBody?.contains("Spent 100 XP on Talent: Rapid Reload.") == true)
+}
+
+@Test func registryBackedTalentUnlockValidationExplainsMissingPrerequisitesAndDuplicateTalent() throws {
+    let character = progressionSampleCharacter(name: "Talent Validation")
+    let weaponTech = try #require(TalentCatalogRegistry.lookup(id: "weapon-tech"))
+    let missingPrerequisite = XPProgressionResolver.validate(
+        XPSpendRequest(character: character, upgrade: .talentUnlock(weaponTech.makeUnlock()))
+    )
+    let meditation = try #require(TalentCatalogRegistry.lookup(id: "meditation"))
+    let duplicateTalent = XPProgressionResolver.validate(
+        XPSpendRequest(
+            character: character,
+            upgrade: .talentUnlock(meditation.makeUnlock())
+        )
+    )
+
+    #expect(missingPrerequisite.isValid == false)
+    #expect(
+        missingPrerequisite.validationErrors
+            == [.unmetPrerequisite(.requiredSkill(name: "Tech-Use", minimumTraining: .known))]
+    )
+    #expect(
+        missingPrerequisite.breakdown.prerequisiteEvaluations.map(\.detail)
+            == [
+                "400 XP currently available.",
+                "Tech-Use is currently Untrained."
+            ]
+    )
+
+    #expect(duplicateTalent.isValid == false)
+    #expect(
+        duplicateTalent.validationErrors
+            == [.invalidUpgrade("Talent unlocks must add a talent the character does not already know.")]
+    )
+}
+
+@Test @MainActor func viewModelApplyXPSpendPersistsTalentUnlockAndAdvancementHistory() async throws {
+    let fileURL = progressionUniqueTestFileURL("batch49-viewmodel-talent-unlock")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let importService = CharacterJSONImportExportService()
+    let source = progressionSampleCharacter(name: "ViewModel Talent Progression")
+
+    try await useCases.upsertCharacter(source)
+
+    let viewModel = progressionViewModel(useCases: useCases, importExportService: importService)
+    await viewModel.load()
+
+    let rapidReload = try #require(TalentCatalogRegistry.lookup(id: "rapid-reload"))
+    let request = XPSpendRequest(
+        character: source,
+        upgrade: .talentUnlock(rapidReload.makeUnlock())
+    )
+
+    let updated = await viewModel.applyXPSpend(request)
+    let persisted = try await useCases.fetchCharacter(id: source.id)
+
+    #expect(updated?.notes.talents == ["Meditation", "Rapid Reload"])
+    #expect(updated?.resources.experienceSpent == 200)
+    #expect(updated?.history.first?.title == "Advancement: Talent: Rapid Reload")
+    #expect(persisted?.history.first?.title == "Advancement: Talent: Rapid Reload")
+    #expect(viewModel.character(by: source.id)?.notes.talents == ["Meditation", "Rapid Reload"])
+}
+
 @Test func invalidSkillAdvanceDoesNotAllowSameTrainingLevel() {
     let character = progressionSampleCharacter(name: "No Change")
     let awareness = character.skills[0]

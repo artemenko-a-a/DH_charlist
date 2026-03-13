@@ -6,7 +6,7 @@ This document defines the intended staged path from the current helper-based mec
 
 Important: this is a roadmap, not a claim that the project already has a full rules engine.
 
-As of 2026-03-12, Stages 1, 2, 3, 4, 5, 6, 7, and 8 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, `Sources/DHCharList/Rules/DamagePipeline.swift`, `Sources/DHCharList/Rules/XPProgression.swift`, and `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`. The project still does **not** have a full rules engine.
+As of 2026-03-13, Stages 1, 2, 3, 4, 5, 6, 7, and 8 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, `Sources/DHCharList/Rules/DamagePipeline.swift`, `Sources/DHCharList/Rules/XPProgression.swift`, `Sources/DHCharList/Rules/ProgressionRegistries.swift`, and `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`. The project still does **not** have a full rules engine.
 
 ## Goals
 
@@ -289,11 +289,12 @@ This stage is about formalization, not adding new gameplay scope.
 
 ---
 
-## Stage 8 — Progression validation foundation
-**Goal:** introduce bounded XP-spend and prerequisite validation without building a full character builder.
+## Stage 8 — Progression validation + bounded upgrade registries
+**Goal:** introduce bounded XP-spend and prerequisite validation plus structured upgrade metadata without building a full character builder.
 
 ### Implemented foundation
 - `Sources/DHCharList/Rules/XPProgression.swift`
+- `Sources/DHCharList/Rules/ProgressionRegistries.swift`
 - explicit `XPSpendRequest`
 - explicit `XPSpendResult`
 - structured `XPSpendBreakdown`
@@ -301,6 +302,11 @@ This stage is about formalization, not adding new gameplay scope.
 - bounded upgrade types for current accepted character state:
   - characteristic advances
   - existing-skill training advances
+  - bounded talent unlocks
+- bounded typed registries for current progression metadata:
+  - talent catalog entries with stable ids, bounded categories, fixed costs, prerequisite metadata, aptitude links, and source/tags
+  - characteristic advance catalog entries with stable ids, target characteristic, tier, delta, and cost metadata
+  - skill advance catalog entries with stable ids, linked skill metadata, target training, and cost metadata
 - bounded prerequisite validation for currently modelable cases:
   - available XP
   - minimum characteristic
@@ -312,6 +318,7 @@ This stage is about formalization, not adding new gameplay scope.
   - applies the upgrade to a copied character
   - deducts XP by increasing `experienceSpent`
   - returns explainable history summary text suitable for history/UI reuse
+- current bounded progression UI now consumes characteristic/skill advance registries for spend metadata without claiming a full progression platform
 
 ### Still intentionally bounded
 - no full character builder
@@ -346,6 +353,7 @@ A practical implementation sequence could look like:
 - **Batch 41** — Damage pipeline foundation
 - **Batch 42** — Scenario tests & golden rules suite
 - **Batch 48** — XP spending + prerequisite validation foundation
+- **Batch 49** — talent / advance catalog registries
 
 This sequence is directional, not immutable.
 
@@ -404,6 +412,6 @@ At the time of writing:
 - the project has mechanics helpers and combat-oriented helpers
 - the project now has a bounded `Rules` foundation for current check-target calculations with explicit request/result/breakdown modeling
 - the project now also has a bounded combat-context layer for active weapon, combat conditions, pinned checks, and combat check preparation
-- the project now also has a bounded XP/progression validation layer for explainable XP cost, prerequisite checks, and explicit apply semantics for current characteristic/skill advances
+- the project now also has a bounded XP/progression validation layer for explainable XP cost, prerequisite checks, explicit apply semantics, and structured talent/advance registries for current progression work
 - the project does **not** yet have a full rules engine
 - this roadmap exists to make future rules work incremental, explainable, and safe

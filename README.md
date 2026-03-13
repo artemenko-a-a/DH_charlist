@@ -236,7 +236,7 @@ Current workspace behavior:
 - reload and quick-toggle actions are explicit conveniences only; there is still no action-economy enforcement or full combat simulation
 - iPhone layouts prioritize the combat summary and shortcuts first, while keeping the full workspace usable on iPad
 
-## XP progression validation (Batch 48)
+## XP progression validation (Batches 48-49)
 
 The app now includes a bounded XP-spend and prerequisite-validation foundation rather than a full progression builder.
 
@@ -248,6 +248,7 @@ Where to open it:
 What it supports today:
 - characteristic advances
 - existing skill training advances
+- bounded talent and advance catalog registries for progression metadata, cost defaults, and prerequisite metadata
 - explicit manual XP cost entry
 - explainable prerequisite checks for:
   - available XP
@@ -269,6 +270,11 @@ Current apply behavior:
 - applying a valid spend updates the character through the accepted save path
 - XP is deducted by increasing `experienceSpent`
 - a concise `advancement` history entry is recorded for the character
+
+Current registry boundary:
+- the current `Spend XP` screen remains intentionally small and still exposes bounded characteristic/skill spends only
+- registry-backed metadata now lives in `Sources/DHCharList/Rules/ProgressionRegistries.swift`
+- bounded talent unlock support now exists in the rules/progression layer for future progression UX work, but this batch does not add a full talent-tree or builder UI
 
 Current scope limits:
 - no full character builder
@@ -393,7 +399,7 @@ Current architectural state
     •    Composition/bootstrap chooses the persistence implementation.
     •    JSON-backed path is the default validated runtime-safe path.
     •    SwiftData path is implemented as a validated alternative.
-    •    Current mechanics checks, bounded damage primitives, and bounded XP/progression validation live in a dedicated `Rules` layer and resolve through explicit request/result/breakdown models, normalized modifier/condition inputs, bounded typed rules registries for stable metadata, a combat-context adapter for the accepted Session Mode / combat workspace flows, and explicit XP spend/prerequisite models for current progression checks.
+    •    Current mechanics checks, bounded damage primitives, and bounded XP/progression validation live in a dedicated `Rules` layer and resolve through explicit request/result/breakdown models, normalized modifier/condition inputs, bounded typed rules registries for stable metadata, a combat-context adapter for the accepted Session Mode / combat workspace flows, explicit XP spend/prerequisite models, and bounded progression registries for talents plus characteristic/skill advances.
 
 Notes
 

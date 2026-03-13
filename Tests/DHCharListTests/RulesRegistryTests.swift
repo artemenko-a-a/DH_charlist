@@ -42,6 +42,41 @@ import Testing
     #expect(metadata.isCanonical == false)
 }
 
+@Test func talentCatalogRegistryProvidesBoundedStructuredTalentMetadata() {
+    let rapidReload = TalentCatalogRegistry.lookup(id: "rapid-reload")
+    let deadeyeShot = TalentCatalogRegistry.lookup(name: "Deadeye Shot")
+
+    #expect(rapidReload?.displayName == "Rapid Reload")
+    #expect(rapidReload?.costModel.defaultCost == 100)
+    #expect(rapidReload?.category == .combat)
+    #expect(rapidReload?.source == "Bounded Talent Registry")
+    #expect(rapidReload?.isCanonical == true)
+
+    #expect(deadeyeShot?.id == "deadeye-shot")
+    #expect(deadeyeShot?.aptitudeLinks == ["Ballistic Skill"])
+    #expect(deadeyeShot?.prerequisites == [.minimumCharacteristic(.ballisticSkill, 35)])
+    #expect(TalentCatalogRegistry.lookup(name: "Unknown Talent") == nil)
+}
+
+@Test func advanceCatalogRegistriesProvideStructuredCharacteristicAndSkillDefaults() {
+    let characteristicEntry = CharacteristicAdvanceCatalogRegistry.entry(for: .weaponSkill)
+    let awareness = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let skillEntry = SkillAdvanceCatalogRegistry.entry(for: awareness, targetTraining: .veteran)
+
+    #expect(characteristicEntry.id == "characteristic.weaponSkill.tier1")
+    #expect(characteristicEntry.delta == 5)
+    #expect(characteristicEntry.costModel.defaultCost == 100)
+    #expect(characteristicEntry.aptitudeLinks == ["Weapon Skill"])
+    #expect(characteristicEntry.source == "Bounded Advance Registry")
+
+    #expect(skillEntry.id == "skill.awareness.veteran")
+    #expect(skillEntry.skillMetadata.id == "awareness")
+    #expect(skillEntry.targetTraining == .veteran)
+    #expect(skillEntry.costModel.defaultCost == 100)
+    #expect(skillEntry.aptitudeLinks == ["Perception"])
+    #expect(skillEntry.source == "Bounded Advance Registry")
+}
+
 @Test func weaponMetadataRegistriesResolveTypesAndTraitsForCombatContext() {
     let weapon = Weapon(
         name: "Chainsword",

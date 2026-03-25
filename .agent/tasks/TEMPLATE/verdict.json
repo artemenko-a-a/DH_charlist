@@ -1,0 +1,42 @@
+{
+  "task_id": "TASK_ID",
+  "title": "Task title",
+  "status": "accepted_with_conditions",
+  "summary": "Short truthful summary of the result.",
+  "accepted_scope": [
+    "implemented feature or foundation piece 1",
+    "implemented feature or foundation piece 2"
+  ],
+  "rejected_scope": [],
+  "blockers": [],
+  "residual_risks": [
+    "real device behavior not verified",
+    "manual visual sign-off still pending"
+  ],
+  "required_followups": [
+    "Run iPhone manual acceptance pass",
+    "Run iPad manual acceptance pass"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/TASK_ID/spec.md",
+    ".agent/tasks/TASK_ID/acceptance.md",
+    ".agent/tasks/TASK_ID/evidence.md",
+    ".agent/tasks/TASK_ID/raw/make-ci.txt"
+  ],
+  "tested_in_this_environment": [
+    "make ci",
+    "swift build",
+    "swift test",
+    "focused host UI tests"
+  ],
+  "not_verified_in_this_environment": [
+    "real Files picker on device",
+    "real share destinations on device"
+  ],
+  "trust_assessment": {
+    "rules_correctness": "strong",
+    "data_safety": "strong",
+    "runtime_ui_confidence": "medium",
+    "real_device_confidence": "low"
+  }
+}

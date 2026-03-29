@@ -4,3 +4,6 @@
 artifacts/
 DHCharListHost/.DS_Store
 DHCharListHost/artifacts/
+web/node_modules
+web/dist
+web/tsconfig.tsbuildinfo

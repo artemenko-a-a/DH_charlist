@@ -2,26 +2,27 @@
   "task_id": "repo-task-proof-loot",
   "title": "Web MVP foundation plan for Dark Heresy II character manager",
   "status": "accepted_with_conditions",
-  "summary": "Initialized a repo-local task-proof bundle and froze MVP scope, trust-critical risks, and validation expectations for web migration planning.",
+  "summary": "Task-verifier confirms planning bundle integrity and truthfulness; implementation and runtime/device verification remain pending.",
   "accepted_scope": [
-    "Task-proof bundle initialization under .agent/tasks/repo-task-proof-loot",
-    "MVP scope and out-of-scope freeze derived from provided technical specification",
-    "Trust-critical risk and confidence model definition for subsequent implementation batches"
+    "Verified required planning artifacts exist and are coherent",
+    "Verified verdict JSON validity",
+    "Confirmed no new concrete failures requiring problems.md in this pass"
   ],
   "rejected_scope": [
-    "Any web feature implementation in this planning step",
-    "Any claim of runtime parity verification between iOS and web"
+    "Any claim that web runtime implementation is complete",
+    "Any claim that iOS-web parity is verified",
+    "Any claim of real-device readiness"
   ],
   "blockers": [],
   "residual_risks": [
-    "Implementation details (shared contracts/parity tests) are not yet executed",
-    "Real-device usability and handoff readiness are not yet verified",
-    "Import/export and destructive flow runtime behavior remains unvalidated"
+    "Web runtime behavior is unverified",
+    "Parity tests are not yet executed",
+    "Real-device browser readiness is unverified"
   ],
   "required_followups": [
-    "Implement Web foundation (Phase 1) as bounded vertical slice",
-    "Add parity-focused tests for rules/data trust-critical paths",
-    "Run iPhone and iPad manual acceptance for gameplay-time usage"
+    "Start Phase 1 web foundation implementation as bounded task",
+    "Run build/test/lint/typecheck for web slice",
+    "Run manual iPad/iPhone browser acceptance before handoff claims"
   ],
   "evidence_bundle": [
     ".agent/tasks/repo-task-proof-loot/spec.md",
@@ -30,19 +31,19 @@
     ".agent/tasks/repo-task-proof-loot/verdict.json"
   ],
   "tested_in_this_environment": [
-    "find .agent/tasks -maxdepth 2 -mindepth 1 -type d | sort",
-    "python3 -m json.tool .agent/tasks/repo-task-proof-loot/verdict.json"
+    "artifact presence checks",
+    "verdict json validation",
+    "problems.md presence check"
   ],
   "not_verified_in_this_environment": [
-    "web runtime build and tests",
-    "rules parity scenarios against iOS behavior",
-    "real-device iPhone/iPad usage",
-    "real share/files integrations"
+    "web build/test/lint/typecheck",
+    "rules parity/golden scenario runtime checks",
+    "real-device iPad/iPhone browser usage"
   ],
   "trust_assessment": {
-    "rules_correctness": "low",
-    "data_safety": "low",
-    "runtime_ui_confidence": "low",
+    "logic_confidence": "medium",
+    "runtime_confidence": "low",
+    "ui_confidence": "low",
     "real_device_confidence": "low"
   }
 }

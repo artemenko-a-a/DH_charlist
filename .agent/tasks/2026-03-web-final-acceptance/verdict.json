@@ -1,0 +1,15 @@
+{
+  "task_id": "2026-03-web-final-acceptance",
+  "title": "Final web acceptance and QA verdict",
+  "status": "rejected",
+  "summary": "Web foundation is delivered and validated on web toolchain, but full repository acceptance is blocked by external environment limitations (no macOS/Xcode-required checks).",
+  "blockers": [
+    "xcodebuild unavailable in this Linux environment",
+    "Makefile depends on /bin/zsh unavailable in environment",
+    "documented swift commands use host-specific absolute package path"
+  ],
+  "required_followups": [
+    "Run full iOS/macOS validation on macOS runner",
+    "Normalize Makefile shell/path assumptions for portable CI"
+  ]
+}

@@ -80,3 +80,29 @@ Typical files:
 This process is intentionally lightweight.
 It is not required for every small change.
 Use it when the cost of being wrong is higher than the cost of documenting proof.
+
+
+## Managed repo workflow
+
+For repository-local orchestration, use:
+
+- `.agent/workflows/repo-task-proof-loop.md`
+- `.agent/subagents/README.md`
+
+Subagent sequence:
+
+1. `spec-agent`
+2. `build-agent`
+3. `evidence-agent`
+4. `verify-agent`
+5. `fix-agent` (loop with verify as needed)
+
+## Confidence categories (required in evidence)
+
+Every trust-sensitive task should report all of:
+- logic confidence,
+- runtime confidence,
+- UI confidence,
+- real-device confidence.
+
+Do not collapse real-device confidence into simulator or CI results.

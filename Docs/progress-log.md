@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-03-29
+
+### Batch 47 — Web delivery completion + repo validation repair
+- **status:** accepted_with_conditions
+- **checks run:** `git pull --ff-only origin main`, `brew install node`, `cd web && npm install`, `cd web && npm run typecheck`, `cd web && npm run test`, `cd web && npm run build`, `make fmt`, `make lint`, `make typecheck`, `swift build --disable-sandbox --package-path /Users/andrey_artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build-direct`, `xcodebuild -version`, attempted `make test`, attempted `swift test --disable-sandbox --package-path /Users/andrey_artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build-direct-test-2`, attempted `sudo xcodebuild -license accept`
+- **results:** rebased local repo onto merged PR #5 foundation; replaced the placeholder web shell with a meaningfully usable local web app that covers character management, bounded session/combat helpers, XP validation/apply, compendium autocomplete/import flows with detached-copy guarantees, and browser dossier preview/print. Added parity-focused TypeScript rules/helpers and web tests for detached-copy semantics, malformed storage/import safety, bounded mechanics, progression apply, and UI smoke. Normalized repo-local validation assumptions by fixing the `Makefile` package path and tightening SwiftData compile guards from `canImport(SwiftData)` to `canImport(SwiftData) && canImport(SwiftDataMacros)` so package builds succeed on the currently installed Apple toolchain when SwiftData macros are unavailable. Updated docs and proof-loop bundles to reflect the actual delivered scope.
+- **blockers:** repository-wide Swift/iOS test validation is blocked by a machine-level prerequisite: Apple’s Xcode license is not accepted on this Mac, and accepting it requires privileged access (`sudo xcodebuild -license`). After wiring the missing `swift-testing` package dependency in `Package.swift`, both `make test` and direct `swift test` stop immediately with exit code `69` on that host-level blocker instead of running the test suite.
+
 ## 2026-03-07
 
 ### Batch 0 — Repo inspection + bootstrap

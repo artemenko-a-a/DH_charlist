@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 @testable import DHCharList
-#if canImport(SwiftData)
+#if canImport(SwiftData) && canImport(SwiftDataMacros)
 import SwiftData
 #endif
 
@@ -1436,7 +1436,7 @@ import SwiftData
     #expect(names == Set(["One", "Two"]))
 }
 
-#if canImport(SwiftData)
+#if canImport(SwiftData) && canImport(SwiftDataMacros)
 @available(iOS 17, macOS 14, *)
 @Test func swiftDataRepositorySaveFetchRoundtrip() async throws {
     let repository = try makeSwiftDataRepository(testName: "swiftdata-roundtrip")
@@ -1714,7 +1714,7 @@ private func uniqueTestFileURL(_ suffix: String) -> URL {
         .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
 }
 
-#if canImport(SwiftData)
+#if canImport(SwiftData) && canImport(SwiftDataMacros)
 @available(iOS 17, macOS 14, *)
 private func makeSwiftDataRepository(testName: String) throws -> SwiftDataCharacterRepository {
     let storeURL = URL(filePath: NSTemporaryDirectory())

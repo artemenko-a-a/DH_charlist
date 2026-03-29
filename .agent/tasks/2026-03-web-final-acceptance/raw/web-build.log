@@ -1,0 +1,13 @@
+
+> dh-charlist-web@0.1.0 build
+> tsc -b && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 34 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.40 kB │ gzip:  0.28 kB
+dist/assets/index-r_58XN_Y.css    4.79 kB │ gzip:  1.68 kB
+dist/assets/index-aTH5ZcPU.js   202.50 kB │ gzip: 60.22 kB
+✓ built in 825ms

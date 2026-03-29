@@ -1,15 +1,18 @@
 {
   "task_id": "2026-03-web-final-acceptance",
   "title": "Final web acceptance and QA verdict",
-  "status": "rejected",
-  "summary": "Web foundation is delivered and validated on web toolchain, but full repository acceptance is blocked by external environment limitations (no macOS/Xcode-required checks).",
+  "status": "accepted_with_conditions",
+  "summary": "The repo contains a working, validated local web app and repo-side validation assumptions were repaired, but repository-wide Swift/iOS test acceptance is blocked on this machine until the Apple Xcode license is accepted with elevated privileges.",
+  "logic_confidence": "high",
+  "runtime_confidence": "mixed",
+  "ui_confidence": "medium",
+  "real_device_confidence": "none",
   "blockers": [
-    "xcodebuild unavailable in this Linux environment",
-    "Makefile depends on /bin/zsh unavailable in environment",
-    "documented swift commands use host-specific absolute package path"
+    "Local Xcode license is not accepted; make/swift test commands stop with exit code 69 before executing repository tests."
   ],
   "required_followups": [
-    "Run full iOS/macOS validation on macOS runner",
-    "Normalize Makefile shell/path assumptions for portable CI"
+    "Run sudo xcodebuild -license on the local machine.",
+    "Rerun make typecheck, make test, and any desired xcodebuild coverage/host checks after the license is accepted.",
+    "Run manual browser/device sanity if release sign-off needs device confidence."
   ]
 }

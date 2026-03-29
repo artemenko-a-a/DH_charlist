@@ -2,6 +2,39 @@
 
 Dark Heresy II character manager for iPhone/iPad.
 
+## Web app
+
+The repository now also contains a local-first web application in [`/Users/andrey_artemenko/repos/DH_charlist/web`](/Users/andrey_artemenko/repos/DH_charlist/web).
+
+Run it locally:
+
+```bash
+cd /Users/andrey_artemenko/repos/DH_charlist/web
+npm install
+npm run dev
+```
+
+Validated web commands:
+
+```bash
+cd /Users/andrey_artemenko/repos/DH_charlist/web
+npm run typecheck
+npm run test
+npm run build
+```
+
+Current web scope:
+- character roster create/select/duplicate/delete
+- profile, characteristics/resources, skills, notes, equipment, and inventory editing
+- session workspace with bounded quick mechanics, attack/reaction shortcuts, and bounded damage helper
+- XP validation/apply with explainable prerequisite checks
+- weapon and armour compendium autocomplete/import with detached-copy and replace-all confirmation semantics
+- dossier preview with browser print/share
+
+Current validation caveat:
+- web validation is green locally
+- repository-wide iOS/Xcode test validation on this machine is currently blocked until the local Apple Xcode license is accepted with `sudo xcodebuild -license`
+
 > Current state: the project is implemented and validated on two local persistence paths:
 > - JSON-backed path — validated and kept as the default/fallback path
 > - SwiftData path — validated and selectable through composition/bootstrap, with explicit fallback diagnostics when JSON remains active

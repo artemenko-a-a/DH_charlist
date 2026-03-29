@@ -7,11 +7,20 @@ let package = Package(
         .iOS(.v17),
         .macOS(.v13)
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-testing.git", from: "0.6.0")
+    ],
     products: [
         .library(name: "DHCharList", targets: ["DHCharList"])
     ],
     targets: [
         .target(name: "DHCharList"),
-        .testTarget(name: "DHCharListTests", dependencies: ["DHCharList"])
+        .testTarget(
+            name: "DHCharListTests",
+            dependencies: [
+                "DHCharList",
+                .product(name: "Testing", package: "swift-testing")
+            ]
+        )
     ]
 )

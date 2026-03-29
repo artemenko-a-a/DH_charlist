@@ -1,19 +1,35 @@
-# Web Version Spec (Bounded, Local-first)
+# Web Version Spec
 
-## Stack
-- React + TypeScript + Vite (`web/`).
-- Browser localStorage persistence for stage foundation.
+## Delivered stack
+- React + TypeScript + Vite in [`/Users/andrey_artemenko/repos/DH_charlist/web`](/Users/andrey_artemenko/repos/DH_charlist/web)
+- Browser-local persistence with guarded load/migration logic
+- Shared TypeScript compatibility layer for character contracts, mechanics helpers, bounded damage, XP progression, compendium parsing, and dossier composition
 
-## Implemented baseline (Stage 1)
-- Character list/create/select.
-- Profile/resources editing.
-- Quick mechanics target readout.
-- Weapon/armour detached-copy add from local compendium entries.
-- Replace-all compendium import with explicit confirmation.
-- Dossier JSON preview.
+## Supported web flows
+- Character roster: create, select, duplicate, delete
+- Profile editing: name, home world, background, role, aptitudes, description
+- Characteristics/resources editing with explainable quick-check helpers
+- Skills editing with training-aware target summaries
+- Notes/text sections editing for talents, traits, mutations, disorders, psychic powers, special abilities, and freeform notes
+- Equipment editing for weapons, armour, movement, and inventory
+- Weapon and armour compendium autocomplete/add flows with detached-copy semantics
+- Replace-all compendium import preview and confirmation with malformed-payload rejection
+- Session workspace with active weapon, temporary modifiers, pinned checks, combat conditions, bounded attack/reaction helpers, and bounded damage helper
+- XP validation/apply flow for characteristic advances, skill advances, and talent unlocks with explicit prerequisites
+- Browser dossier preview with print/share via `window.print()`
 
-## Not yet complete
-- Full screen parity with iOS.
-- Full progression apply/prereq parity.
-- Full session workspace parity.
-- Real-device verification.
+## Verified web evidence
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
+- Raw logs stored under [`/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw`](/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw)
+
+## Safety boundaries
+- Malformed browser-local character or compendium state falls back to safe defaults with recovery warnings
+- Malformed compendium imports are rejected before replace-all confirmation
+- Character-owned weapon and armour entries are detached copies and are not mutated by later compendium replacement
+- Session/progression helpers are intentionally bounded and explainable; they do not claim full Dark Heresy II rules coverage
+
+## Current limitations
+- Real browser/device validation was not executed in this run
+- Repository-wide iOS/Xcode validation is blocked on this machine until the Apple Xcode license is accepted with elevated privileges

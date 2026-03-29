@@ -1,0 +1,11 @@
+{
+  "task_id": "2026-03-web-editable-core",
+  "title": "Editable core web flows",
+  "status": "accepted_with_conditions",
+  "summary": "Basic editable profile/resources flows are implemented with localStorage persistence; full core parity remains incomplete.",
+  "blockers": [],
+  "required_followups": [
+    "Complete editable skills/notes/equipment parity",
+    "Add focused edit-flow tests"
+  ]
+}

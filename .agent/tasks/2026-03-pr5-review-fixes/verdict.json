@@ -1,0 +1,17 @@
+{
+  "task_id": "2026-03-pr5-review-fixes",
+  "title": "PR #5 review fixes for persistence safety and empty-state recovery",
+  "status": "implemented_pending_runtime_verification",
+  "summary": "The three unresolved review findings were addressed in code and test intent, but Node-based verification could not run in this environment because node/npm are unavailable.",
+  "logic_confidence": "medium",
+  "runtime_confidence": "blocked_by_environment",
+  "ui_confidence": "medium",
+  "real_device_confidence": "not_verified",
+  "blockers": [],
+  "required_followups": [
+    "Run `npm run test` in `web/` on a machine with Node/npm installed.",
+    "Run `npm run typecheck` in `web/` on a machine with Node/npm installed.",
+    "Run `npm run build` in `web/` on a machine with Node/npm installed.",
+    "Optionally reply to or resolve the three PR #5 review threads after verification passes."
+  ]
+}

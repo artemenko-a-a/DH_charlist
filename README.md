@@ -574,3 +574,21 @@ Local-to-CI command mapping:
 Intentionally manual:
 - screenshot capture/review remains manual-triggered because it is heavier and artifact-oriented
 - final visual acceptance stays on the manual checklist (`Docs/manual-smoke-checklist.md`)
+
+## Web app (experimental, local-first)
+
+A repo-integrated web target now exists under `web/`.
+
+Run:
+- `cd web`
+- `npm install`
+- `npm run dev`
+
+Validation:
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
+
+Current web scope is a bounded Stage-1 foundation: character list/create/select, profile/resources edits, quick mechanics target view, detached-copy add from weapon/armour compendiums, replace-all compendium import confirmations, and dossier JSON preview.
+
+This is not yet full iOS parity and remains under the task-proof bundles in `.agent/tasks/2026-03-web-*`.

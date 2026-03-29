@@ -1,0 +1,40 @@
+{
+  "task_id": "repo-task-proof-loop",
+  "title": "Initialize repo-local proof-loop workflow and project-scoped subagents",
+  "status": "accepted",
+  "summary": "Repository now contains project-scoped subagents and managed workflow guidance for spec-build-evidence-verify-fix proof-loop execution.",
+  "accepted_scope": [
+    "Added .agent/subagents stage-specific guidance files",
+    "Added managed workflow document under .agent/workflows",
+    "Updated Docs/task-proof-loop.md with managed workflow references",
+    "Renamed template evidance.md to evidence.md"
+  ],
+  "rejected_scope": [],
+  "blockers": [],
+  "residual_risks": [
+    "Legacy task-id typo repo-task-proof-loot remains as historical artifact"
+  ],
+  "required_followups": [
+    "Use corrected TASK_ID naming for future bundles"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/repo-task-proof-loop/spec.md",
+    ".agent/tasks/repo-task-proof-loop/acceptance.md",
+    ".agent/tasks/repo-task-proof-loop/evidence.md",
+    ".agent/tasks/repo-task-proof-loop/verdict.json"
+  ],
+  "tested_in_this_environment": [
+    "file existence checks",
+    "git diff inspection"
+  ],
+  "not_verified_in_this_environment": [
+    "application runtime behavior (out of scope)",
+    "real-device behavior (out of scope)"
+  ],
+  "trust_assessment": {
+    "logic_confidence": "strong",
+    "runtime_confidence": "medium",
+    "ui_confidence": "not_applicable",
+    "real_device_confidence": "not_applicable"
+  }
+}

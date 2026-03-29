@@ -1,0 +1,12 @@
+{
+  "task_id": "2026-03-web-foundation",
+  "title": "Web foundation shell + architecture baseline",
+  "status": "accepted_with_conditions",
+  "summary": "Runnable web shell delivered with local-first persistence and bounded trust-critical semantics; platform-specific iOS/Xcode checks remain pending.",
+  "blockers": [],
+  "required_followups": [
+    "Implement read-only vertical slice completeness",
+    "Run iOS/macOS validation on a macOS runner",
+    "Run manual browser validation on iPad/iPhone"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "task_id": "2026-03-web-session-progression-compendium",
+  "title": "Session/progression/compendium parity",
+  "status": "accepted_with_conditions",
+  "summary": "Bounded quick mechanics and compendium detached-copy/replace-all flows exist, but progression/session parity is partial.",
+  "blockers": [],
+  "required_followups": [
+    "Implement full progression prerequisite and apply behavior parity",
+    "Expand session combat shortcuts and bounded damage flow",
+    "Add parity-focused tests"
+  ]
+}

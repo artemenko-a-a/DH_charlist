@@ -1,0 +1,15 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination generic/platform=iOS build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  DHCharList: /Users/andrey_artemenko/.codex/worktrees/b55e/DH_charlist @ local
+
+2026-03-29 21:30:09.728 xcodebuild[36282:737731] Writing error result bundle to /var/folders/qc/958w2phd7fb4hcfdmz2rx_3r0000gn/T/ResultBundle_2026-29-03_21-30-0009.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ generic:1, platform:iOS }
+
+	Ineligible destinations for the "DHCharListHost" scheme:
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 26.4 is not installed. Please download and install the platform from Xcode > Settings > Components. }

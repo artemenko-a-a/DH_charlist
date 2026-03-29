@@ -3,7 +3,7 @@
 ## Run
 
 ```bash
-cd /Users/andrey_artemenko/repos/DH_charlist/web
+cd web
 npm install
 npm run dev
 ```
@@ -11,7 +11,7 @@ npm run dev
 ## Validate
 
 ```bash
-cd /Users/andrey_artemenko/repos/DH_charlist/web
+cd web
 npm run typecheck
 npm run test
 npm run build

@@ -1,7 +1,7 @@
 # Web Version Spec
 
 ## Delivered stack
-- React + TypeScript + Vite in [`/Users/andrey_artemenko/repos/DH_charlist/web`](/Users/andrey_artemenko/repos/DH_charlist/web)
+- React + TypeScript + Vite in `web/`
 - Browser-local persistence with guarded load/migration logic
 - Shared TypeScript compatibility layer for character contracts, mechanics helpers, bounded damage, XP progression, compendium parsing, and dossier composition
 
@@ -22,7 +22,7 @@
 - `npm run typecheck`
 - `npm run test`
 - `npm run build`
-- Raw logs stored under [`/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw`](/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw)
+- Raw logs stored under `.agent/tasks/2026-03-web-final-acceptance/raw`
 
 ## Safety boundaries
 - Malformed browser-local character or compendium state falls back to safe defaults with recovery warnings
@@ -32,4 +32,4 @@
 
 ## Current limitations
 - Real browser/device validation was not executed in this run
-- Repository-wide iOS/Xcode validation is blocked on this machine until the Apple Xcode license is accepted with elevated privileges
+- Repository-wide host-project Xcode validation is blocked on this machine until the local iOS 26.4 platform/component is installed in Xcode

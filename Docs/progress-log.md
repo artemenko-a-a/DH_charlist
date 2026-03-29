@@ -432,3 +432,10 @@
   - `2026-03-web-session-progression-compendium`
   - `2026-03-web-final-acceptance`
 - Full iOS/macOS validation remains pending due environment limitations (Linux runner, no Xcode).
+
+## 2026-03-29 — Web acceptance rerun on local Xcode machine
+- Re-ran repo acceptance after local Xcode license acceptance.
+- Confirmed `make fmt`, `make lint`, `make typecheck`, and `make test` now pass locally from the repo root.
+- Confirmed `cd web && npm install && npm run typecheck && npm run test && npm run build` passes locally in this worktree.
+- Fixed one local repo issue exposed by the rerun: `Package.swift` argument ordering after the `swift-testing` dependency addition was invalid for the current SwiftPM/Xcode manifest parser.
+- Host-project Xcode validation remains blocked by local machine state, but the blocker changed: `make ci` now fails because Xcode reports the iOS 26.4 platform/component is not installed for the `DHCharListHost` scheme destination. Evidence and the current verdict live under `.agent/tasks/2026-03-web-final-acceptance/`.

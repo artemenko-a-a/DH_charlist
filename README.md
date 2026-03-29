@@ -4,12 +4,12 @@ Dark Heresy II character manager for iPhone/iPad.
 
 ## Web app
 
-The repository now also contains a local-first web application in [`/Users/andrey_artemenko/repos/DH_charlist/web`](/Users/andrey_artemenko/repos/DH_charlist/web).
+The repository now also contains a local-first web application in `web/`.
 
 Run it locally:
 
 ```bash
-cd /Users/andrey_artemenko/repos/DH_charlist/web
+cd web
 npm install
 npm run dev
 ```
@@ -17,7 +17,7 @@ npm run dev
 Validated web commands:
 
 ```bash
-cd /Users/andrey_artemenko/repos/DH_charlist/web
+cd web
 npm run typecheck
 npm run test
 npm run build
@@ -33,7 +33,8 @@ Current web scope:
 
 Current validation caveat:
 - web validation is green locally
-- repository-wide iOS/Xcode test validation on this machine is currently blocked until the local Apple Xcode license is accepted with `sudo xcodebuild -license`
+- `make typecheck` and `make test` are green locally
+- host-project Xcode validation on this machine is currently blocked because the local Xcode installation is missing the iOS 26.4 platform/component needed by `DHCharListHost`
 
 > Current state: the project is implemented and validated on two local persistence paths:
 > - JSON-backed path — validated and kept as the default/fallback path
@@ -622,6 +623,12 @@ Validation:
 - `npm run test`
 - `npm run build`
 
-Current web scope is a bounded Stage-1 foundation: character list/create/select, profile/resources edits, quick mechanics target view, detached-copy add from weapon/armour compendiums, replace-all compendium import confirmations, and dossier JSON preview.
+Current web scope is a bounded but genuinely usable local-first companion app:
+- character roster create/select/duplicate/delete
+- profile, characteristics/resources, skills, notes, and equipment editing
+- session workspace with quick checks, active weapon state, temporary modifiers, pinned checks, combat conditions, bounded attack/reaction helpers, and bounded damage helper
+- XP validation/apply flow for characteristic advances, skill advances, and bounded talent unlocks
+- weapon and armour compendium autocomplete/add/import with explicit replace-all confirmation and detached-copy semantics
+- browser dossier preview with print/share support
 
-This is not yet full iOS parity and remains under the task-proof bundles in `.agent/tasks/2026-03-web-*`.
+The web app still does not claim full iOS parity or full rules-engine coverage. Final repo-wide host-project Xcode validation on this machine is currently blocked by a missing local iOS 26.4 platform install; see `.agent/tasks/2026-03-web-final-acceptance/`.

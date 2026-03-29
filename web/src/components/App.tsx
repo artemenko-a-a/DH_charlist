@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Character, Weapon, Armour } from '../lib/types'
-import { loadArmourCompendium, loadCharacters, loadWeaponCompendium, saveArmourCompendium, saveCharacters, saveWeaponCompendium } from '../lib/storage'
+import {
+  loadArmourCompendium,
+  loadCharacters,
+  loadWeaponCompendium,
+  parseArmourCompendiumImport,
+  parseWeaponCompendiumImport,
+  saveArmourCompendium,
+  saveCharacters,
+  saveWeaponCompendium
+} from '../lib/storage'
 
 function detachedWeaponCopy(source: Weapon): Weapon {
   return { ...source, id: crypto.randomUUID() }
@@ -51,21 +60,24 @@ export default function App() {
 
   function importCompendium(kind: 'weapon' | 'armour', payload: string) {
     if (!confirm('Replace-all import. Existing compendium catalog will be replaced. Continue?')) return
-    const data = JSON.parse(payload)
     if (kind === 'weapon') {
-      const next = { updatedAt: new Date().toISOString(), entries: data.entries as Weapon[] }
+      const next = parseWeaponCompendiumImport(payload)
+      if (!next) {
+        alert('Invalid weapon compendium payload. Expected {"entries": Weapon[]}.')
+        return
+      }
       setWeaponCompendium(next)
       saveWeaponCompendium(next)
       return
     }
-    const next = { updatedAt: new Date().toISOString(), entries: data.entries as Armour[] }
+    const next = parseArmourCompendiumImport(payload)
+    if (!next) {
+      alert('Invalid armour compendium payload. Expected {"entries": Armour[]}.')
+      return
+    }
     setArmourCompendium(next)
     saveArmourCompendium(next)
   }
-
-  if (!selected) return <div>No character selected.</div>
-
-  const target = selected.characteristics.bs + Math.floor((selected.characteristics.per - 30) / 10)
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: '100vh', background: '#101318', color: '#e1e6ef', fontFamily: 'system-ui' }}>
@@ -79,58 +91,67 @@ export default function App() {
         ))}
       </aside>
       <main style={{ padding: 16 }}>
-        <h1>{selected.name}</h1>
-        <section>
-          <h3>Profile</h3>
-          <input value={selected.name} onChange={(e) => updateCharacter((c) => ({ ...c, name: e.target.value }))} placeholder="Name" />
-          <input value={selected.homeWorld} onChange={(e) => updateCharacter((c) => ({ ...c, homeWorld: e.target.value }))} placeholder="Home World" />
-          <input value={selected.role} onChange={(e) => updateCharacter((c) => ({ ...c, role: e.target.value }))} placeholder="Role" />
-        </section>
-        <section>
-          <h3>Resources</h3>
-          <label>Wounds <input type="number" value={selected.wounds} onChange={(e) => updateCharacter((c) => ({ ...c, wounds: Number(e.target.value) }))} /></label>
-          <label>Fatigue <input type="number" value={selected.fatigue} onChange={(e) => updateCharacter((c) => ({ ...c, fatigue: Number(e.target.value) }))} /></label>
-          <label>XP <input type="number" value={selected.xpAvailable} onChange={(e) => updateCharacter((c) => ({ ...c, xpAvailable: Number(e.target.value) }))} /></label>
-        </section>
-        <section>
-          <h3>Quick mechanics (bounded)</h3>
-          <p>Ranged target (BS + Per bonus): <strong>{target}</strong></p>
-        </section>
-        <section>
-          <h3>Weapons (detached copy add)</h3>
-          <select onChange={(e) => {
-            const source = sortedWeapons.find((w) => w.id === e.target.value)
-            if (!source) return
-            updateCharacter((c) => ({ ...c, weapons: [...c.weapons, detachedWeaponCopy(source)] }))
-          }}>
-            <option value="">Select weapon from compendium</option>
-            {sortedWeapons.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-          </select>
-          <ul>{selected.weapons.map((w) => <li key={w.id}>{w.name} — {w.damage}</li>)}</ul>
-        </section>
-        <section>
-          <h3>Armour (detached copy add)</h3>
-          <select onChange={(e) => {
-            const source = sortedArmour.find((a) => a.id === e.target.value)
-            if (!source) return
-            updateCharacter((c) => ({ ...c, armour: [...c.armour, detachedArmourCopy(source)] }))
-          }}>
-            <option value="">Select armour from compendium</option>
-            {sortedArmour.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
-          <ul>{selected.armour.map((a) => <li key={a.id}>{a.name} ({a.location}) AP {a.ap}</li>)}</ul>
-        </section>
-        <section>
-          <h3>Compendium import (replace-all)</h3>
-          <textarea id="weapon-json" placeholder='{"entries": [{"id":"w1","name":"Autogun","damage":"1d10+3 I","notes":""}]}' style={{ width: '100%', minHeight: 70 }} />
-          <button onClick={() => importCompendium('weapon', (document.getElementById('weapon-json') as HTMLTextAreaElement).value)}>Import Weapon Compendium</button>
-          <textarea id="armour-json" placeholder='{"entries": [{"id":"a1","name":"Mesh Vest","location":"Body","ap":5}]}' style={{ width: '100%', minHeight: 70 }} />
-          <button onClick={() => importCompendium('armour', (document.getElementById('armour-json') as HTMLTextAreaElement).value)}>Import Armour Compendium</button>
-        </section>
-        <section>
-          <h3>Dossier preview</h3>
-          <pre>{JSON.stringify({ name: selected.name, role: selected.role, wounds: selected.wounds, weapons: selected.weapons, armour: selected.armour }, null, 2)}</pre>
-        </section>
+        {selected ? (
+          <>
+            <h1>{selected.name}</h1>
+            <section>
+              <h3>Profile</h3>
+              <input value={selected.name} onChange={(e) => updateCharacter((c) => ({ ...c, name: e.target.value }))} placeholder="Name" />
+              <input value={selected.homeWorld} onChange={(e) => updateCharacter((c) => ({ ...c, homeWorld: e.target.value }))} placeholder="Home World" />
+              <input value={selected.role} onChange={(e) => updateCharacter((c) => ({ ...c, role: e.target.value }))} placeholder="Role" />
+            </section>
+            <section>
+              <h3>Resources</h3>
+              <label>Wounds <input type="number" value={selected.wounds} onChange={(e) => updateCharacter((c) => ({ ...c, wounds: Number(e.target.value) }))} /></label>
+              <label>Fatigue <input type="number" value={selected.fatigue} onChange={(e) => updateCharacter((c) => ({ ...c, fatigue: Number(e.target.value) }))} /></label>
+              <label>XP <input type="number" value={selected.xpAvailable} onChange={(e) => updateCharacter((c) => ({ ...c, xpAvailable: Number(e.target.value) }))} /></label>
+            </section>
+            <section>
+              <h3>Quick mechanics (bounded)</h3>
+              <p>Ranged target (BS + Per bonus): <strong>{selected.characteristics.bs + Math.floor((selected.characteristics.per - 30) / 10)}</strong></p>
+            </section>
+            <section>
+              <h3>Weapons (detached copy add)</h3>
+              <select onChange={(e) => {
+                const source = sortedWeapons.find((w) => w.id === e.target.value)
+                if (!source) return
+                updateCharacter((c) => ({ ...c, weapons: [...c.weapons, detachedWeaponCopy(source)] }))
+              }}>
+                <option value="">Select weapon from compendium</option>
+                {sortedWeapons.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+              </select>
+              <ul>{selected.weapons.map((w) => <li key={w.id}>{w.name} — {w.damage}</li>)}</ul>
+            </section>
+            <section>
+              <h3>Armour (detached copy add)</h3>
+              <select onChange={(e) => {
+                const source = sortedArmour.find((a) => a.id === e.target.value)
+                if (!source) return
+                updateCharacter((c) => ({ ...c, armour: [...c.armour, detachedArmourCopy(source)] }))
+              }}>
+                <option value="">Select armour from compendium</option>
+                {sortedArmour.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+              <ul>{selected.armour.map((a) => <li key={a.id}>{a.name} ({a.location}) AP {a.ap}</li>)}</ul>
+            </section>
+            <section>
+              <h3>Compendium import (replace-all)</h3>
+              <textarea id="weapon-json" placeholder='{"entries": [{"id":"w1","name":"Autogun","damage":"1d10+3 I","notes":""}]}' style={{ width: '100%', minHeight: 70 }} />
+              <button onClick={() => importCompendium('weapon', (document.getElementById('weapon-json') as HTMLTextAreaElement).value)}>Import Weapon Compendium</button>
+              <textarea id="armour-json" placeholder='{"entries": [{"id":"a1","name":"Mesh Vest","location":"Body","ap":5}]}' style={{ width: '100%', minHeight: 70 }} />
+              <button onClick={() => importCompendium('armour', (document.getElementById('armour-json') as HTMLTextAreaElement).value)}>Import Armour Compendium</button>
+            </section>
+            <section>
+              <h3>Dossier preview</h3>
+              <pre>{JSON.stringify({ name: selected.name, role: selected.role, wounds: selected.wounds, weapons: selected.weapons, armour: selected.armour }, null, 2)}</pre>
+            </section>
+          </>
+        ) : (
+          <>
+            <h1>Character dossier</h1>
+            <p>No character selected. Create a character to continue.</p>
+          </>
+        )}
       </main>
     </div>
   )

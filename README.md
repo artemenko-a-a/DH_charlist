@@ -2,6 +2,40 @@
 
 Dark Heresy II character manager for iPhone/iPad.
 
+## Web app
+
+The repository now also contains a local-first web application in `web/`.
+
+Run it locally:
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Validated web commands:
+
+```bash
+cd web
+npm run typecheck
+npm run test
+npm run build
+```
+
+Current web scope:
+- character roster create/select/duplicate/delete
+- profile, characteristics/resources, skills, notes, equipment, and inventory editing
+- session workspace with bounded quick mechanics, attack/reaction shortcuts, and bounded damage helper
+- XP validation/apply with explainable prerequisite checks
+- weapon and armour compendium autocomplete/import with detached-copy and replace-all confirmation semantics
+- dossier preview with browser print/share
+
+Current validation caveat:
+- web validation is green locally
+- `make fmt`, `make lint`, `make typecheck`, `make test`, and `make ci` are green locally
+- `bash ./scripts/run_xcode_coverage.sh` and `bash ./scripts/check_coverage_policy.sh` are green locally
+
 > Current state: the project is implemented and validated on two local persistence paths:
 > - JSON-backed path — validated and kept as the default/fallback path
 > - SwiftData path — validated and selectable through composition/bootstrap, with explicit fallback diagnostics when JSON remains active
@@ -589,6 +623,12 @@ Validation:
 - `npm run test`
 - `npm run build`
 
-Current web scope is a bounded Stage-1 foundation: character list/create/select, profile/resources edits, quick mechanics target view, detached-copy add from weapon/armour compendiums, replace-all compendium import confirmations, and dossier JSON preview.
+Current web scope is a bounded but genuinely usable local-first companion app:
+- character roster create/select/duplicate/delete
+- profile, characteristics/resources, skills, notes, and equipment editing
+- session workspace with quick checks, active weapon state, temporary modifiers, pinned checks, combat conditions, bounded attack/reaction helpers, and bounded damage helper
+- XP validation/apply flow for characteristic advances, skill advances, and bounded talent unlocks
+- weapon and armour compendium autocomplete/add/import with explicit replace-all confirmation and detached-copy semantics
+- browser dossier preview with print/share support
 
-This is not yet full iOS parity and remains under the task-proof bundles in `.agent/tasks/2026-03-web-*`.
+The web app still does not claim full iOS parity or full rules-engine coverage. Final acceptance evidence and the current verdict live under `.agent/tasks/2026-03-web-final-acceptance/`.

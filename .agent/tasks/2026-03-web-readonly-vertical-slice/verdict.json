@@ -1,10 +1,14 @@
 {
   "task_id": "2026-03-web-readonly-vertical-slice",
   "title": "Read-only character vertical slice",
-  "status": "accepted_with_conditions",
-  "summary": "Character list/select and basic read surfaces are available in web shell, but parity breadth is incomplete.",
+  "status": "accepted",
+  "summary": "The browser workspace now exposes all major character sections with safe startup and coherent dossier/session summaries.",
+  "logic_confidence": "medium",
+  "runtime_confidence": "high",
+  "ui_confidence": "medium",
+  "real_device_confidence": "none",
   "blockers": [],
   "required_followups": [
-    "Expand read-only sections to full iOS coverage"
+    "Run manual browser/device review if stronger UI confidence is required."
   ]
 }

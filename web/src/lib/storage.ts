@@ -1,132 +1,152 @@
-import { Character, Compendium, Weapon, Armour } from './types'
+import {
+  ArmourCompendiumCatalog,
+  Character,
+  StorageLoadReport,
+  WeaponCompendiumCatalog
+} from './types'
+import {
+  coerceCharacter,
+  createDefaultCharacter,
+  demoArmourCatalog,
+  demoWeaponCatalog
+} from './domain'
 
-const CHAR_KEY = 'dh.web.characters.v1'
-const WEAPON_KEY = 'dh.web.weapons.v1'
-const ARMOUR_KEY = 'dh.web.armour.v1'
+const CHARACTER_KEY = 'dh.web.characters.v2'
+const LEGACY_CHARACTER_KEY = 'dh.web.characters.v1'
+const WEAPON_KEY = 'dh.web.weapons.v2'
+const LEGACY_WEAPON_KEY = 'dh.web.weapons.v1'
+const ARMOUR_KEY = 'dh.web.armour.v2'
+const LEGACY_ARMOUR_KEY = 'dh.web.armour.v1'
 
-const baseCharacter = (): Character => ({
-  id: crypto.randomUUID(),
-  name: 'New Acolyte',
-  homeWorld: '',
-  role: '',
-  characteristics: { ws: 30, bs: 30, s: 30, t: 30, ag: 30, int: 30, per: 30, wp: 30, fel: 30 },
-  wounds: 10,
-  fatigue: 0,
-  xpAvailable: 0,
-  skills: [{ name: 'Awareness', value: 30 }],
-  notes: '',
-  weapons: [],
-  armour: []
-})
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function isCharacteristicBlock(value: unknown): value is Character['characteristics'] {
-  if (!isRecord(value)) return false
-  return ['ws', 'bs', 's', 't', 'ag', 'int', 'per', 'wp', 'fel'].every((key) => typeof value[key] === 'number')
-}
-
-function isSkill(value: unknown): value is Character['skills'][number] {
-  return isRecord(value) && typeof value.name === 'string' && typeof value.value === 'number'
-}
-
-function isWeapon(value: unknown): value is Weapon {
-  return isRecord(value) &&
-    typeof value.id === 'string' &&
-    typeof value.name === 'string' &&
-    typeof value.damage === 'string' &&
-    typeof value.notes === 'string'
-}
-
-function isArmour(value: unknown): value is Armour {
-  return isRecord(value) &&
-    typeof value.id === 'string' &&
-    typeof value.name === 'string' &&
-    typeof value.location === 'string' &&
-    typeof value.ap === 'number'
-}
-
-function isCharacter(value: unknown): value is Character {
-  return isRecord(value) &&
-    typeof value.id === 'string' &&
-    typeof value.name === 'string' &&
-    typeof value.homeWorld === 'string' &&
-    typeof value.role === 'string' &&
-    isCharacteristicBlock(value.characteristics) &&
-    typeof value.wounds === 'number' &&
-    typeof value.fatigue === 'number' &&
-    typeof value.xpAvailable === 'number' &&
-    Array.isArray(value.skills) &&
-    value.skills.every(isSkill) &&
-    typeof value.notes === 'string' &&
-    Array.isArray(value.weapons) &&
-    value.weapons.every(isWeapon) &&
-    Array.isArray(value.armour) &&
-    value.armour.every(isArmour)
-}
-
-function safeParse<T>(raw: string, validator: (value: unknown) => value is T): T | null {
+function safeParse(raw: string): unknown {
   try {
-    const parsed = JSON.parse(raw) as unknown
-    return validator(parsed) ? parsed : null
+    return JSON.parse(raw) as unknown
   } catch {
     return null
   }
 }
 
-function isCompendium<T>(value: unknown, itemValidator: (entry: unknown) => entry is T): value is Compendium<T> {
-  return isRecord(value) &&
-    typeof value.updatedAt === 'string' &&
-    Array.isArray(value.entries) &&
-    value.entries.every(itemValidator)
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }
 
-export function parseWeaponCompendiumImport(payload: string): Compendium<Weapon> | null {
-  const parsed = safeParse(payload, (value): value is { entries: Weapon[] } => isRecord(value) && Array.isArray(value.entries) && value.entries.every(isWeapon))
-  if (!parsed) return null
-  return { updatedAt: new Date().toISOString(), entries: parsed.entries }
+function loadCharactersWithWarnings(warnings: string[]): Character[] {
+  const raw = localStorage.getItem(CHARACTER_KEY) ?? localStorage.getItem(LEGACY_CHARACTER_KEY)
+  if (!raw) return [createDefaultCharacter()]
+
+  const parsed = safeParse(raw)
+  if (!Array.isArray(parsed)) {
+    warnings.push('Character storage was malformed. Browser state was reset to a safe default roster.')
+    return [createDefaultCharacter()]
+  }
+
+  const characters = parsed.map(coerceCharacter).filter((item): item is Character => item !== null)
+  if (characters.length === 0 && parsed.length > 0) {
+    warnings.push('Stored characters could not be recovered. Browser state was reset to a safe default roster.')
+    return [createDefaultCharacter()]
+  }
+
+  return characters
 }
 
-export function parseArmourCompendiumImport(payload: string): Compendium<Armour> | null {
-  const parsed = safeParse(payload, (value): value is { entries: Armour[] } => isRecord(value) && Array.isArray(value.entries) && value.entries.every(isArmour))
-  if (!parsed) return null
-  return { updatedAt: new Date().toISOString(), entries: parsed.entries }
+function coerceWeaponCatalog(parsed: unknown): WeaponCompendiumCatalog | null {
+  if (!isRecord(parsed)) return null
+  const catalog = isRecord(parsed.catalog) ? parsed.catalog : parsed
+  const definitions = Array.isArray(catalog.definitions ?? catalog.entries) ? (catalog.definitions ?? catalog.entries) as unknown[] : null
+  const id = typeof catalog.id === 'string' ? catalog.id.trim() : ''
+  const displayName = typeof catalog.displayName === 'string' ? catalog.displayName.trim() : ''
+  if (!definitions || !id || !displayName) return null
+
+  return {
+    id,
+    displayName,
+    definitions: definitions.flatMap((item) => {
+      if (!isRecord(item)) return []
+      const definitionID = typeof item.id === 'string' ? item.id.trim() : ''
+      const name = typeof item.name === 'string' ? item.name.trim() : ''
+      if (!definitionID || !name) return []
+      return [{
+        id: definitionID,
+        catalogID: typeof item.catalogID === 'string' && item.catalogID.trim() ? item.catalogID.trim() : id,
+        name,
+        type: typeof item.type === 'string' ? item.type.trim() : '',
+        range: typeof item.range === 'string' ? item.range.trim() : '',
+        damage: typeof item.damage === 'string' ? item.damage.trim() : '',
+        penetration: typeof item.penetration === 'string' ? item.penetration.trim() : '',
+        clip: typeof item.clip === 'string' ? item.clip.trim() : '',
+        reload: typeof item.reload === 'string' ? item.reload.trim() : '',
+        traits: Array.isArray(item.traits) ? item.traits.filter((entry): entry is string => typeof entry === 'string').map((entry) => entry.trim()).filter(Boolean) : [],
+        notes: typeof item.notes === 'string' ? item.notes.trim() : ''
+      }]
+    })
+  }
 }
 
-export function loadCharacters(): Character[] {
-  const raw = localStorage.getItem(CHAR_KEY)
-  if (!raw) return [baseCharacter()]
-  return safeParse(raw, (value): value is Character[] => Array.isArray(value) && value.every(isCharacter)) ?? [baseCharacter()]
+function coerceArmourCatalog(parsed: unknown): ArmourCompendiumCatalog | null {
+  if (!isRecord(parsed)) return null
+  const catalog = isRecord(parsed.catalog) ? parsed.catalog : parsed
+  const definitions = Array.isArray(catalog.definitions ?? catalog.entries) ? (catalog.definitions ?? catalog.entries) as unknown[] : null
+  const id = typeof catalog.id === 'string' ? catalog.id.trim() : ''
+  const displayName = typeof catalog.displayName === 'string' ? catalog.displayName.trim() : ''
+  if (!definitions || !id || !displayName) return null
+
+  return {
+    id,
+    displayName,
+    definitions: definitions.flatMap((item) => {
+      if (!isRecord(item)) return []
+      const definitionID = typeof item.id === 'string' ? item.id.trim() : ''
+      const name = typeof item.name === 'string' ? item.name.trim() : ''
+      const armourPoints = typeof item.armourPoints === 'number' ? item.armourPoints : typeof item.ap === 'number' ? item.ap : null
+      if (!definitionID || !name || armourPoints === null) return []
+      return [{
+        id: definitionID,
+        catalogID: typeof item.catalogID === 'string' && item.catalogID.trim() ? item.catalogID.trim() : id,
+        name,
+        category: typeof item.category === 'string' ? item.category.trim() : '',
+        coverage: Array.isArray(item.coverage) ? item.coverage.filter((entry): entry is string => typeof entry === 'string').map((entry) => entry.trim()).filter(Boolean) : [],
+        armourPoints,
+        weight: typeof item.weight === 'string' ? item.weight.trim() : '',
+        availability: typeof item.availability === 'string' ? item.availability.trim() : '',
+        traits: Array.isArray(item.traits) ? item.traits.filter((entry): entry is string => typeof entry === 'string').map((entry) => entry.trim()).filter(Boolean) : [],
+        notes: typeof item.notes === 'string' ? item.notes.trim() : ''
+      }]
+    })
+  }
 }
 
-export function saveCharacters(chars: Character[]) {
-  localStorage.setItem(CHAR_KEY, JSON.stringify(chars))
+export function loadAppState(): StorageLoadReport {
+  const warnings: string[] = []
+  const characters = loadCharactersWithWarnings(warnings)
+
+  const rawWeaponCatalog = localStorage.getItem(WEAPON_KEY) ?? localStorage.getItem(LEGACY_WEAPON_KEY)
+  const weaponCatalog = rawWeaponCatalog ? coerceWeaponCatalog(safeParse(rawWeaponCatalog)) ?? demoWeaponCatalog : demoWeaponCatalog
+  if (rawWeaponCatalog && weaponCatalog === demoWeaponCatalog) {
+    warnings.push('Weapon compendium storage was malformed. The demo weapon catalog was restored.')
+  }
+
+  const rawArmourCatalog = localStorage.getItem(ARMOUR_KEY) ?? localStorage.getItem(LEGACY_ARMOUR_KEY)
+  const armourCatalog = rawArmourCatalog ? coerceArmourCatalog(safeParse(rawArmourCatalog)) ?? demoArmourCatalog : demoArmourCatalog
+  if (rawArmourCatalog && armourCatalog === demoArmourCatalog) {
+    warnings.push('Armour compendium storage was malformed. The demo armour catalog was restored.')
+  }
+
+  return {
+    characters,
+    weaponCatalog,
+    armourCatalog,
+    warnings
+  }
 }
 
-function defaultWeapons(): Compendium<Weapon> {
-  return { updatedAt: new Date().toISOString(), entries: [{ id: 'w-lasgun', name: 'Lasgun', damage: '1d10+3 E', notes: 'Reliable' }] }
+export function saveCharacters(characters: Character[]): void {
+  localStorage.setItem(CHARACTER_KEY, JSON.stringify(characters))
 }
 
-function defaultArmour(): Compendium<Armour> {
-  return { updatedAt: new Date().toISOString(), entries: [{ id: 'a-flak-body', name: 'Flak Coat', location: 'Body', ap: 4 }] }
+export function saveWeaponCatalog(catalog: WeaponCompendiumCatalog): void {
+  localStorage.setItem(WEAPON_KEY, JSON.stringify(catalog))
 }
 
-export function loadWeaponCompendium(): Compendium<Weapon> {
-  const raw = localStorage.getItem(WEAPON_KEY)
-  return raw ? (safeParse(raw, (value): value is Compendium<Weapon> => isCompendium(value, isWeapon)) ?? defaultWeapons()) : defaultWeapons()
-}
-
-export function saveWeaponCompendium(data: Compendium<Weapon>) {
-  localStorage.setItem(WEAPON_KEY, JSON.stringify(data))
-}
-
-export function loadArmourCompendium(): Compendium<Armour> {
-  const raw = localStorage.getItem(ARMOUR_KEY)
-  return raw ? (safeParse(raw, (value): value is Compendium<Armour> => isCompendium(value, isArmour)) ?? defaultArmour()) : defaultArmour()
-}
-
-export function saveArmourCompendium(data: Compendium<Armour>) {
-  localStorage.setItem(ARMOUR_KEY, JSON.stringify(data))
+export function saveArmourCatalog(catalog: ArmourCompendiumCatalog): void {
+  localStorage.setItem(ARMOUR_KEY, JSON.stringify(catalog))
 }

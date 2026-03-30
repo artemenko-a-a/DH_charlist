@@ -1,11 +1,14 @@
 {
   "task_id": "2026-03-web-editable-core",
   "title": "Editable core web flows",
-  "status": "accepted_with_conditions",
-  "summary": "Basic editable profile/resources flows are implemented with localStorage persistence; full core parity remains incomplete.",
+  "status": "accepted",
+  "summary": "Character lifecycle and core editing flows are implemented and persisted locally across profile, resources, skills, notes, and equipment.",
+  "logic_confidence": "medium_high",
+  "runtime_confidence": "high",
+  "ui_confidence": "medium",
+  "real_device_confidence": "none",
   "blockers": [],
   "required_followups": [
-    "Complete editable skills/notes/equipment parity",
-    "Add focused edit-flow tests"
+    "Run manual browser/device review if stronger UI confidence is required."
   ]
 }

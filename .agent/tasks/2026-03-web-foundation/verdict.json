@@ -1,12 +1,14 @@
 {
   "task_id": "2026-03-web-foundation",
   "title": "Web foundation shell + architecture baseline",
-  "status": "accepted_with_conditions",
-  "summary": "Runnable web shell delivered with local-first persistence and bounded trust-critical semantics; platform-specific iOS/Xcode checks remain pending.",
+  "status": "accepted",
+  "summary": "The repo now contains a real local-first web app foundation with guarded storage, typed compatibility helpers, and green web validation.",
+  "logic_confidence": "medium_high",
+  "runtime_confidence": "high",
+  "ui_confidence": "medium",
+  "real_device_confidence": "none",
   "blockers": [],
   "required_followups": [
-    "Implement read-only vertical slice completeness",
-    "Run iOS/macOS validation on a macOS runner",
-    "Run manual browser validation on iPad/iPhone"
+    "Run real-device browser sanity if release sign-off needs device confidence."
   ]
 }

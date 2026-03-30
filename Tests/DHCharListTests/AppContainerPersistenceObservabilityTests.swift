@@ -23,7 +23,7 @@ private struct IntentionalSwiftDataBootstrapFailure: LocalizedError {
     #expect(characters.first?.profile.name == "JSON Backend")
 }
 
-#if canImport(SwiftData)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 @available(iOS 17, macOS 14, *)
 @Test func swiftDataBootstrapStatusExposesSwiftDataAsActiveBackend() async throws {
     let documentsDirectory = try makeBatch32TemporaryDirectory()

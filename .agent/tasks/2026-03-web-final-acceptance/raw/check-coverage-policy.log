@@ -1,0 +1,14 @@
+Package surface coverage gate:
+- baseline package coverage: 19.59%
+- current package coverage:  19.59%
+- allowed regression budget: 0.50pp
+- minimum allowed now:       19.09%
+- package files seen:        36
+Per-area non-regression:
+- App: baseline 92.68% | current 92.68% | min 91.68%
+- Application: baseline 97.36% | current 97.36% | min 96.36%
+- Domain: baseline 97.71% | current 97.71% | min 96.71%
+- Infrastructure: baseline 99.44% | current 99.44% | min 98.44%
+- Presentation: baseline 2.15% | current 2.15% | min 1.15%
+- Rules: baseline 94.55% | current 94.55% | min 93.55%
+Coverage policy check passed.

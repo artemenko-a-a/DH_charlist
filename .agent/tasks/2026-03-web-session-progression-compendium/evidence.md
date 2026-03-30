@@ -1,16 +1,26 @@
 # Evidence
 
-## spec-freezer
-Scope: bounded trust-critical subset (quick mechanics, compendium detached-copy, explicit replace-all import).
+## spec-agent
+- Trust-critical scope frozen around session helpers, bounded damage, XP validation/apply, and compendium detached-copy/replace-all behavior.
 
-## builder
-Implemented:
-- quick mechanics target output,
-- weapon/armour detached-copy add,
-- replace-all compendium import confirmation.
+## build-agent
+- Added bounded mechanics, combat shortcuts, damage resolution, XP progression, compendium import parsing, and dossier composition in [`/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.ts`](/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.ts).
+- Wired those helpers into the browser UI in [`/Users/andrey_artemenko/repos/DH_charlist/web/src/components/App.tsx`](/Users/andrey_artemenko/repos/DH_charlist/web/src/components/App.tsx).
 
-## verifier
-Validated by web build/test/typecheck.
+## verify-agent
+- Logic tests in [`/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.test.ts`](/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.test.ts) cover:
+  - detached-copy semantics
+  - malformed import rejection
+  - bounded mechanics behavior
+  - XP validation/apply
+  - dossier and damage helpers
+- UI smoke in [`/Users/andrey_artemenko/repos/DH_charlist/web/src/components/App.test.tsx`](/Users/andrey_artemenko/repos/DH_charlist/web/src/components/App.test.tsx) covers:
+  - character creation
+  - replace-all preview/confirm
+  - malformed import rejection before confirmation
 
-## fixer
-No additional fixes in this pass.
+## Confidence
+- logic confidence: high for the bounded implemented scope
+- runtime confidence: high on the validated web toolchain
+- UI confidence: medium
+- real-device confidence: none

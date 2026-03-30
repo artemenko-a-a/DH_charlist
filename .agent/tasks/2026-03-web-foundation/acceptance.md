@@ -1,7 +1,7 @@
 # Acceptance
 
-- [ ] Stage objectives complete
-- [ ] Verification complete
-- [ ] Truthful evidence captured
+- [x] Stage objectives complete
+- [x] Verification complete
+- [x] Truthful evidence captured
 
-Current status: accepted_with_conditions
+Current status: accepted

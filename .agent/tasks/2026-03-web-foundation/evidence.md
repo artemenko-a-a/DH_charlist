@@ -1,25 +1,25 @@
 # Evidence
 
-## Role pass: builder
-- Added React+TS+Vite web app under `web/`.
-- Added localStorage repositories and typed domain-like models.
-- Added bounded UI flows for character management, mechanics target, compendium detached-copy adds, replace-all imports, and dossier preview.
+## spec-agent
+- Scope frozen around the in-repo React/Vite web foundation plus local-first safety, detached-copy semantics, replace-all confirmation, and dossier/session representation.
 
-## Role pass: verifier
-Commands executed:
-- `cd web && npm install`
-- `cd web && npm run typecheck`
-- `cd web && npm run test`
-- `cd web && npm run build`
-- `python3 -m json.tool .agent/tasks/2026-03-web-foundation/verdict.json`
+## build-agent
+- Replaced the placeholder shell with a typed compatibility layer and a usable browser workspace under [`/Users/andrey_artemenko/repos/DH_charlist/web`](/Users/andrey_artemenko/repos/DH_charlist/web).
+- Added local guarded storage loading, bounded rules helpers, compendium parsers, and dossier composition in [`/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.ts`](/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/domain.ts) and [`/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/storage.ts`](/Users/andrey_artemenko/repos/DH_charlist/web/src/lib/storage.ts).
 
-Observed:
-- Web build/type/test passed.
-- iOS/macOS coverage checks were **not** run in this Linux environment.
+## evidence-agent
+- Web validation logs:
+  - [`/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-typecheck.log`](/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-typecheck.log)
+  - [`/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-test.log`](/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-test.log)
+  - [`/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-build.log`](/Users/andrey_artemenko/repos/DH_charlist/.agent/tasks/2026-03-web-final-acceptance/raw/web-build.log)
 
-## Role pass: fixer
-- No verifier-confirmed code defects found in this stage pass.
+## verify-agent
+- `npm run typecheck`: passed
+- `npm run test`: passed
+- `npm run build`: passed
 
-## Truth gaps
-- No iPad/iPhone real-device browser validation.
-- No macOS/Xcode validation in this environment.
+## Confidence
+- logic confidence: medium-high
+- runtime confidence: high for the web toolchain
+- UI confidence: medium from interactive jsdom smoke plus successful build
+- real-device confidence: none, not executed

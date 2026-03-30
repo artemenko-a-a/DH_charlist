@@ -1,0 +1,15 @@
+
+> dh-charlist-web@0.1.0 test
+> vitest run
+
+
+ RUN  v2.1.9 /Users/andrey_artemenko/.codex/worktrees/b55e/DH_charlist/web
+
+ ✓ src/lib/domain.test.ts (5 tests) 28ms
+ ✓ src/components/App.test.tsx (3 tests) 309ms
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  21:27:56
+   Duration  1.43s (transform 210ms, setup 163ms, collect 361ms, tests 337ms, environment 716ms, prepare 168ms)
+

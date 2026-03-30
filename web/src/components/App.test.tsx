@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { createDefaultCharacter } from '../lib/domain'
 
 const storage = new Map<string, string>()
 
@@ -105,5 +106,23 @@ describe('web workspace smoke', () => {
 
     expect(screen.getByText(/weapon compendium import failed/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Confirm Weapon Replace-All' })).not.toBeInTheDocument()
+  })
+
+  it('refreshes updatedAt when overview edits are saved', async () => {
+    const user = userEvent.setup()
+    const seeded = createDefaultCharacter('Timestamp Test')
+    seeded.updatedAt = '2026-03-01T00:00:00.000Z'
+    storage.set('dh.web.characters.v2', JSON.stringify([seeded]))
+
+    render(<App />)
+
+    const nameInput = screen.getByLabelText('Name')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Timestamp Updated')
+
+    const persisted = JSON.parse(storage.get('dh.web.characters.v2') ?? '[]') as Array<{ updatedAt: string; profile: { name: string } }>
+
+    expect(persisted[0]?.profile.name).toBe('Timestamp Updated')
+    expect(persisted[0]?.updatedAt).not.toBe('2026-03-01T00:00:00.000Z')
   })
 })

@@ -101,7 +101,10 @@ function App() {
     setCharacters((current) => {
       const next = current.map((character) => {
         if (character.id !== selectedId) return character
-        return updater(character)
+        return {
+          ...updater(character),
+          updatedAt: new Date().toISOString()
+        }
       })
       saveCharacters(next)
       return next

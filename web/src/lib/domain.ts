@@ -5,6 +5,7 @@ import {
   Character,
   CharacterDossier,
   CharacterHistoryEntry,
+  CharacterHistoryEntryType,
   CharacteristicKey,
   CharacteristicSet,
   CombatFlow,
@@ -24,6 +25,7 @@ import {
   XPSpendResult,
   XPUpgrade,
   characteristicOrder,
+  historyEntryTypes,
   trainingOrder
 } from './types'
 
@@ -970,6 +972,13 @@ function asStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean) : []
 }
 
+function normalizeHistoryEntryType(value: unknown): CharacterHistoryEntryType {
+  const candidate = asString(value)
+  return historyEntryTypes.includes(candidate as CharacterHistoryEntryType)
+    ? (candidate as CharacterHistoryEntryType)
+    : 'sessionNote'
+}
+
 function clampNumber(value: unknown, fallback = 0): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
@@ -1121,7 +1130,7 @@ export function coerceCharacter(value: unknown): Character | null {
           characterID: normalizeText(asString(item.characterID), id),
           createdAt: normalizeText(asString(item.createdAt), new Date().toISOString()),
           title: normalizeText(asString(item.title), 'Untitled Entry'),
-          type: 'sessionNote',
+          type: normalizeHistoryEntryType(item.type),
           body: asString(item.body),
           tags: asStringArray(item.tags)
         }

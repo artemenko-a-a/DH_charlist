@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addDetachedWeapon,
+  coerceCharacter,
   composeDossier,
   createDefaultCharacter,
   parseArmourCompendiumImport,
@@ -35,6 +36,25 @@ describe('rules and safety helpers', () => {
 
     expect(definition.name).toBe(originalName)
     expect(updated.equipment.weapons[0]!.name).toBe('Customized Lasgun')
+  })
+
+  it('preserves persisted history entry types during coercion', () => {
+    const source = createDefaultCharacter('History Type Test')
+    source.history = [
+      {
+        id: 'history-1',
+        characterID: source.id,
+        createdAt: '2026-03-29T00:00:00.000Z',
+        title: 'Recovered Advancement',
+        type: 'advancement',
+        body: 'Bought a rank.',
+        tags: ['xp']
+      }
+    ]
+
+    const coerced = coerceCharacter(source)
+
+    expect(coerced?.history[0]?.type).toBe('advancement')
   })
 
   it('rejects malformed compendium imports and accepts valid replace-all payloads', () => {

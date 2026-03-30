@@ -1,5 +1,5 @@
 import Foundation
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 import SwiftData
 #endif
 
@@ -133,7 +133,7 @@ public struct AppContainer: Sendable {
             )
         }
 
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
         if #available(iOS 17, macOS 14, *) {
             do {
                 let repositories = try makeSwiftDataRepositories(
@@ -183,7 +183,7 @@ public struct AppContainer: Sendable {
 #endif
     }
 
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
     @available(iOS 17, macOS 14, *)
     private static func makeSwiftDataRepositories(
         documentsDirectory: URL,

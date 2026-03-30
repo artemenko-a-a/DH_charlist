@@ -1,4 +1,4 @@
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 import Foundation
 import SwiftData
 

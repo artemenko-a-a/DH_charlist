@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 @testable import DHCharList
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 import SwiftData
 #endif
 
@@ -21,6 +21,86 @@ import SwiftData
 
     #expect(decoded.count == 1)
     #expect(decoded.first?.profile.name == "Raibos")
+}
+
+@Test func characterCodableRoundtripPreservesHistoryAndDefaultsMissingHistory() throws {
+    let source = Character(
+        id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+        profile: Profile(
+            name: "Codable Acolyte",
+            homeWorld: "Hive",
+            background: "Adeptus Administratum",
+            role: "Sage",
+            aptitudes: ["Knowledge", "Intelligence"],
+            description: "Roundtrip coverage fixture"
+        ),
+        characteristics: CharacteristicSet(
+            weaponSkill: 32,
+            ballisticSkill: 28,
+            strength: 31,
+            toughness: 33,
+            agility: 37,
+            intelligence: 46,
+            perception: 41,
+            willpower: 39,
+            fellowship: 27
+        ),
+        resources: ResourceState(
+            currentWounds: 10,
+            maxWounds: 12,
+            fatigue: 1,
+            corruption: 2,
+            insanity: 3,
+            currentFate: 1,
+            maxFate: 2,
+            experienceSpent: 250,
+            experienceTotal: 500
+        ),
+        skills: [
+            Skill(
+                id: UUID(uuidString: "11111111-2222-3333-4444-555555555555")!,
+                name: "Awareness",
+                characteristic: .perception,
+                training: .trained,
+                specialisations: ["Sight"]
+            )
+        ],
+        notes: NotesState(
+            talents: ["Air of Authority"],
+            traits: ["Peer"],
+            mutations: [],
+            disorders: [],
+            psychicPowers: [],
+            specialAbilities: ["Keen Mind"],
+            notes: "Carries cogitator slates."
+        ),
+        equipment: EquipmentState(),
+        session: SessionState(),
+        history: [
+            CharacterHistoryEntry(
+                id: UUID(uuidString: "99999999-8888-7777-6666-555555555555")!,
+                characterID: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+                createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+                title: "Promoted",
+                type: .advancement,
+                body: "Purchased Awareness +10",
+                tags: ["xp", "awareness"]
+            )
+        ],
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_100)
+    )
+
+    let encoded = try JSONEncoder.iso8601.encode(source)
+    let decoded = try JSONDecoder.iso8601.decode(Character.self, from: encoded)
+    #expect(decoded == source)
+
+    var missingHistoryObject = try #require(
+        JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+    )
+    missingHistoryObject.removeValue(forKey: "history")
+    let missingHistoryData = try JSONSerialization.data(withJSONObject: missingHistoryObject, options: [.sortedKeys])
+    let missingHistoryDecoded = try JSONDecoder.iso8601.decode(Character.self, from: missingHistoryData)
+    #expect(missingHistoryDecoded.history.isEmpty)
 }
 
 @Test func importRejectsUnsupportedSchema() throws {
@@ -1436,7 +1516,7 @@ import SwiftData
     #expect(names == Set(["One", "Two"]))
 }
 
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 @available(iOS 17, macOS 14, *)
 @Test func swiftDataRepositorySaveFetchRoundtrip() async throws {
     let repository = try makeSwiftDataRepository(testName: "swiftdata-roundtrip")
@@ -1714,7 +1794,7 @@ private func uniqueTestFileURL(_ suffix: String) -> URL {
         .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
 }
 
-#if canImport(SwiftData) && canImport(SwiftDataMacros)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 @available(iOS 17, macOS 14, *)
 private func makeSwiftDataRepository(testName: String) throws -> SwiftDataCharacterRepository {
     let storeURL = URL(filePath: NSTemporaryDirectory())

@@ -32,4 +32,4 @@
 
 ## Current limitations
 - Real browser/device validation was not executed in this run
-- Repository-wide host-project Xcode validation is blocked on this machine until the local iOS 26.4 platform/component is installed in Xcode
+- The web app remains a bounded representation layer rather than a full iOS/rules-engine parity target

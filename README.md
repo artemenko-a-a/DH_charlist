@@ -33,8 +33,8 @@ Current web scope:
 
 Current validation caveat:
 - web validation is green locally
-- `make typecheck` and `make test` are green locally
-- host-project Xcode validation on this machine is currently blocked because the local Xcode installation is missing the iOS 26.4 platform/component needed by `DHCharListHost`
+- `make fmt`, `make lint`, `make typecheck`, `make test`, and `make ci` are green locally
+- `bash ./scripts/run_xcode_coverage.sh` and `bash ./scripts/check_coverage_policy.sh` are green locally
 
 > Current state: the project is implemented and validated on two local persistence paths:
 > - JSON-backed path — validated and kept as the default/fallback path
@@ -631,4 +631,4 @@ Current web scope is a bounded but genuinely usable local-first companion app:
 - weapon and armour compendium autocomplete/add/import with explicit replace-all confirmation and detached-copy semantics
 - browser dossier preview with print/share support
 
-The web app still does not claim full iOS parity or full rules-engine coverage. Final repo-wide host-project Xcode validation on this machine is currently blocked by a missing local iOS 26.4 platform install; see `.agent/tasks/2026-03-web-final-acceptance/`.
+The web app still does not claim full iOS parity or full rules-engine coverage. Final acceptance evidence and the current verdict live under `.agent/tasks/2026-03-web-final-acceptance/`.

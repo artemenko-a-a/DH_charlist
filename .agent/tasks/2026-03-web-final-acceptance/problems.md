@@ -1,26 +1,13 @@
 # Problems
 
-## External machine blocker: iOS platform not installed in local Xcode
+## Resolved during final acceptance
 
-- Observed command failures:
-  - `make ci`
-  - `xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination 'generic/platform=iOS' build`
-- Observed error:
-  - `Unable to find a destination matching the provided destination specifier`
-  - `iOS 26.4 is not installed. Please download and install the platform from Xcode > Settings > Components.`
-- Attempted local remediation:
-  - `xcodebuild -downloadPlatform iOS` started downloading `iOS 26.4 Simulator (23E244) (arm64)` and logged progress to `.agent/tasks/2026-03-web-final-acceptance/raw/xcode-download-ios-platform.log`
-- Why this is external:
-  - the missing platform/component lives in the local Xcode installation rather than in the repo
-  - repo code cannot make the machine eligible for host-project destinations without the host completing the Xcode component install
-- Repo-side normalization completed before hitting the blocker:
-  - `Makefile` no longer hardcodes a stale package path
-  - SwiftData compile guards no longer over-assume macro availability
-  - `swift-testing` is declared in `Package.swift`
-  - `Package.swift` uses a manifest argument order accepted by current SwiftPM/Xcode
-- Validation that now passes on this machine:
-  - `make fmt`
-  - `make lint`
-  - `make typecheck`
-  - `make test`
-  - `cd web && npm install && npm run typecheck && npm run test && npm run build`
+- Local machine blocker resolved:
+  - the iOS 26.4 simulator/platform is now installed and `make ci` completes locally
+- Repo issues resolved during re-verification:
+  - SwiftData compile guards were refined so CLI SwiftPM stays green while Xcode-host builds still exercise SwiftData
+  - `Character` `Codable` coverage was restored with a direct roundtrip regression test
+  - the quick-mechanics host smoke test was hardened against control-type/visibility flake for the custom modifier input
+  - the repository coverage baseline was refreshed from the latest truthful package-surface capture
+
+No open acceptance blocker remains for the bounded scope validated in this run.

@@ -1,21 +1,27 @@
 {
   "status": "active",
-  "captured_at": "2026-03-10T03:47:37+00:00",
+  "captured_at": "2026-03-30T01:50:52+00:00",
   "source_scheme": "DHCharListHost",
   "source_of_truth": "SwiftPM code coverage JSON over Sources/DHCharList for gate enforcement, with xcodebuild/xccov host artifacts retained as diagnostics",
   "baseline": {
-    "metrics_source": "/Users/an.artemenko/repos/DH_charlist/DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
+    "metrics_source": "/Users/andrey_artemenko/.codex/worktrees/b55e/DH_charlist/DHCharListHost/artifacts/coverage/latest/coverage-metrics.json",
     "package_surface": {
-      "line_coverage_pct": 14.18,
-      "covered_lines": 1612,
-      "executable_lines": 11365,
-      "file_count": 28,
+      "line_coverage_pct": 19.59,
+      "covered_lines": 3491,
+      "executable_lines": 17817,
+      "file_count": 36,
       "files": [
         {
           "path": "App/AppContainer.swift",
-          "executable_lines": 110,
-          "covered_lines": 94,
-          "line_coverage_pct": 85.45
+          "executable_lines": 82,
+          "covered_lines": 76,
+          "line_coverage_pct": 92.68
+        },
+        {
+          "path": "Application/ArmourCompendium.swift",
+          "executable_lines": 303,
+          "covered_lines": 300,
+          "line_coverage_pct": 99.01
         },
         {
           "path": "Application/CharacterDossier.swift",
@@ -38,8 +44,8 @@
         {
           "path": "Application/CharacterUseCases.swift",
           "executable_lines": 187,
-          "covered_lines": 171,
-          "line_coverage_pct": 91.44
+          "covered_lines": 179,
+          "line_coverage_pct": 95.72
         },
         {
           "path": "Application/ProfileAutosaveCoordinator.swift",
@@ -48,10 +54,16 @@
           "line_coverage_pct": 100.0
         },
         {
+          "path": "Application/WeaponCompendium.swift",
+          "executable_lines": 291,
+          "covered_lines": 288,
+          "line_coverage_pct": 98.97
+        },
+        {
           "path": "Domain/Character.swift",
           "executable_lines": 177,
-          "covered_lines": 173,
-          "line_coverage_pct": 97.74
+          "covered_lines": 174,
+          "line_coverage_pct": 98.31
         },
         {
           "path": "Domain/CharacterTemplate.swift",
@@ -66,6 +78,12 @@
           "line_coverage_pct": 98.48
         },
         {
+          "path": "Infrastructure/Persistence/JSONFileArmourCompendiumRepository.swift",
+          "executable_lines": 19,
+          "covered_lines": 19,
+          "line_coverage_pct": 100.0
+        },
+        {
           "path": "Infrastructure/Persistence/JSONFileCharacterRepository.swift",
           "executable_lines": 34,
           "covered_lines": 34,
@@ -78,16 +96,10 @@
           "line_coverage_pct": 100.0
         },
         {
-          "path": "Infrastructure/Persistence/SwiftDataCharacterRepository.swift",
-          "executable_lines": 65,
-          "covered_lines": 64,
-          "line_coverage_pct": 98.46
-        },
-        {
-          "path": "Infrastructure/Persistence/SwiftDataCharacterTemplateRepository.swift",
-          "executable_lines": 65,
-          "covered_lines": 63,
-          "line_coverage_pct": 96.92
+          "path": "Infrastructure/Persistence/JSONFileWeaponCompendiumRepository.swift",
+          "executable_lines": 19,
+          "covered_lines": 19,
+          "line_coverage_pct": 100.0
         },
         {
           "path": "Presentation/AdaptiveLayout.swift",
@@ -97,19 +109,19 @@
         },
         {
           "path": "Presentation/AppShell/DHCharListAppShell.swift",
-          "executable_lines": 55,
+          "executable_lines": 83,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
         {
           "path": "Presentation/Features/CharacterList/CharacterListScreen.swift",
-          "executable_lines": 2553,
-          "covered_lines": 88,
-          "line_coverage_pct": 3.45
+          "executable_lines": 2704,
+          "covered_lines": 182,
+          "line_coverage_pct": 6.73
         },
         {
           "path": "Presentation/Features/Characteristics/CharacteristicsScreen.swift",
-          "executable_lines": 316,
+          "executable_lines": 417,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
@@ -127,9 +139,9 @@
         },
         {
           "path": "Presentation/Features/Equipment/EquipmentScreen.swift",
-          "executable_lines": 1280,
+          "executable_lines": 2157,
           "covered_lines": 58,
-          "line_coverage_pct": 4.53
+          "line_coverage_pct": 2.69
         },
         {
           "path": "Presentation/Features/History/CampaignHistoryScreen.swift",
@@ -139,7 +151,7 @@
         },
         {
           "path": "Presentation/Features/Mechanics/QuickMechanicsHelperView.swift",
-          "executable_lines": 696,
+          "executable_lines": 845,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
@@ -156,8 +168,14 @@
           "line_coverage_pct": 0.0
         },
         {
+          "path": "Presentation/Features/Progression/XPSpendScreen.swift",
+          "executable_lines": 1094,
+          "covered_lines": 0,
+          "line_coverage_pct": 0.0
+        },
+        {
           "path": "Presentation/Features/SessionMode/SessionModeScreen.swift",
-          "executable_lines": 1882,
+          "executable_lines": 4089,
           "covered_lines": 0,
           "line_coverage_pct": 0.0
         },
@@ -174,61 +192,91 @@
           "line_coverage_pct": 0.0
         },
         {
+          "path": "Rules/CombatActionShortcuts.swift",
+          "executable_lines": 218,
+          "covered_lines": 200,
+          "line_coverage_pct": 91.74
+        },
+        {
+          "path": "Rules/DamagePipeline.swift",
+          "executable_lines": 157,
+          "covered_lines": 148,
+          "line_coverage_pct": 94.27
+        },
+        {
           "path": "Rules/MechanicsChecks.swift",
-          "executable_lines": 169,
-          "covered_lines": 161,
-          "line_coverage_pct": 95.27
+          "executable_lines": 506,
+          "covered_lines": 478,
+          "line_coverage_pct": 94.47
+        },
+        {
+          "path": "Rules/ProgressionRegistries.swift",
+          "executable_lines": 109,
+          "covered_lines": 88,
+          "line_coverage_pct": 80.73
+        },
+        {
+          "path": "Rules/RulesRegistries.swift",
+          "executable_lines": 177,
+          "covered_lines": 177,
+          "line_coverage_pct": 100.0
+        },
+        {
+          "path": "Rules/XPProgression.swift",
+          "executable_lines": 373,
+          "covered_lines": 365,
+          "line_coverage_pct": 97.86
         }
       ],
       "areas": [
         {
           "name": "App",
-          "covered_lines": 94,
-          "executable_lines": 110,
+          "covered_lines": 76,
+          "executable_lines": 82,
           "file_count": 1,
-          "line_coverage_pct": 85.45
+          "line_coverage_pct": 92.68
         },
         {
           "name": "Application",
-          "covered_lines": 659,
-          "executable_lines": 695,
-          "file_count": 5,
-          "line_coverage_pct": 94.82
+          "covered_lines": 1255,
+          "executable_lines": 1289,
+          "file_count": 7,
+          "line_coverage_pct": 97.36
         },
         {
           "name": "Domain",
-          "covered_lines": 212,
+          "covered_lines": 213,
           "executable_lines": 218,
           "file_count": 2,
-          "line_coverage_pct": 97.25
+          "line_coverage_pct": 97.71
         },
         {
           "name": "Infrastructure",
-          "covered_lines": 268,
-          "executable_lines": 272,
+          "covered_lines": 179,
+          "executable_lines": 180,
           "file_count": 5,
-          "line_coverage_pct": 98.53
+          "line_coverage_pct": 99.44
         },
         {
           "name": "Presentation",
-          "covered_lines": 218,
-          "executable_lines": 9901,
-          "file_count": 14,
-          "line_coverage_pct": 2.2
+          "covered_lines": 312,
+          "executable_lines": 14508,
+          "file_count": 15,
+          "line_coverage_pct": 2.15
         },
         {
           "name": "Rules",
-          "covered_lines": 161,
-          "executable_lines": 169,
-          "file_count": 1,
-          "line_coverage_pct": 95.27
+          "covered_lines": 1456,
+          "executable_lines": 1540,
+          "file_count": 6,
+          "line_coverage_pct": 94.55
         }
       ]
     },
     "host_xccov": {
-      "line_coverage_pct": 96.18,
-      "covered_lines": 730,
-      "executable_lines": 759
+      "line_coverage_pct": 98.04,
+      "covered_lines": 1453,
+      "executable_lines": 1482
     }
   },
   "policy": {

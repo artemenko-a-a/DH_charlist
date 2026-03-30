@@ -1,61 +1,13 @@
 swift build --disable-sandbox --package-path /Users/andrey_artemenko/.codex/worktrees/b55e/DH_charlist --build-path /tmp/dh_charlist-build
-Fetching https://github.com/apple/swift-testing.git
-[1/36672] Fetching swift-testing
-Fetched https://github.com/apple/swift-testing.git from cache (19.13s)
-Computing version for https://github.com/apple/swift-testing.git
-Computed https://github.com/apple/swift-testing.git at 0.99.0 (19.80s)
-Fetching https://github.com/swiftlang/swift-syntax.git
-[1/74889] Fetching swift-syntax
-Fetched https://github.com/swiftlang/swift-syntax.git from cache (52.75s)
-Computing version for https://github.com/swiftlang/swift-syntax.git
-Computed https://github.com/swiftlang/swift-syntax.git at 600.0.1 (56.79s)
-Creating working copy for https://github.com/swiftlang/swift-syntax.git
-Working copy of https://github.com/swiftlang/swift-syntax.git resolved at 600.0.1
-Creating working copy for https://github.com/apple/swift-testing.git
-Working copy of https://github.com/apple/swift-testing.git resolved at 0.99.0
 [0/1] Planning build
 Building for debugging...
 [0/2] Write sources
 [1/2] Write swift-version--58304C5D6DBC2206.txt
-[3/37] Compiling DHCharList AppContainer.swift
-[4/37] Compiling DHCharList ArmourCompendium.swift
-[5/37] Compiling DHCharList CharacterDossier.swift
-[6/37] Compiling DHCharList CharacterImportPreviewSummary.swift
-[7/37] Compiling DHCharList CharacterRepository.swift
-[8/37] Compiling DHCharList CharacterTemplateRepository.swift
-[9/37] Compiling DHCharList CharacterTemplateUseCases.swift
-[10/43] Emitting module DHCharList
-[11/43] Compiling DHCharList CombatActionShortcuts.swift
-[12/43] Compiling DHCharList DamagePipeline.swift
-[13/43] Compiling DHCharList MechanicsChecks.swift
-[14/43] Compiling DHCharList ProgressionRegistries.swift
-[15/43] Compiling DHCharList RulesRegistries.swift
-[16/43] Compiling DHCharList XPProgression.swift
-[17/43] Compiling DHCharList NotesScreen.swift
-[18/43] Compiling DHCharList ProfileScreen.swift
-[19/43] Compiling DHCharList XPSpendScreen.swift
-[20/43] Compiling DHCharList SessionModeScreen.swift
-[21/43] Compiling DHCharList SkillsScreen.swift
-[22/43] Compiling DHCharList CogitatorTheme.swift
-[23/43] Compiling DHCharList CharacterUseCases.swift
-[24/43] Compiling DHCharList ProfileAutosaveCoordinator.swift
-[25/43] Compiling DHCharList WeaponCompendium.swift
-[26/43] Compiling DHCharList Character.swift
-[27/43] Compiling DHCharList CharacterTemplate.swift
-[28/43] Compiling DHCharList CharacterJSONImportExportService.swift
-[29/43] Compiling DHCharList JSONFileArmourCompendiumRepository.swift
-[30/43] Compiling DHCharList CharacterListScreen.swift
-[31/43] Compiling DHCharList CharacteristicsScreen.swift
-[32/43] Compiling DHCharList PersistenceStatusScreen.swift
-[33/43] Compiling DHCharList CharacterDossierScreen.swift
-[34/43] Compiling DHCharList EquipmentScreen.swift
-[35/43] Compiling DHCharList CampaignHistoryScreen.swift
-[36/43] Compiling DHCharList QuickMechanicsHelperView.swift
-[37/43] Compiling DHCharList JSONFileCharacterRepository.swift
-[38/43] Compiling DHCharList JSONFileCharacterTemplateRepository.swift
-[39/43] Compiling DHCharList JSONFileWeaponCompendiumRepository.swift
-[40/43] Compiling DHCharList SwiftDataCharacterRepository.swift
-[41/43] Compiling DHCharList SwiftDataCharacterTemplateRepository.swift
-[42/43] Compiling DHCharList AdaptiveLayout.swift
-[43/43] Compiling DHCharList DHCharListAppShell.swift
-Build complete! (99.16s)
+[3/6] Compiling DHCharList SwiftDataCharacterRepository.swift
+[4/6] Compiling DHCharList SwiftDataCharacterTemplateRepository.swift
+[5/6] Emitting module DHCharList
+[6/6] Compiling DHCharList AppContainer.swift
+[7/9] Compiling DHCharList PersistenceStatusScreen.swift
+[8/9] Compiling DHCharList CharacterListScreen.swift
+[9/9] Compiling DHCharList DHCharListAppShell.swift
+Build complete! (6.19s)

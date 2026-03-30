@@ -173,11 +173,19 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         plusTwentyModifier.tap()
         assertQuickCheckFinalTarget("20")
 
-        let customModifierField = app.textFields["quick-check.custom-modifier"]
-        XCTAssertTrue(customModifierField.waitForExistence(timeout: 5))
+        let customModifierTextField = app.textFields["quick-check.custom-modifier"]
+        let customModifierTextView = app.textViews["quick-check.custom-modifier"]
+        reveal(customModifierTextField, maxSwipes: 4)
+        reveal(customModifierTextView, maxSwipes: 4)
+        XCTAssertTrue(
+            customModifierTextField.waitForExistence(timeout: 1) ||
+            customModifierTextView.waitForExistence(timeout: 5)
+        )
+        let customModifierField = customModifierTextField.exists ? customModifierTextField : customModifierTextView
         customModifierField.clearAndEnterText("-10")
 
         let applyCustomModifierButton = app.buttons["quick-check.apply-custom"]
+        reveal(applyCustomModifierButton, maxSwipes: 2)
         XCTAssertTrue(applyCustomModifierButton.waitForExistence(timeout: 5))
         applyCustomModifierButton.tap()
         assertQuickCheckFinalTarget("-10")

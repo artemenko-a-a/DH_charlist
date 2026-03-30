@@ -15,22 +15,28 @@
   - `.agent/tasks/2026-03-web-final-acceptance/raw/make-typecheck.log`
   - `.agent/tasks/2026-03-web-final-acceptance/raw/make-test.log`
   - `.agent/tasks/2026-03-web-final-acceptance/raw/make-ci.log`
-  - `.agent/tasks/2026-03-web-final-acceptance/raw/xcodebuild-generic-ios-build.log`
-  - `.agent/tasks/2026-03-web-final-acceptance/raw/xcode-download-ios-platform.log`
+  - `.agent/tasks/2026-03-web-final-acceptance/raw/run-xcode-coverage.log`
+  - `.agent/tasks/2026-03-web-final-acceptance/raw/refresh-coverage-baseline.log`
+  - `.agent/tasks/2026-03-web-final-acceptance/raw/check-coverage-policy.log`
+  - `.agent/tasks/2026-03-web-final-acceptance/raw/xcodebuild-swiftdata-smoke.log`
+  - `.agent/tasks/2026-03-web-final-acceptance/raw/xcodebuild-quick-mechanics-smoke.log`
 
 ## fix-agent
 - Normalized `Makefile` package paths to use the current repo root instead of a stale host-specific absolute path.
-- Tightened SwiftData compile guards so package builds no longer assume SwiftData macros are available whenever `SwiftData` itself can be imported.
+- Tightened SwiftData compile guards so CLI SwiftPM builds stay green, then refined them to allow SwiftData in Xcode-host builds via the existing `Xcode` compilation condition.
 - Added the missing `swift-testing` package dependency to make the test target’s `import Testing` declaration manifest-truthful.
 - Restored valid SwiftPM manifest argument ordering in `Package.swift` so current Xcode/SwiftPM accepts the package after adding `swift-testing`.
+- Added a direct `Character` `Codable` roundtrip regression test so package-surface `Domain` coverage remains truthful.
+- Hardened the quick-mechanics host smoke test to reveal and resolve the custom-modifier control as either a text field or text view before interacting with it.
+- Refreshed `Docs/coverage-baseline.json` from the latest truthful package-surface capture after the SwiftPM/Xcode coverage source was stabilized.
 
-## Current blocker
-- Swift package validation is green on this machine, but host-project `xcodebuild` validation still cannot complete because the local Xcode installation is missing the iOS 26.4 platform component.
-- `make ci` and direct host-project builds both fail before compilation with `Unable to find a destination matching the provided destination specifier ... iOS 26.4 is not installed`.
-- A local remediation attempt via `xcodebuild -downloadPlatform iOS` was started and logged, confirming the missing component is machine state rather than a repo defect.
+## Acceptance result
+- `make fmt`, `make lint`, `make typecheck`, `make test`, and `make ci` all pass locally on this machine.
+- `bash ./scripts/run_xcode_coverage.sh`, `bash ./scripts/refresh_coverage_baseline.sh`, and `bash ./scripts/check_coverage_policy.sh` pass locally after the final fixes.
+- Host-project Xcode validation and the repository coverage gate are now green rather than conditionally blocked.
 
 ## Confidence
 - logic confidence: high for the web app’s bounded scope
-- runtime confidence: mixed; high for the web toolchain and Swift package layer, low for host-project Apple-toolchain validation because it is blocked on local Xcode platform installation
+- runtime confidence: high for the validated local toolchains and bounded product scope
 - UI confidence: medium
 - real-device confidence: none

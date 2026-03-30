@@ -439,3 +439,11 @@
 - Confirmed `cd web && npm install && npm run typecheck && npm run test && npm run build` passes locally in this worktree.
 - Fixed one local repo issue exposed by the rerun: `Package.swift` argument ordering after the `swift-testing` dependency addition was invalid for the current SwiftPM/Xcode manifest parser.
 - Host-project Xcode validation remains blocked by local machine state, but the blocker changed: `make ci` now fails because Xcode reports the iOS 26.4 platform/component is not installed for the `DHCharListHost` scheme destination. Evidence and the current verdict live under `.agent/tasks/2026-03-web-final-acceptance/`.
+
+## 2026-03-30 — Final local acceptance closed green
+- The local iOS 26.4 simulator/platform was installed and repo-level acceptance was rerun end-to-end.
+- Refined SwiftData compile guards to `canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)` so CLI SwiftPM validation stays green while Xcode-host validation still exercises the SwiftData path.
+- Added a direct `Character` `Codable` roundtrip regression test to restore truthful `Domain` package-surface coverage.
+- Hardened the quick-mechanics host smoke test so the custom modifier control is revealed and resolved as either a text field or text view before typing, removing the remaining UI-test flake without changing product behavior.
+- Re-ran `bash ./scripts/run_xcode_coverage.sh`, refreshed `Docs/coverage-baseline.json` from the new truthful package-surface capture, rechecked `bash ./scripts/check_coverage_policy.sh`, and finished with green `make ci`.
+- Final acceptance for the bounded web + iOS-integrated scope is now `accepted`; see `.agent/tasks/2026-03-web-final-acceptance/verdict.json`.

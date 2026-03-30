@@ -1,18 +1,14 @@
 {
   "task_id": "2026-03-web-final-acceptance",
   "title": "Final web acceptance and QA verdict",
-  "status": "accepted_with_conditions",
-  "summary": "The repo contains a working, validated local web app, `make typecheck` and `make test` now pass on this machine, and repo-side validation assumptions were repaired. Final host-project Xcode acceptance remains blocked by a missing local iOS 26.4 platform install, not by repo code.",
+  "status": "accepted",
+  "summary": "The repo contains a working, validated local web app, web validation is green, SwiftPM validation is green, host-project Xcode validation is green, and the repo-local coverage gate passes from a fresh truthful capture.",
   "logic_confidence": "high",
-  "runtime_confidence": "mixed",
+  "runtime_confidence": "high",
   "ui_confidence": "medium",
   "real_device_confidence": "none",
-  "blockers": [
-    "Local Xcode host-project validation cannot find an eligible iOS destination because the machine is missing the iOS 26.4 platform component."
-  ],
+  "blockers": [],
   "required_followups": [
-    "Install the local iOS 26.4 platform/component in Xcode and rerun `make ci`.",
-    "Rerun `bash ./scripts/run_xcode_coverage.sh` and `bash ./scripts/check_coverage_policy.sh` after the platform is installed.",
     "Run manual browser/device sanity if release sign-off needs device confidence."
   ]
 }

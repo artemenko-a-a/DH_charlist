@@ -1,0 +1,38 @@
+{
+  "task_id": "2026-04-a11y-ci-quickwins",
+  "title": "Accessibility and CI quick wins",
+  "status": "accepted_with_conditions",
+  "summary": "Removed forced dark mode and added web validation checks to main CI workflow.",
+  "accepted_scope": [
+    "Removed preferredColorScheme(.dark) override",
+    "Added web-validation job in ci.yml"
+  ],
+  "rejected_scope": [],
+  "blockers": [],
+  "residual_risks": [
+    "GitHub execution of new web job not verified in this environment",
+    "No manual visual pass for theme behavior"
+  ],
+  "required_followups": [
+    "Observe first CI run with web-validation job",
+    "Optional manual UI visual check across light/dark settings"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-a11y-ci-quickwins/spec.md",
+    ".agent/tasks/2026-04-a11y-ci-quickwins/acceptance.md",
+    ".agent/tasks/2026-04-a11y-ci-quickwins/evidence.md"
+  ],
+  "tested_in_this_environment": [
+    "swift test"
+  ],
+  "not_verified_in_this_environment": [
+    "GitHub-hosted workflow run",
+    "real-device UI validation"
+  ],
+  "trust_assessment": {
+    "rules_correctness": "not_applicable",
+    "data_safety": "medium",
+    "runtime_ui_confidence": "medium",
+    "real_device_confidence": "low"
+  }
+}

@@ -51,7 +51,7 @@ public struct CharacterUseCases: Sendable {
         guard var character = try await repository.fetch(id: characterID) else {
             throw CharacterRepositoryError.notFound
         }
-        character.resources = resources
+        character.resources = normalizedResources(resources)
         character.updatedAt = .now
         try await repository.save(character)
         return character
@@ -181,16 +181,7 @@ public struct CharacterUseCases: Sendable {
     @discardableResult
     public func importCharacters(from data: Data, using service: any CharacterImportExportService) async throws -> Int {
         let imported = try service.import(data)
-        let existing = try await repository.fetchAll()
-        let importedIDs = Set(imported.map(\.id))
-
-        for character in imported {
-            try await repository.save(character)
-        }
-
-        for character in existing where !importedIDs.contains(character.id) {
-            try await repository.delete(id: character.id)
-        }
+        try await repository.replaceAll(with: imported)
 
         return imported.count
     }
@@ -199,6 +190,25 @@ public struct CharacterUseCases: Sendable {
         tags
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
+    }
+
+    private func normalizedResources(_ resources: ResourceState) -> ResourceState {
+        let maxWounds = max(0, resources.maxWounds)
+        let maxFate = max(0, resources.maxFate)
+        let experienceTotal = max(0, resources.experienceTotal)
+        let experienceSpent = min(max(0, resources.experienceSpent), experienceTotal)
+
+        return ResourceState(
+            currentWounds: min(max(0, resources.currentWounds), maxWounds),
+            maxWounds: maxWounds,
+            fatigue: max(0, resources.fatigue),
+            corruption: max(0, resources.corruption),
+            insanity: max(0, resources.insanity),
+            currentFate: min(max(0, resources.currentFate), maxFate),
+            maxFate: maxFate,
+            experienceSpent: experienceSpent,
+            experienceTotal: experienceTotal
+        )
     }
 }
 

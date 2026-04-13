@@ -168,6 +168,22 @@ import SwiftData
     #expect(persisted.first?.profile.name == "Imported Only")
 }
 
+@Test func useCasesImportUsesRepositoryReplaceAllPath() async throws {
+    let repository = ReplaceAllSpyCharacterRepository()
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let incoming = Character(profile: Profile(name: "Atomic Import"))
+    let payload = try service.exportCharacters([incoming])
+
+    let importedCount = try await useCases.importCharacters(from: payload, using: service)
+
+    #expect(importedCount == 1)
+    #expect(await repository.replaceAllCallCount() == 1)
+    #expect(await repository.saveCallCount() == 0)
+    #expect(await repository.deleteCallCount() == 0)
+    #expect(try await repository.fetchAll().map(\.id) == [incoming.id])
+}
+
 @Test func useCasesImportRejectsUnsupportedSchemaVersion() async throws {
     let fileURL = uniqueTestFileURL("batch11-schema")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -550,6 +566,37 @@ import SwiftData
     #expect(updated.resources.experienceAvailable == 350)
     #expect(persisted?.resources == edited)
     #expect(persisted?.resources.experienceAvailable == 350)
+}
+
+@Test func resourceUpdateNormalizesInvalidValues() async throws {
+    let fileURL = uniqueTestFileURL("resources-normalization")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let created = try await useCases.createCharacter(profile: Profile(name: "Normalization"))
+
+    let invalid = ResourceState(
+        currentWounds: -5,
+        maxWounds: -1,
+        fatigue: -2,
+        corruption: -3,
+        insanity: -4,
+        currentFate: 9,
+        maxFate: -1,
+        experienceSpent: 150,
+        experienceTotal: 100
+    )
+
+    let updated = try await useCases.updateResources(characterID: created.id, resources: invalid)
+
+    #expect(updated.resources.currentWounds == 0)
+    #expect(updated.resources.maxWounds == 0)
+    #expect(updated.resources.fatigue == 0)
+    #expect(updated.resources.corruption == 0)
+    #expect(updated.resources.insanity == 0)
+    #expect(updated.resources.currentFate == 0)
+    #expect(updated.resources.maxFate == 0)
+    #expect(updated.resources.experienceTotal == 100)
+    #expect(updated.resources.experienceSpent == 100)
 }
 
 @Test func addSkillPersistsCorrectly() async throws {
@@ -1691,6 +1738,44 @@ private actor SaveRecorder {
     func saves() -> [(UUID, Profile)] {
         stored
     }
+}
+
+private actor ReplaceAllSpyCharacterRepository: CharacterRepository {
+    private var characters: [Character] = []
+    private var saveCalls = 0
+    private var deleteCalls = 0
+    private var replaceAllCalls = 0
+
+    func fetchAll() async throws -> [Character] {
+        characters
+    }
+
+    func fetch(id: UUID) async throws -> Character? {
+        characters.first(where: { $0.id == id })
+    }
+
+    func save(_ character: Character) async throws {
+        saveCalls += 1
+        if let index = characters.firstIndex(where: { $0.id == character.id }) {
+            characters[index] = character
+        } else {
+            characters.append(character)
+        }
+    }
+
+    func delete(id: UUID) async throws {
+        deleteCalls += 1
+        characters.removeAll { $0.id == id }
+    }
+
+    func replaceAll(with characters: [Character]) async throws {
+        replaceAllCalls += 1
+        self.characters = characters
+    }
+
+    func saveCallCount() -> Int { saveCalls }
+    func deleteCallCount() -> Int { deleteCalls }
+    func replaceAllCallCount() -> Int { replaceAllCalls }
 }
 
 private actor SaveGate {

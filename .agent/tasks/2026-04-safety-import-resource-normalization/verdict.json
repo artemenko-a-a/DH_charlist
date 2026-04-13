@@ -1,0 +1,43 @@
+{
+  "task_id": "2026-04-safety-import-resource-normalization",
+  "title": "Atomic roster import and resource-state normalization",
+  "status": "accepted_with_conditions",
+  "summary": "Import now uses repository-level replaceAll semantics and resources are normalized before persistence.",
+  "accepted_scope": [
+    "Added CharacterRepository.replaceAll(with:)",
+    "Switched importCharacters to atomic replace-all path",
+    "Added resource normalization in updateResources",
+    "Added focused tests for import path and resource normalization"
+  ],
+  "rejected_scope": [],
+  "blockers": [],
+  "residual_risks": [
+    "Full CI and coverage policy checks not executed in this task",
+    "No real-device validation performed"
+  ],
+  "required_followups": [
+    "Run make ci and coverage gate commands",
+    "Continue with session UX continuity and autosave track"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-safety-import-resource-normalization/spec.md",
+    ".agent/tasks/2026-04-safety-import-resource-normalization/acceptance.md",
+    ".agent/tasks/2026-04-safety-import-resource-normalization/evidence.md",
+    "Tests/DHCharListTests/DHCharListTests.swift"
+  ],
+  "tested_in_this_environment": [
+    "swift test"
+  ],
+  "not_verified_in_this_environment": [
+    "make ci",
+    "bash ./scripts/run_xcode_coverage.sh",
+    "bash ./scripts/check_coverage_policy.sh",
+    "real device validation"
+  ],
+  "trust_assessment": {
+    "rules_correctness": "medium",
+    "data_safety": "strong",
+    "runtime_ui_confidence": "low",
+    "real_device_confidence": "low"
+  }
+}

@@ -35,6 +35,10 @@ public actor JSONFileCharacterRepository: CharacterRepository {
         try persist(all)
     }
 
+    public func replaceAll(with characters: [Character]) async throws {
+        try persist(characters)
+    }
+
     private func persist(_ characters: [Character]) throws {
         let data = try importExport.exportCharacters(characters)
         try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)

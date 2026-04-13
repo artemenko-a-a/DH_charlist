@@ -5,6 +5,7 @@ public protocol CharacterRepository: Sendable {
     func fetch(id: UUID) async throws -> Character?
     func save(_ character: Character) async throws
     func delete(id: UUID) async throws
+    func replaceAll(with characters: [Character]) async throws
 }
 
 public protocol CharacterImportExportService: Sendable {

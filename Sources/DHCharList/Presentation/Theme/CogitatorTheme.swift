@@ -192,7 +192,6 @@ private struct CogitatorSupportingTextModifier: ViewModifier {
 private struct CogitatorAppChromeModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .preferredColorScheme(.dark)
             .background {
                 Rectangle()
                     .fill(CogitatorPalette.screenGradient)

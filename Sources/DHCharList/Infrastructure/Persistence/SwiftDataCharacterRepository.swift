@@ -94,5 +94,25 @@ public actor SwiftDataCharacterRepository: CharacterRepository {
         modelContext.delete(record)
         try modelContext.save()
     }
+
+    public func replaceAll(with characters: [Character]) async throws {
+        let existingRecords = try modelContext.fetch(FetchDescriptor<SwiftDataCharacterRecord>())
+        let incomingByID = Dictionary(uniqueKeysWithValues: characters.map { ($0.id, $0) })
+
+        for record in existingRecords {
+            if let incoming = incomingByID[record.id] {
+                try mapper.update(record, from: incoming)
+            } else {
+                modelContext.delete(record)
+            }
+        }
+
+        let existingIDs = Set(existingRecords.map(\.id))
+        for character in characters where !existingIDs.contains(character.id) {
+            modelContext.insert(try mapper.makeRecord(from: character))
+        }
+
+        try modelContext.save()
+    }
 }
 #endif

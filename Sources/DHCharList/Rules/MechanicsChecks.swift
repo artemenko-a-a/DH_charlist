@@ -653,6 +653,7 @@ extension SkillTrainingLevel {
         case .untrained: "Untrained"
         case .known: "Known"
         case .trained: "Trained"
+        case .experienced: "Experienced"
         case .veteran: "Veteran"
         }
     }

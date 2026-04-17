@@ -12,7 +12,7 @@ export const characteristicOrder = [
 
 export type CharacteristicKey = (typeof characteristicOrder)[number]
 
-export const trainingOrder = ['untrained', 'known', 'trained', 'veteran'] as const
+export const trainingOrder = ['untrained', 'known', 'trained', 'experienced', 'veteran'] as const
 export type SkillTrainingLevel = (typeof trainingOrder)[number]
 
 export const historyEntryTypes = [

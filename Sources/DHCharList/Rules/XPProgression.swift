@@ -434,8 +434,10 @@ extension SkillTrainingLevel {
             1
         case .trained:
             2
-        case .veteran:
+        case .experienced:
             3
+        case .veteran:
+            4
         }
     }
 }

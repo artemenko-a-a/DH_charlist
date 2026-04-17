@@ -216,6 +216,7 @@ public enum SkillTrainingLevel: String, Codable, CaseIterable, Sendable {
     case untrained
     case known
     case trained
+    case experienced
     case veteran
 
     public var modifier: Int {
@@ -223,7 +224,8 @@ public enum SkillTrainingLevel: String, Codable, CaseIterable, Sendable {
         case .untrained: return -20
         case .known: return 0
         case .trained: return 10
-        case .veteran: return 20
+        case .experienced: return 20
+        case .veteran: return 30
         }
     }
 }

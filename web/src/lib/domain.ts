@@ -45,6 +45,7 @@ export const trainingLabels: Record<SkillTrainingLevel, string> = {
   untrained: 'Untrained',
   known: 'Known',
   trained: 'Trained',
+  experienced: 'Experienced',
   veteran: 'Veteran'
 }
 
@@ -52,7 +53,8 @@ export const trainingModifiers: Record<SkillTrainingLevel, number> = {
   untrained: -20,
   known: 0,
   trained: 10,
-  veteran: 20
+  experienced: 20,
+  veteran: 30
 }
 
 export const demoWeaponCatalog: WeaponCompendiumCatalog = {
@@ -87,40 +89,32 @@ export function createDefaultCharacter(name = 'New Acolyte'): Character {
       homeWorld: '',
       background: '',
       role: '',
-      aptitudes: ['Perception'],
+      aptitudes: [],
       description: ''
     },
     characteristics: {
-      weaponSkill: 30,
-      ballisticSkill: 30,
-      strength: 30,
-      toughness: 30,
-      agility: 30,
-      intelligence: 30,
-      perception: 30,
-      willpower: 30,
-      fellowship: 30
+      weaponSkill: 0,
+      ballisticSkill: 0,
+      strength: 0,
+      toughness: 0,
+      agility: 0,
+      intelligence: 0,
+      perception: 0,
+      willpower: 0,
+      fellowship: 0
     },
     resources: {
-      currentWounds: 10,
-      maxWounds: 10,
+      currentWounds: 0,
+      maxWounds: 0,
       fatigue: 0,
       corruption: 0,
       insanity: 0,
-      currentFate: 1,
-      maxFate: 1,
+      currentFate: 0,
+      maxFate: 0,
       experienceSpent: 0,
-      experienceTotal: 400
+      experienceTotal: 0
     },
-    skills: [
-      {
-        id: crypto.randomUUID(),
-        name: 'Awareness',
-        characteristic: 'perception',
-        training: 'known',
-        specialisations: []
-      }
-    ],
+    skills: [],
     notes: {
       talents: [],
       traits: [],
@@ -133,7 +127,7 @@ export function createDefaultCharacter(name = 'New Acolyte'): Character {
     equipment: {
       weapons: [],
       armour: [],
-      movement: { halfMove: 3, fullMove: 6, charge: 9, run: 18 },
+      movement: { halfMove: 0, fullMove: 0, charge: 0, run: 0 },
       inventory: []
     },
     session: {
@@ -986,15 +980,15 @@ function clampNumber(value: unknown, fallback = 0): number {
 function migratedCharacteristics(record: Record<string, unknown>): CharacteristicSet {
   const source = isRecord(record.characteristics) ? record.characteristics : record
   return {
-    weaponSkill: clampNumber(source.weaponSkill ?? source.ws, 30),
-    ballisticSkill: clampNumber(source.ballisticSkill ?? source.bs, 30),
-    strength: clampNumber(source.strength ?? source.s, 30),
-    toughness: clampNumber(source.toughness ?? source.t, 30),
-    agility: clampNumber(source.agility ?? source.ag, 30),
-    intelligence: clampNumber(source.intelligence ?? source.int, 30),
-    perception: clampNumber(source.perception ?? source.per, 30),
-    willpower: clampNumber(source.willpower ?? source.wp, 30),
-    fellowship: clampNumber(source.fellowship ?? source.fel, 30)
+    weaponSkill: clampNumber(source.weaponSkill ?? source.ws, 0),
+    ballisticSkill: clampNumber(source.ballisticSkill ?? source.bs, 0),
+    strength: clampNumber(source.strength ?? source.s, 0),
+    toughness: clampNumber(source.toughness ?? source.t, 0),
+    agility: clampNumber(source.agility ?? source.ag, 0),
+    intelligence: clampNumber(source.intelligence ?? source.int, 0),
+    perception: clampNumber(source.perception ?? source.per, 0),
+    willpower: clampNumber(source.willpower ?? source.wp, 0),
+    fellowship: clampNumber(source.fellowship ?? source.fel, 0)
   }
 }
 
@@ -1048,15 +1042,15 @@ export function coerceCharacter(value: unknown): Character | null {
     },
     characteristics: migratedCharacteristics(value),
     resources: {
-      currentWounds: clampNumber(resourcesSource.currentWounds ?? resourcesSource.wounds, 10),
-      maxWounds: clampNumber(resourcesSource.maxWounds ?? resourcesSource.wounds, 10),
+      currentWounds: clampNumber(resourcesSource.currentWounds ?? resourcesSource.wounds, 0),
+      maxWounds: clampNumber(resourcesSource.maxWounds ?? resourcesSource.wounds, 0),
       fatigue: clampNumber(resourcesSource.fatigue, 0),
       corruption: clampNumber(resourcesSource.corruption, 0),
       insanity: clampNumber(resourcesSource.insanity, 0),
-      currentFate: clampNumber(resourcesSource.currentFate, 1),
-      maxFate: clampNumber(resourcesSource.maxFate, 1),
+      currentFate: clampNumber(resourcesSource.currentFate, 0),
+      maxFate: clampNumber(resourcesSource.maxFate, 0),
       experienceSpent: clampNumber(resourcesSource.experienceSpent, 0),
-      experienceTotal: clampNumber(resourcesSource.experienceTotal ?? resourcesSource.xpAvailable, 400)
+      experienceTotal: clampNumber(resourcesSource.experienceTotal ?? resourcesSource.xpAvailable, 0)
     },
     skills,
     notes: {

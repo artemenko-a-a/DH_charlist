@@ -10,10 +10,43 @@ import {
   resolveDamage,
   resolveReactionFlow,
   resolveSkillCheck,
+  trainingModifiers,
   validateOrApplyXPSpend
 } from './domain'
 
 describe('rules and safety helpers', () => {
+  it('starts new web characters as blank manual records instead of invented DH2 defaults', () => {
+    const character = createDefaultCharacter('Blank Start')
+
+    expect(character.profile.aptitudes).toEqual([])
+    expect(character.characteristics).toEqual({
+      weaponSkill: 0,
+      ballisticSkill: 0,
+      strength: 0,
+      toughness: 0,
+      agility: 0,
+      intelligence: 0,
+      perception: 0,
+      willpower: 0,
+      fellowship: 0
+    })
+    expect(character.resources).toMatchObject({
+      currentWounds: 0,
+      maxWounds: 0,
+      currentFate: 0,
+      maxFate: 0,
+      experienceSpent: 0,
+      experienceTotal: 0
+    })
+    expect(character.skills).toEqual([])
+    expect(character.equipment.movement).toEqual({
+      halfMove: 0,
+      fullMove: 0,
+      charge: 0,
+      run: 0
+    })
+  })
+
   it('keeps detached weapon instances separate from compendium definitions', () => {
     const character = createDefaultCharacter('Detach Test')
     const originalName = 'Lasgun'
@@ -57,6 +90,70 @@ describe('rules and safety helpers', () => {
     expect(coerced?.history[0]?.type).toBe('advancement')
   })
 
+  it('does not invent canonical stats or resources when recovering sparse records', () => {
+    const coerced = coerceCharacter({
+      id: 'sparse',
+      profile: {
+        name: 'Sparse'
+      }
+    })
+
+    expect(coerced?.characteristics).toEqual({
+      weaponSkill: 0,
+      ballisticSkill: 0,
+      strength: 0,
+      toughness: 0,
+      agility: 0,
+      intelligence: 0,
+      perception: 0,
+      willpower: 0,
+      fellowship: 0
+    })
+    expect(coerced?.resources).toMatchObject({
+      currentWounds: 0,
+      maxWounds: 0,
+      currentFate: 0,
+      maxFate: 0,
+      experienceSpent: 0,
+      experienceTotal: 0
+    })
+  })
+
+  it('matches DH2 skill progression bonuses through veteran rank', () => {
+    expect(trainingModifiers.known).toBe(0)
+    expect(trainingModifiers.trained).toBe(10)
+    expect(trainingModifiers.experienced).toBe(20)
+    expect(trainingModifiers.veteran).toBe(30)
+
+    const characteristics = {
+      weaponSkill: 0,
+      ballisticSkill: 0,
+      strength: 0,
+      toughness: 0,
+      agility: 0,
+      intelligence: 0,
+      perception: 40,
+      willpower: 0,
+      fellowship: 0
+    }
+
+    const experiencedSkill = {
+      id: 'skill-experienced',
+      name: 'Awareness',
+      characteristic: 'perception' as const,
+      training: 'experienced' as const,
+      specialisations: []
+    }
+    const veteranSkill = {
+      ...experiencedSkill,
+      id: 'skill-veteran',
+      training: 'veteran' as const
+    }
+
+    expect(resolveSkillCheck(experiencedSkill, characteristics).finalTarget).toBe(60)
+    expect(resolveSkillCheck(veteranSkill, characteristics).finalTarget).toBe(70)
+  })
+
   it('rejects malformed compendium imports and accepts valid replace-all payloads', () => {
     expect(parseWeaponCompendiumImport('{').ok).toBe(false)
     expect(parseArmourCompendiumImport('{"schemaVersion":2}').ok).toBe(false)
@@ -72,7 +169,25 @@ describe('rules and safety helpers', () => {
 
   it('resolves skill and combat helpers with explainable targets', () => {
     const character = createDefaultCharacter('Mechanics')
-    const skill = { ...character.skills[0]!, training: 'trained' as const }
+    character.characteristics = {
+      weaponSkill: 30,
+      ballisticSkill: 30,
+      strength: 30,
+      toughness: 30,
+      agility: 30,
+      intelligence: 30,
+      perception: 30,
+      willpower: 30,
+      fellowship: 30
+    }
+    const skill = {
+      id: 'mechanics-awareness',
+      name: 'Awareness',
+      characteristic: 'perception' as const,
+      training: 'trained' as const,
+      specialisations: []
+    }
+    character.skills = [skill]
     const skillResult = resolveSkillCheck(skill, character.characteristics, 10)
 
     expect(skillResult.finalTarget).toBe(50)
@@ -103,6 +218,7 @@ describe('rules and safety helpers', () => {
   it('validates and applies XP spending with history updates', () => {
     const character = createDefaultCharacter('XP Test')
     character.profile.aptitudes = ['Knowledge']
+    character.characteristics.strength = 30
     character.resources.experienceTotal = 400
     character.resources.experienceSpent = 0
 

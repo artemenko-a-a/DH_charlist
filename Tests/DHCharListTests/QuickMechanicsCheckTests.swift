@@ -80,6 +80,30 @@ import Testing
     #expect(result.breakdown.contribution(of: .training)?.appliesToFinalTarget == true)
 }
 
+@Test func skillTrainingRanksMatchDh2KnownTrainedExperiencedVeteranBonuses() {
+    let characteristics = CharacteristicSet(
+        weaponSkill: 30,
+        ballisticSkill: 30,
+        strength: 30,
+        toughness: 30,
+        agility: 30,
+        intelligence: 30,
+        perception: 40,
+        willpower: 30,
+        fellowship: 30
+    )
+
+    let known = Skill(name: "Awareness", characteristic: .perception, training: .known)
+    let trained = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let experienced = Skill(name: "Awareness", characteristic: .perception, training: .experienced)
+    let veteran = Skill(name: "Awareness", characteristic: .perception, training: .veteran)
+
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(known, characteristics: characteristics, modifiers: [])).finalTarget == 40)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(trained, characteristics: characteristics, modifiers: [])).finalTarget == 50)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(experienced, characteristics: characteristics, modifiers: [])).finalTarget == 60)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(veteran, characteristics: characteristics, modifiers: [])).finalTarget == 70)
+}
+
 @Test func standardQuickMechanicsPresetsRemainExpected() {
     #expect(DifficultyPresetRegistry.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
     #expect(DifficultyPresetRegistry.preset(for: 20)?.source == "Difficulty Preset Registry")

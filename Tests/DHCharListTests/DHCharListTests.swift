@@ -646,7 +646,7 @@ import SwiftData
     let editedTarget = DerivedValueCalculator.skillTarget(for: editedCharacter.skills[0], characteristics: editedCharacter.characteristics)
 
     #expect(baselineTarget == 15)
-    #expect(editedTarget == 62)
+    #expect(editedTarget == 72)
 }
 
 @Test func skillSpecialisationsPersistCorrectly() async throws {

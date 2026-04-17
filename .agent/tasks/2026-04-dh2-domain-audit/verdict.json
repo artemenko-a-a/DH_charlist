@@ -1,0 +1,53 @@
+{
+  "task_id": "2026-04-dh2-domain-audit",
+  "title": "Dark Heresy II domain audit and bounded rules-correctness hardening",
+  "status": "accepted_with_conditions",
+  "summary": "Audited the actual supported DH2 scope, fixed two high-confidence domain mismatches, and verified the touched Swift and web surfaces locally. The app is materially safer and more rules-correct within its bounded scope, but full DH2 generation automation and real-device validation remain out of scope.",
+  "accepted_scope": [
+    "Shared skill training ranks and modifiers",
+    "Quick mechanics skill target calculation",
+    "Bounded XP progression ordering for skill ranks",
+    "Web new-character defaults and sparse storage recovery behavior"
+  ],
+  "rejected_scope": [
+    "Full DH2 character creation automation",
+    "Automatic home world/background/role package application",
+    "Full talent and advancement table implementation",
+    "Real-device verification claims"
+  ],
+  "blockers": [],
+  "residual_risks": [
+    "Manual profile choices still do not automatically drive DH2 starting packages.",
+    "UI confidence is based on automated coverage plus static inspection, not a manual simulator/device smoke pass.",
+    "Broader DH2 systems remain intentionally partial or out of scope."
+  ],
+  "required_followups": [
+    "If the product goal is full character-generation trust, implement a rule-driven creation pipeline instead of manual profile storage.",
+    "Add higher-level UI smoke coverage for blank-character creation/edit/progression on the web surface.",
+    "Plan a separate pass for home world/background/role package correctness if those choices are meant to become authoritative."
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-dh2-domain-audit/spec.md",
+    ".agent/tasks/2026-04-dh2-domain-audit/acceptance.md",
+    ".agent/tasks/2026-04-dh2-domain-audit/evidence.md",
+    ".agent/tasks/2026-04-dh2-domain-audit/problems.md"
+  ],
+  "tested_in_this_environment": [
+    "swift build",
+    "swift test",
+    "cd web && npm test",
+    "cd web && npm run typecheck",
+    "cd web && npm run build"
+  ],
+  "not_verified_in_this_environment": [
+    "real-device behavior",
+    "manual simulator smoke pass",
+    "full DH2 generation pipeline behavior"
+  ],
+  "trust_assessment": {
+    "logic_confidence": "high",
+    "runtime_confidence": "high",
+    "ui_confidence": "medium",
+    "real_device_confidence": "none"
+  }
+}

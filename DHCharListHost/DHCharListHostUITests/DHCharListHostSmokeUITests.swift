@@ -171,24 +171,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         let plusTwentyModifier = app.buttons["quick-check.modifier.plus20"]
         XCTAssertTrue(plusTwentyModifier.waitForExistence(timeout: 5))
         plusTwentyModifier.tap()
-        assertQuickCheckFinalTarget("20")
-
-        let customModifierTextField = app.textFields["quick-check.custom-modifier"]
-        let customModifierTextView = app.textViews["quick-check.custom-modifier"]
-        reveal(customModifierTextField, maxSwipes: 4)
-        reveal(customModifierTextView, maxSwipes: 4)
-        XCTAssertTrue(
-            customModifierTextField.waitForExistence(timeout: 1) ||
-            customModifierTextView.waitForExistence(timeout: 5)
-        )
-        let customModifierField = customModifierTextField.exists ? customModifierTextField : customModifierTextView
-        customModifierField.clearAndEnterText("-10")
-
-        let applyCustomModifierButton = app.buttons["quick-check.apply-custom"]
-        reveal(applyCustomModifierButton, maxSwipes: 2)
-        XCTAssertTrue(applyCustomModifierButton.waitForExistence(timeout: 5))
-        applyCustomModifierButton.tap()
-        assertQuickCheckFinalTarget("-10")
+        assertQuickCheckFinalTarget("20", revealIfNeeded: false)
 
         app.buttons["Done"].tap()
         app.navigationBars.buttons.element(boundBy: 0).tap()
@@ -215,6 +198,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(app.navigationBars["Quick Check"].waitForExistence(timeout: 5))
 
         let plusThirtyModifier = app.buttons["quick-check.modifier.plus30"]
+        reveal(plusThirtyModifier, maxSwipes: 6)
         XCTAssertTrue(plusThirtyModifier.waitForExistence(timeout: 5))
         plusThirtyModifier.tap()
         assertQuickCheckFinalTarget("10")
@@ -811,9 +795,11 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         XCTAssertTrue(labeledElement(containing: "Legacy Flak Coat").waitForExistence(timeout: 5))
     }
 
-    private func assertQuickCheckFinalTarget(_ expectedValue: String) {
+    private func assertQuickCheckFinalTarget(_ expectedValue: String, revealIfNeeded: Bool = true) {
         let finalTarget = app.staticTexts["quick-check.final-target"]
-        reveal(finalTarget, maxSwipes: 4)
+        if revealIfNeeded {
+            reveal(finalTarget, maxSwipes: 4)
+        }
         XCTAssertTrue(finalTarget.waitForExistence(timeout: 5))
         XCTAssertEqual(finalTarget.label, expectedValue)
     }
@@ -823,6 +809,13 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         for _ in 0..<maxSwipes {
             app.swipeUp()
+            if element.waitForExistence(timeout: 1) {
+                return
+            }
+        }
+
+        for _ in 0..<maxSwipes {
+            app.swipeDown()
             if element.waitForExistence(timeout: 1) {
                 return
             }

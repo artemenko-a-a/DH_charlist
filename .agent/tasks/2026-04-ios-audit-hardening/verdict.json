@@ -1,0 +1,52 @@
+{
+  "task_id": "2026-04-ios-audit-hardening",
+  "title": "Bounded iOS audit, UX hardening, and regression-proof delivery",
+  "status": "accepted",
+  "summary": "Audit-driven UX and reliability improvements were implemented, local build/test/coverage validation succeeded, and the repo is PR-ready on the audit branch.",
+  "accepted_scope": [
+    "Product, UI, architecture, and test coverage audit grounded in repository facts",
+    "High-value Quick Check UX hardening",
+    "Persistence diagnostic fallback hardening",
+    "Smoke/UI test stabilization aligned to user-visible behavior",
+    "Full local validation through the repository CI workflow"
+  ],
+  "rejected_scope": [
+    "Real-device verification claims",
+    "Large-scale architectural rewrite",
+    "Broad visual redesign outside the validated hardening scope"
+  ],
+  "blockers": [],
+  "residual_risks": [
+    "Real-device behavior not verified",
+    "Dedicated iPad runtime validation was not performed in this task",
+    "swift-testing remains explicitly pinned for build-path compatibility and emits deprecation warnings on Swift 6 toolchains"
+  ],
+  "required_followups": [
+    "Optionally run a dedicated iPad simulator audit pass",
+    "Optionally migrate off explicit swift-testing dependency when the repo CI path supports toolchain-native Testing reliably"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-ios-audit-hardening/spec.md",
+    ".agent/tasks/2026-04-ios-audit-hardening/acceptance.md",
+    ".agent/tasks/2026-04-ios-audit-hardening/evidence.md",
+    ".agent/tasks/2026-04-ios-audit-hardening/raw/make-ci-final.txt"
+  ],
+  "tested_in_this_environment": [
+    "Swift package build",
+    "Swift package tests",
+    "Targeted Quick Check host UI flow",
+    "Full host build",
+    "Xcode coverage run",
+    "Coverage policy gate"
+  ],
+  "not_verified_in_this_environment": [
+    "real device behavior",
+    "dedicated iPad simulator matrix"
+  ],
+  "trust_assessment": {
+    "rules_correctness": "high",
+    "data_safety": "high",
+    "runtime_ui_confidence": "medium_high",
+    "real_device_confidence": "low"
+  }
+}

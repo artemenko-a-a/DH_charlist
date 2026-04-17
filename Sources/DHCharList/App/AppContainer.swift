@@ -155,7 +155,7 @@ public struct AppContainer: Sendable {
                     status: PersistenceBootstrapStatus(
                         requestedBackend: .swiftData,
                         activeBackend: .jsonFile,
-                        diagnosticNote: "SwiftData bootstrap failed: \(error.localizedDescription)"
+                        diagnosticNote: "SwiftData bootstrap failed: \(bootstrapDiagnosticMessage(for: error))"
                     )
                 )
             }
@@ -181,6 +181,21 @@ public struct AppContainer: Sendable {
             )
         )
 #endif
+    }
+
+    static func bootstrapDiagnosticMessage(for error: Error) -> String {
+        if let localizedError = error as? LocalizedError,
+           let description = localizedError.errorDescription?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !description.isEmpty {
+            return description
+        }
+
+        let localizedDescription = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !localizedDescription.isEmpty {
+            return localizedDescription
+        }
+
+        return String(describing: error)
     }
 
 #if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)

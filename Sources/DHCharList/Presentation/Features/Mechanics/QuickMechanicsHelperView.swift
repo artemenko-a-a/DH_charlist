@@ -99,6 +99,7 @@ struct QuickMechanicsHelperView: View {
         NavigationStack {
             Form {
                 selectionSection
+                breakdownSection
                 modifierSection
 
                 if !availableSessionModifiers.isEmpty {
@@ -108,8 +109,6 @@ struct QuickMechanicsHelperView: View {
                 if !combatConditions.isEmpty {
                     activeConditionsSection
                 }
-
-                breakdownSection
             }
             .formContentWidth(maxWidth: 720)
             .formStyle(.grouped)
@@ -283,29 +282,6 @@ struct QuickMechanicsHelperView: View {
     private var breakdownSection: some View {
         Section {
             if let checkResult {
-                LabeledContent("Check Name", value: checkResult.checkName)
-                    .cogitatorReadoutStyle()
-                    .cogitatorPanelRow()
-                LabeledContent("Source", value: checkResult.sourceName)
-                    .cogitatorReadoutStyle()
-                    .cogitatorPanelRow()
-                LabeledContent("Base Value", value: String(checkResult.breakdown.baseValue))
-                    .cogitatorReadoutStyle()
-                    .cogitatorPanelRow()
-                if let derivedBonus = checkResult.breakdown.derivedBonus {
-                    LabeledContent("Derived Bonus", value: String(derivedBonus))
-                        .cogitatorReadoutStyle()
-                        .cogitatorPanelRow()
-                }
-                if let trainingModifier = checkResult.breakdown.trainingContribution {
-                    LabeledContent("Training Contribution", value: trainingModifier.signedValueLabel)
-                        .cogitatorReadoutStyle()
-                        .cogitatorPanelRow()
-                }
-                LabeledContent("Applied Modifier", value: checkResult.breakdown.appliedModifier.signedValueLabel)
-                    .cogitatorReadoutStyle()
-                    .cogitatorPanelRow()
-
                 HStack {
                     Text("Final Target")
                     Spacer()
@@ -326,15 +302,46 @@ struct QuickMechanicsHelperView: View {
                         .accessibilityIdentifier("quick-check.final-target")
                 }
                 .cogitatorPanelRow()
+
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(checkResult.checkName)
+                            .font(.headline)
+                            .foregroundStyle(CogitatorPalette.textPrimary)
+                        Text(checkResult.sourceName)
+                            .font(.caption)
+                            .foregroundStyle(CogitatorPalette.textSecondary)
+                    }
+                    Spacer()
+                    CogitatorStatusChip(finalTargetLevel(checkResult.finalTarget).label, level: finalTargetLevel(checkResult.finalTarget))
+                }
+                .cogitatorPanelRow()
+
+                LabeledContent("Base Value", value: String(checkResult.breakdown.baseValue))
+                    .cogitatorReadoutStyle()
+                    .cogitatorPanelRow()
+                if let derivedBonus = checkResult.breakdown.derivedBonus {
+                    LabeledContent("Derived Bonus", value: String(derivedBonus))
+                        .cogitatorReadoutStyle()
+                        .cogitatorPanelRow()
+                }
+                if let trainingModifier = checkResult.breakdown.trainingContribution {
+                    LabeledContent("Training Contribution", value: trainingModifier.signedValueLabel)
+                        .cogitatorReadoutStyle()
+                        .cogitatorPanelRow()
+                }
+                LabeledContent("Applied Modifier", value: checkResult.breakdown.appliedModifier.signedValueLabel)
+                    .cogitatorReadoutStyle()
+                    .cogitatorPanelRow()
             } else {
                 Text("Select a valid source to build a quick check.")
                     .cogitatorSupportingText()
                     .cogitatorPanelRow()
             }
         } header: {
-            CogitatorSectionHeader("Breakdown", subtitle: "Transparent Target Calculation")
+            CogitatorSectionHeader("Current Target", subtitle: "Live Resolved Summary")
         } footer: {
-            Text("This helper does not roll dice or persist results automatically.")
+            Text("The current target updates immediately as you switch source or modifier; detailed context stays below.")
                 .cogitatorSupportingText()
         }
     }
@@ -443,6 +450,22 @@ struct QuickMechanicsHelperView: View {
             return .caution
         }
         return .nominal
+    }
+}
+
+@available(iOS 17, macOS 14, *)
+private extension CogitatorStatusLevel {
+    var label: String {
+        switch self {
+        case .nominal:
+            return "Strong"
+        case .caution:
+            return "Bounded"
+        case .warning:
+            return "Risky"
+        case .critical:
+            return "Critical"
+        }
     }
 }
 #endif

@@ -11,6 +11,7 @@ struct CharacteristicsScreen: View {
     @State private var characteristics: CharacteristicSet
     @State private var resources: ResourceState
     @State private var quickCheckSelection: QuickMechanicsSelection?
+    @State private var quickCheckDetent: PresentationDetent = .large
     @State private var showingXPSpend = false
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
@@ -110,8 +111,13 @@ struct CharacteristicsScreen: View {
                 skills: viewModel.character(by: characterID)?.skills ?? [],
                 initialSelection: selection
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.medium, .large], selection: $quickCheckDetent)
             .presentationDragIndicator(.visible)
+        }
+        .onChange(of: quickCheckSelection) { _, selection in
+            if selection != nil {
+                quickCheckDetent = .large
+            }
         }
         .sheet(isPresented: $showingXPSpend) {
             if let snapshot = characterSnapshot {

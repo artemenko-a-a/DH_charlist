@@ -8,6 +8,11 @@ private struct IntentionalSwiftDataBootstrapFailure: LocalizedError {
     }
 }
 
+private struct BlankLocalizedBootstrapError: LocalizedError, CustomStringConvertible {
+    var errorDescription: String? { "   " }
+    var description: String { "BlankLocalizedBootstrapError(description fallback)" }
+}
+
 @Test func jsonBootstrapStatusExposesJSONAsActiveBackend() async throws {
     let documentsDirectory = try makeBatch32TemporaryDirectory()
     let container = AppContainer.live(persistence: .jsonFile, documentsDirectory: documentsDirectory)
@@ -54,12 +59,40 @@ private struct IntentionalSwiftDataBootstrapFailure: LocalizedError {
     #expect(container.persistenceStatus.requestedBackend == .swiftData)
     #expect(container.persistenceStatus.activeBackend == .jsonFile)
     #expect(container.persistenceStatus.didFallback == true)
+#if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
     #expect(container.persistenceStatus.diagnosticNote?.contains("Intentional SwiftData bootstrap failure") == true)
+#else
+    #expect(container.persistenceStatus.diagnosticNote?.contains("SwiftData is unavailable in this build") == true)
+#endif
 
     _ = try await container.characterUseCases.createCharacter(profile: Profile(name: "Fallback JSON"))
     let characters = try await container.characterUseCases.listCharacters()
     #expect(characters.count == 1)
     #expect(characters.first?.profile.name == "Fallback JSON")
+}
+
+@Test func bootstrapDiagnosticMessagePrefersLocalizedErrorDescription() {
+    let message = AppContainer.bootstrapDiagnosticMessage(for: IntentionalSwiftDataBootstrapFailure())
+
+    #expect(message == "Intentional SwiftData bootstrap failure")
+}
+
+@Test func bootstrapDiagnosticMessageFallsBackToNSErrorLocalizedDescription() {
+    let error = NSError(
+        domain: "DHCharList.Tests",
+        code: 42,
+        userInfo: [NSLocalizedDescriptionKey: "  NSError-provided bootstrap note  "]
+    )
+
+    let message = AppContainer.bootstrapDiagnosticMessage(for: error)
+
+    #expect(message == "NSError-provided bootstrap note")
+}
+
+@Test func bootstrapDiagnosticMessageUsesStringDescriptionWhenDescriptionsAreBlank() {
+    let message = AppContainer.bootstrapDiagnosticMessage(for: BlankLocalizedBootstrapError())
+
+    #expect(message == "BlankLocalizedBootstrapError(description fallback)")
 }
 
 private func makeBatch32TemporaryDirectory() throws -> URL {

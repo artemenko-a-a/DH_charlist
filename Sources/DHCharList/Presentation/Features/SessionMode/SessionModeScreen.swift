@@ -18,6 +18,7 @@ public struct SessionModeScreen: View {
     @State private var temporaryModifierDraft: TemporaryModifierDraft?
     @State private var combatConditionDraft: CombatConditionDraft?
     @State private var quickCheckSelection: QuickMechanicsSelection?
+    @State private var quickCheckDetent: PresentationDetent = .large
     @State private var isShowingAttackShortcut = false
     @State private var isShowingDamageShortcut = false
     @State private var shownReactionShortcut: CombatReactionShortcutKind?
@@ -102,8 +103,13 @@ public struct SessionModeScreen: View {
                 initialSelection: selection,
                 origin: .sessionCombat
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.medium, .large], selection: $quickCheckDetent)
             .presentationDragIndicator(.visible)
+        }
+        .onChange(of: quickCheckSelection) { _, selection in
+            if selection != nil {
+                quickCheckDetent = .large
+            }
         }
         .sheet(isPresented: $isShowingAttackShortcut) {
             CombatAttackShortcutView(

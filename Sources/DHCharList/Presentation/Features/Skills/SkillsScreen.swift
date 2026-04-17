@@ -12,6 +12,7 @@ struct SkillsScreen: View {
     @State private var characteristics: CharacteristicSet
     @State private var draft: SkillDraft?
     @State private var quickCheckSelection: QuickMechanicsSelection?
+    @State private var quickCheckDetent: PresentationDetent = .large
     @State private var searchText = ""
 
     init(characterID: UUID, viewModel: CharacterListViewModel) {
@@ -67,8 +68,13 @@ struct SkillsScreen: View {
                 skills: skills,
                 initialSelection: selection
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.medium, .large], selection: $quickCheckDetent)
             .presentationDragIndicator(.visible)
+        }
+        .onChange(of: quickCheckSelection) { _, selection in
+            if selection != nil {
+                quickCheckDetent = .large
+            }
         }
     }
 

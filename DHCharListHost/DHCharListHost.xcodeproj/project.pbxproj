@@ -203,7 +203,7 @@
 			mainGroup = 014343BB2F5C68DC00553EFC;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference "../../DH_charlist" */,
+				014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference ".." */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 014343C52F5C68DC00553EFC /* Products */;
@@ -612,16 +612,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference "../../DH_charlist" */ = {
+		014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../DH_charlist;
+			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		014343D32F5C6A1D00553EFC /* DHCharList */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference "../../DH_charlist" */;
+			package = 014343D22F5C6A1D00553EFC /* XCLocalSwiftPackageReference ".." */;
 			productName = DHCharList;
 		};
 /* End XCSwiftPackageProductDependency section */

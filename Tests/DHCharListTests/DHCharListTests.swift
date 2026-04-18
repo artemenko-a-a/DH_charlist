@@ -103,6 +103,79 @@ import SwiftData
     #expect(missingHistoryDecoded.history.isEmpty)
 }
 
+@Test func characterCodableRoundtripPreservesDhiiEngineStateAndDefaultsMissingIt() throws {
+    let persistedState = try persistedDHIIEngineState(
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior"
+    )
+
+    let source = Character(
+        id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+        profile: Profile(name: "Engine Backed"),
+        dhiiEngineState: persistedState,
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_200)
+    )
+
+    let encoded = try JSONEncoder.iso8601.encode(source)
+    let decoded = try JSONDecoder.iso8601.decode(Character.self, from: encoded)
+    #expect(decoded == source)
+
+    var missingStateObject = try #require(
+        JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+    )
+    missingStateObject.removeValue(forKey: "dhiiEngineState")
+    let missingStateData = try JSONSerialization.data(withJSONObject: missingStateObject, options: [.sortedKeys])
+    let missingStateDecoded = try JSONDecoder.iso8601.decode(Character.self, from: missingStateData)
+    #expect(missingStateDecoded.dhiiEngineState == nil)
+}
+
+@Test func importExportRoundtripPreservesDhiiEngineStateAndExportsMigratedSchema() throws {
+    let service = CharacterJSONImportExportService()
+    let persistedState = try persistedDHIIEngineState(
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior"
+    )
+    let source = Character(profile: Profile(name: "Roundtrip Engine"), dhiiEngineState: persistedState)
+
+    let data = try service.exportCharacters([source])
+    let envelope = try JSONDecoder.iso8601.decode(CharacterExportEnvelope.self, from: data)
+    let decoded = try service.import(data)
+
+    #expect(envelope.schemaVersion == 2)
+    #expect(decoded.count == 1)
+    #expect(decoded.first?.dhiiEngineState == persistedState)
+}
+
+@Test func importSupportsLegacySchemaOneWithoutDhiiEngineState() throws {
+    let legacyCharacter = Character(
+        id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+        profile: Profile(name: "Legacy Import"),
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_300)
+    )
+    let encodedCharacter = try JSONEncoder.iso8601.encode(CharacterDTO(character: legacyCharacter))
+    var characterObject = try #require(
+        JSONSerialization.jsonObject(with: encodedCharacter) as? [String: Any]
+    )
+    characterObject.removeValue(forKey: "dhiiEngineState")
+
+    let payload = try JSONSerialization.data(
+        withJSONObject: [
+            "schemaVersion": 1,
+            "exportedAt": ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: 1_700_000_300)),
+            "characters": [characterObject]
+        ],
+        options: [.sortedKeys]
+    )
+
+    let decoded = try CharacterJSONImportExportService().import(payload)
+
+    #expect(decoded.count == 1)
+    #expect(decoded.first?.profile.name == "Legacy Import")
+    #expect(decoded.first?.dhiiEngineState == nil)
+}
+
 @Test func importRejectsUnsupportedSchema() throws {
     let envelope = CharacterExportEnvelope(schemaVersion: 999, exportedAt: .now, characters: [])
     let encoder = JSONEncoder()
@@ -1792,6 +1865,43 @@ private extension JSONDecoder {
 private func uniqueTestFileURL(_ suffix: String) -> URL {
     URL(filePath: NSTemporaryDirectory())
         .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
+}
+
+private func persistedDHIIEngineState(
+    homeWorld: String,
+    background: String,
+    role: String
+) throws -> DHIICharacterEngineState {
+    let draft = try DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Persisted",
+            homeWorld: homeWorld,
+            background: background,
+            role: role
+        )
+    )
+    .settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+    .settingBackgroundAptitudeChoice("Fieldcraft")
+    .settingBackgroundSkillChoice("Operate (Surface)", at: 0)
+    .settingBackgroundEquipmentChoice("Lasgun", at: 0)
+    .settingRoleTalentChoice("Rapid Reload")
+    .settingStartingWoundsRoll(2)
+    .settingStartingFateRoll(7)
+
+    return DHIICharacterCreationEngine.persistedEngineState(for: draft)
 }
 
 #if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)

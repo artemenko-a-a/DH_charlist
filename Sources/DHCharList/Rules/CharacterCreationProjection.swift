@@ -193,6 +193,7 @@ extension DHIICharacterCreationEngine {
             movement: movementProfile(for: projectedCharacteristics),
             inventory: projectedPackage.inventory
         )
+        projected.dhiiEngineState = persistedEngineState(for: draft)
 
         return DHIICreationStartingPackagePreview(
             projectedCharacter: projected,

@@ -4,10 +4,10 @@
 2026-04-dhii-engine
 
 ## Title
-DHII Engine architecture freeze with Tasks 01-06 creation foundations
+DHII Engine architecture freeze with Tasks 01-07 creation foundations and persistence seam
 
 ## Goal
-Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и поэтапно реализовать первые шесть безопасных вертикальных срезов: typed home-world foundation, typed background catalog foundation, typed role/aptitude-composition foundation, typed in-memory creation draft aggregate, typed characteristic-generation foundation и starting-package projection с каноническим источником правил, compatibility diagnostics и безопасной интеграцией в текущий bounded domain.
+Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и поэтапно реализовать первые семь безопасных вертикальных срезов: typed home-world foundation, typed background catalog foundation, typed role/aptitude-composition foundation, typed in-memory creation draft aggregate, typed characteristic-generation foundation, starting-package projection и storage-safe persistence/migration seam с каноническим источником правил, compatibility diagnostics и безопасной интеграцией в текущий bounded domain.
 
 ## User value
 - Пользователь получает первые rulebook-backed creation surfaces вместо полностью свободных текстовых полей без доменной опоры.
@@ -15,6 +15,7 @@ DHII Engine architecture freeze with Tasks 01-06 creation foundations
 - Команда получает typed creation draft seam, через который можно безопасно менять ранние creation choices без скрытого протаскивания устаревших downstream aptitude choices.
 - Пользователь получает typed, explainable characteristic-generation engine для стандартного DHII random-roll и standard point-allocation flows, без выдуманных стартовых значений и без потери rulebook-critical `Influence` внутри transient creation state.
 - Пользователь получает engine-backed стартовый пакет персонажа в пределах поддерживаемого scope: стартовые aptitudes, ресурсы, навыки, таланты, traits, special abilities, оружие и инвентарь теперь собираются из typed creation truth вместо ручных догадок.
+- Пользователь получает storage-safe сохранение engine-backed creation state: канонические выборы, choice slots и characteristic-generation provenance теперь могут безопасно переживать save/reload/import/export без разрушения legacy data.
 - Команда получает согласованную архитектуру и последовательный roadmap, а не хаотичное наращивание UI.
 - Риск ложных или неполных стартовых правил снижается за счёт явного catalog/preview и честной индикации текущих доменных пробелов.
 
@@ -33,27 +34,28 @@ DHII Engine architecture freeze with Tasks 01-06 creation foundations
 - Task 04: typed in-memory creation draft aggregate over canonical home world/background/role selections plus explicit background/role aptitude choice state with safe recomposition and a legacy adapter from `Profile`.
 - Task 05: typed characteristic-generation model over the creation draft for the standard DHII random-roll and standard point-allocation modes, including a single random-generation reroll, explicit transient `Influence`, explainable breakdowns, and safe handling of home-world recomposition or invalidation.
 - Task 06: starting-package projection over the typed creation draft for supported DHII creation outputs, including explicit choice-slot resolution for package skills/talents/equipment, starting wounds/fate rolls, bounded `Character` projection, and explicit compatibility diagnostics for unsupported rule effects.
+- Task 07: additive persistence seam for typed creation state, characteristic-generation provenance, and projected engine-backed characters, including legacy-compatible import/export migration.
 - Explainable home-world/background previews и compatibility diagnostics для текущей snapshot-модели.
 - Explainable role preview and composed-aptitude preview for the current snapshot model.
 - Typed in-memory creation draft derived from the current snapshot model, including explicit unresolved choice-slot handling and pruning of stale downstream choice state when selections change.
 - Narrow, non-persistent creation-engine integration that does not change the current persistence shape.
 - Safe use of composed aptitudes in bounded XP prerequisite and skill-cost helpers without rewriting persisted `profile.aptitudes`.
 - Bounded starting-package projection that derives a safe legacy `Character` snapshot plus transient `Influence` from a fully resolved creation draft.
+- Additive persistence of bounded engine-backed creation state through `Character.dhiiEngineState`, including canonical ids, supported choice slots, starting rolls, fallback aptitudes, and characteristic-generation state.
+- Legacy-compatible import/export support that still accepts schema `1` payloads while exporting migrated schema `2` payloads containing additive engine state when available.
 - Unit/regression tests на новый foundation slice.
 
 ## Out of scope
 - Полный character creation pipeline.
 - Автоматическое применение background/role packages.
-- Typed persistence for creation-time aptitude choices.
-- Typed persistence for characteristic-generation provenance.
-- Typed persistence for starting-package choice state or projected engine state.
-- Полная миграция persistence shape под rich engine state.
+- Полная замена legacy snapshot persistence на engine-first aggregate persistence.
+- Полная миграция persistence shape под rich engine state beyond additive `dhiiEngineState`.
 - Experienced Acolyte / high-power characteristic-generation variant (`+25` random base, adjusted point-allocation floor/cap).
 - Web parity для creation preview foundations.
 - Real-device validation.
 
 ## Constraints
-- Не менять persistence shape без явной необходимости.
+- Не делать silent destructive persistence migration; additive persistence changes допустимы только при legacy compatibility.
 - Не ломать accepted runtime behavior.
 - Не тащить full engine / full rulebook digitization / giant DSL.
 - Сохранять bounded scope и explainability.
@@ -79,9 +81,8 @@ DHII Engine architecture freeze with Tasks 01-06 creation foundations
 - Character generation can look more authoritative than the current saved snapshot really is unless transient `Influence` and unsupported projection remain explicit.
 - Current saved character snapshot cannot yet project background package effects such as availability modifiers, combat-state hooks, or conditional creation grants.
 - Current saved character snapshot cannot yet persist typed background/role aptitude choices or role talent choices.
-- Current saved character snapshot still cannot persist typed background/role aptitude choices; Task 04 may only derive them in memory from legacy profile fields and must not introduce silent destructive writes.
-- Current saved character snapshot still cannot persist characteristic-generation mode, dice provenance, point-allocation state, or transient `Influence`; Task 05 must keep these transient and must not silently flatten them into invented persisted defaults.
-- Current saved character snapshot still cannot persist typed starting-package choice provenance or engine-backed creation state, so Task 06 must project safely into the legacy snapshot without introducing a shadow persisted truth.
+- Additive engine-state persistence can drift from legacy freeform profile fields unless restoration always prefers typed canonical state and sanitizes stale/unknown values.
+- Import/export migration can look destructive unless schema support stays explicitly backward-compatible and legacy data still opens untouched.
 - UI could over-promise automation if the preview is not clearly marked informational.
 - Future phases could diverge if the roadmap is not frozen before additional implementation.
 
@@ -106,6 +107,9 @@ DHII Engine architecture freeze with Tasks 01-06 creation foundations
 - AC18. The rules layer exposes a starting-package projection API that requires canonical selections, resolved supported choice slots, characteristic generation, and starting wounds/fate rolls before yielding a projected package.
 - AC19. The engine can derive a bounded starting `Character` snapshot end-to-end from a fully resolved creation draft, including supported aptitudes, starting resources, skills, talents, traits, special abilities, weapons, and inventory, while surfacing transient `Influence` separately.
 - AC20. Unsupported or unresolved starting-package rules remain explicit through validation or compatibility diagnostics instead of being silently guessed or flattened into incorrect saved state.
+- AC21. The domain can persist bounded engine-backed creation state additively inside the legacy `Character` snapshot without breaking existing saved data.
+- AC22. Restoring a typed creation draft from persisted engine state sanitizes stale or unknown canonical values instead of blindly trusting corrupted payloads.
+- AC23. Import/export remains backward-compatible: schema `1` payloads still load, and schema `2` exports round-trip additive engine state safely without silent destructive migration.
 
 ## Required validation
 - `make fmt`
@@ -131,7 +135,8 @@ The evidence bundle must include:
 - focused rules/data evidence for starting-package projection, including choice-slot resolution requirements and bounded `Character` projection
 - explicit separation between tested behavior and future phases
 - explicit separation between transient engine-only characteristic generation state and persisted snapshot projection
-- explicit separation between projected legacy snapshot data and still-unpersisted engine state
+- explicit separation between projected legacy snapshot data and additive persisted engine state
+- explicit separation between legacy schema import support and newer schema export behavior
 - confidence split across logic, runtime, UI, and real-device categories
 - final recommendation: accepted / accepted_with_conditions / rejected
 
@@ -140,6 +145,7 @@ The evidence bundle must include:
 - Task 03 may consume composed aptitudes in bounded progression flows, but must not introduce typed persistence or silent choice inference.
 - Task 05 must stay on the standard DHII characteristic-generation path only; do not silently include the optional higher-power variant.
 - Task 06 must project only supported package effects into the legacy snapshot and must keep unresolved choice slots plus unsupported rule effects explicit.
+- Task 07 must keep persistence migration additive and legacy-compatible; no destructive rewrite or engine-first persistence cutover yet.
 - Prefer typed domain structures over raw strings in the new rules layer.
 - Treat the read-only preview as an integration seam, not as the full creation UI.
 - Be explicit that `Influence` remains a known model gap.

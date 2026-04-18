@@ -255,7 +255,7 @@
   - import/export integrity
   - regression suite
 - Manual validation: import/export smoke
-- Status: pending
+- Status: completed
 
 ### T08 — Engine-backed creation flow
 - Description: Replace manual creation illusions with a staged engine-backed UI flow.
@@ -274,7 +274,7 @@
 ## 5. Execution Log
 
 ### Current task in work
-- T07 — Persistence and migration path
+- T08 — Engine-backed creation flow
 
 ### What is done so far
 - Current repository architecture and local process rules audited.
@@ -282,10 +282,11 @@
 - Tasks 01-06 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, typed standard characteristic-generation foundation, and bounded starting-package projection are now in place.
 - Standard DHII random-roll and point-allocation characteristic generation now exist as transient creation-draft state with explicit `Influence`, explainable breakdowns, and honest invalidation on home-world changes.
 - Starting-package projection now derives a bounded engine-backed starting character package from resolved canonical selections, explicit choice slots, generated characteristics, and starting wounds/fate rolls while keeping unsupported rule areas honest.
+- Additive `dhiiEngineState` persistence now preserves bounded creation truth, starting rolls, choice slots, and characteristic-generation provenance across save/reload/import/export while keeping legacy schema `1` imports readable and exporting schema `2` explicitly.
 
 ### Gate status
-- Acceptance gate for T06: passed locally.
-- Next task is T07: storage-safe engine state and legacy-compatible migration path.
+- Acceptance gate for T07: passed locally.
+- Next task is T08: engine-backed staged creation/edit flow.
 
 ## 6. Final Delivery Summary
 

@@ -15,6 +15,8 @@
 - [x] Point-allocation generation works as described in the spec
 - [x] Starting-package projection derives a bounded engine-backed character package end-to-end
 - [x] Starting-package projection refuses unresolved or unsupported selections instead of guessing
+- [x] Existing saved data still opens after additive engine-state persistence lands
+- [x] Engine-backed characters round-trip through codable/import-export paths with persisted creation state intact
 
 ## Rules / logic correctness
 - [x] Home-world facts are backed by the DH2 core rulebook
@@ -36,18 +38,23 @@
 - [x] Home-world changes recompose or invalidate generation state honestly
 - [x] Starting-package projection requires explicit resolution of supported choice slots and roll gates
 - [x] Starting-package projection keeps unsupported rule effects explicit through compatibility diagnostics
+- [x] Persisted engine state restores canonical selections and characteristic-generation state through a sanitizing adapter
+- [x] Projected engine-backed characters persist bounded creation state explicitly instead of relying on legacy inference alone
 
 ## Data safety
 - [x] Existing saved characters are not silently mutated
-- [x] Persistence shape remains unchanged
-- [x] Import/export semantics remain unchanged
+- [x] Persistence shape change is additive and legacy-compatible
+- [x] Import/export migration path remains backward-compatible for legacy schema `1`
+- [x] Exported payloads migrate to schema `2` when engine state is present
 - [x] Current freeform profile fields continue to round-trip
 - [x] No persisted background identifier or dual source of truth was introduced
 - [x] No persisted role identifier or typed aptitude-choice state was introduced prematurely
-- [x] No draft-only state is silently persisted into the current storage shape
-- [x] No transient generation provenance is silently persisted into the current storage shape
-- [x] No typed starting-package engine state is silently persisted into the current storage shape
+- [x] Draft-only state is persisted only through explicit `dhiiEngineState`, not by mutating legacy freeform fields silently
+- [x] Characteristic-generation provenance is persisted only through explicit engine state, not flattened into invented legacy defaults
+- [x] Typed starting-package engine state is persisted only through explicit engine state, not by shadow-writing conflicting legacy fields
 - [x] Projected legacy `Character` remains codable and safe to round-trip
+- [x] No silent destructive migration path was introduced
+- [x] Missing `dhiiEngineState` still decodes safely as `nil`
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
@@ -56,6 +63,7 @@
 - [x] Web regression set remains green
 - [x] New generation-specific regression set is green
 - [x] New starting-package projection regression set is green
+- [x] Import/export smoke remains green with additive engine-state persistence
 
 ## UI / UX
 - [x] Preview is clearly informational and does not imply full automation
@@ -74,9 +82,10 @@
 - [x] `make test` passed
 - [x] `make ci` passed
 - [x] targeted DHII Engine tests passed
-- [x] worktree clean enough for intentional follow-up
+- [x] worktree is ready for intentional follow-up after commit/push
 - [x] T05 targeted DHII Engine tests passed
 - [x] T06 targeted DHII Engine tests passed
+- [x] T07 targeted DHII Engine tests passed
 
 ## Documentation / truthfulness
 - [x] DHII Engine roadmap doc added or updated
@@ -90,7 +99,6 @@
 - [ ] Rejected
 
 ## Remaining conditions / follow-up
-- Typed persistence and migration path for characteristic-generation state
-- Typed persistence and migration path for creation state
 - Background package application
-- Storage-safe persistence and migration path for engine-backed creation state
+- Progression and dependency hardening against persisted engine state
+- Engine-backed staged creation/edit flow

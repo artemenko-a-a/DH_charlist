@@ -1,75 +1,66 @@
 {
   "task_id": "2026-04-dhii-engine",
-  "title": "DHII Engine architecture freeze with Tasks 01-06 creation foundations",
+  "title": "DHII Engine architecture freeze with Tasks 01-07 creation foundations and persistence seam",
   "status": "accepted_with_conditions",
-  "summary": "Tasks 01-06 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, a typed in-memory creation draft aggregate, a typed characteristic-generation foundation for standard DHII random-roll and point-allocation modes, and bounded starting-package projection into the legacy Character snapshot. Validation is green locally, including full make ci and coverage-policy checks after adding starting-package coverage.",
+  "summary": "Tasks 01-07 are accepted locally. The repo now has a frozen DHII Engine roadmap, canonical creation catalogs, explainable aptitude composition, a typed creation draft, standard DHII characteristic generation, bounded starting-package projection, and an additive persistence/migration seam for engine-backed creation state. Validation is green locally, including full make ci, host/UI coverage, schema-compatibility tests, and coverage-policy checks.",
   "accepted_scope": [
-    "DHII Engine roadmap and task decomposition",
-    "typed six-world home-world catalog with aliases and rulebook-backed previews",
-    "typed seven-background catalog with aliases, package summaries, and unsupported-mechanics diagnostics",
-    "typed eight-role catalog with aliases, package summaries, and unsupported-mechanics diagnostics",
-    "explainable aptitude composition across home world, background, and role with explicit unresolved-choice handling",
-    "typed in-memory creation draft aggregate derived from the current profile snapshot",
-    "safe recomposition and pruning of stale background/role choice state",
-    "profile-flow informational preview integration",
-    "bounded progression consumption of engine-backed aptitudes without persistence mutation",
-    "typed characteristic-generation foundation with transient Influence and explainable breakdowns",
-    "bounded starting-package projection into a safe legacy Character snapshot with transient Influence kept separate",
-    "Task 01-06 regression hardening and validation proof bundle updates"
+    "DHII Engine roadmap and ordered task decomposition",
+    "typed home-world, background, and role catalogs with rulebook-backed previews",
+    "deterministic aptitude composition with explicit unresolved-choice handling",
+    "typed creation draft aggregate and safe recomposition",
+    "standard DHII characteristic generation with transient Influence",
+    "bounded starting-package projection into the legacy Character snapshot",
+    "additive persisted DHII engine state for canonical selections, supported choice slots, starting rolls, fallback aptitudes, and characteristic-generation provenance",
+    "legacy-compatible import/export migration from schema 1 to schema 2",
+    "Task 01-07 regression hardening and proof-bundle updates"
   ],
   "rejected_scope": [
-    "automatic role package application",
-    "automatic background package application",
     "full DHII character creation pipeline",
-    "typed persistence for creation-time choice slots",
-    "typed persistence for characteristic-generation provenance",
+    "engine-first persistence cutover replacing the legacy Character snapshot",
+    "full background and role package automation beyond the supported bounded projection surface",
     "real-device behavior claims"
   ],
   "blockers": [],
   "residual_risks": [
-    "real device behavior not verified",
-    "typed persistence for unresolved aptitude choices is not yet implemented",
-    "typed persistence for characteristic-generation state is not yet implemented",
-    "typed persistence for starting-package choice provenance is not yet implemented",
-    "web does not yet mirror the new creation preview foundations"
+    "real-device behavior is not verified",
+    "the app still lacks the staged engine-backed creation/edit flow",
+    "Influence is still not a first-class public field on the persisted Character snapshot",
+    "web does not yet consume the new creation engine seam directly"
   ],
   "required_followups": [
-    "Project typed creation state into persistence safely",
-    "Persist and recompose creation-time aptitude choices safely",
-    "Replace manual creation illusions with an engine-backed creation flow"
+    "Replace manual creation illusions with an engine-backed staged creation/edit flow",
+    "Harden progression and dependency evaluation against persisted engine state",
+    "Decide the longer-term migration path from additive engine state to engine-first persistence"
   ],
   "evidence_bundle": [
     ".agent/tasks/2026-04-dhii-engine/spec.md",
     ".agent/tasks/2026-04-dhii-engine/acceptance.md",
-    ".agent/tasks/2026-04-dhii-engine/evidence.md"
+    ".agent/tasks/2026-04-dhii-engine/evidence.md",
+    ".agent/tasks/2026-04-dhii-engine/problems.md"
   ],
   "tested_in_this_environment": [
-    "swift test",
-    "targeted Swift tests for CharacterCreationEngine, XPProgression, and RulesRegistry",
-    "expanded CharacterCreationEngine draft-coverage tests",
-    "expanded CharacterCreationEngine characteristic-generation tests",
-    "expanded CharacterCreationEngine starting-package projection tests",
     "swift build",
+    "swift test --filter CharacterCreationEngineTests",
+    "swift test --filter DHCharListTests",
+    "swift test",
+    "web npm test",
+    "web typecheck",
+    "web production build",
     "make fmt",
     "make lint",
     "make typecheck",
     "make test",
-    "web npm test",
-    "web typecheck",
-    "web production build",
-    "targeted host UI smoke for create-flow entry points",
-    "targeted host UI smoke for XP validation screen",
-    "full make ci including host coverage run and coverage policy"
+    "full make ci including host/UI coverage and coverage policy"
   ],
   "not_verified_in_this_environment": [
-    "real device behavior",
-    "full DHII engine-backed character creation flow",
-    "persistence-backed creation-state migration"
+    "real-device behavior",
+    "full engine-backed staged creation/edit flow",
+    "manual visual review of the new engine state through the UI"
   ],
   "trust_assessment": {
     "logic_confidence": "high",
     "runtime_confidence": "high",
-    "ui_confidence": "high",
+    "ui_confidence": "medium_high",
     "real_device_confidence": "low"
   }
 }

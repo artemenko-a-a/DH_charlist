@@ -1,6 +1,6 @@
 import Foundation
 
-enum DHIICreationCharacteristic: String, CaseIterable, Sendable {
+enum DHIICreationCharacteristic: String, CaseIterable, Codable, Sendable {
     case weaponSkill
     case ballisticSkill
     case strength
@@ -63,7 +63,7 @@ enum DHIICreationCharacteristic: String, CaseIterable, Sendable {
     }
 }
 
-struct DHIICreationCharacteristicValues: Equatable, Sendable {
+struct DHIICreationCharacteristicValues: Codable, Equatable, Sendable {
     var weaponSkill: Int
     var ballisticSkill: Int
     var strength: Int

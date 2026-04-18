@@ -2,6 +2,12 @@
 
 ## 2026-04-18
 
+### DHII Engine Task 07 — Persistence and migration path
+- **status:** accepted_with_conditions
+- **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift test --filter DHCharListTests`, `swift build`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`
+- **results:** completed Task 07 with an additive persistence seam for the bounded DHII Engine state. Added `DHIICharacterEngineState` and typed persisted creation payloads in `Sources/DHCharList/Domain/CharacterEngineState.swift`, wired `Character` codable round-trip support for `dhiiEngineState`, taught the creation engine to prefer persisted engine state over legacy freeform inference when available, and sanitized stale or unknown persisted canonical values during draft restoration. Starting-package projection now persists bounded engine-backed creation truth into projected legacy characters, and import/export now stays backward-compatible by continuing to accept schema `1` payloads while exporting schema `2` payloads that round-trip additive engine state safely. Added targeted codable/import-export/restore regression tests and then reran the full repo gate; final `make ci` is green, including the long host/UI suite and truthful coverage policy (`27.06%` package surface, `96.91%` Domain, `94.27%` Rules).
+- **blockers:** no blocker remains for Task 07. Residual scope limits stay intentional: no engine-backed staged creation/edit UI yet, no engine-first persistence cutover, no first-class public `Influence` field on `Character`, and no real-device verification.
+
 ### DHII Engine Task 06 — Starting package projection
 - **status:** accepted_with_conditions
 - **checks run:** `swift build`, `swift test --filter CharacterCreationEngineTests`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `make ci`

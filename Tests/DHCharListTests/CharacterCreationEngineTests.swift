@@ -739,6 +739,65 @@ import Testing
     #expect(decoded == projected)
 }
 
+@Test func creationDraftUsesPersistedEngineStateWhenCharacterCarriesIt() throws {
+    let draft = try fullyResolvedStartingPackageDraft(
+        name: "Persisted Draft",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload",
+        startingWoundsRoll: 2,
+        startingFateRoll: 7
+    )
+
+    let character = Character(
+        profile: Profile(
+            name: "Conflict",
+            homeWorld: "Feral World",
+            background: "Outcast",
+            role: "Desperado",
+            aptitudes: ["Social"],
+            description: "Legacy profile should not override engine state"
+        ),
+        dhiiEngineState: DHIICharacterCreationEngine.persistedEngineState(for: draft)
+    )
+
+    let restored = DHIICharacterCreationEngine.creationDraft(from: character)
+
+    #expect(restored.homeWorldID == DHIIHomeWorldID.hiveWorld)
+    #expect(restored.backgroundID == DHIIBackgroundID.imperialGuard)
+    #expect(restored.roleID == DHIIRoleID.warrior)
+    #expect(restored.backgroundAptitudeChoice == "Fieldcraft")
+    #expect(restored.backgroundSkillChoices == ["Operate (Surface)"])
+    #expect(restored.backgroundEquipmentChoices == ["Lasgun"])
+    #expect(restored.roleTalentChoice == "Rapid Reload")
+    #expect(restored.startingWoundsRoll == 2)
+    #expect(restored.startingFateRoll == 7)
+}
+
+@Test func startingPackageProjectionPersistsDhiiEngineStateIntoProjectedCharacter() throws {
+    let draft = try fullyResolvedStartingPackageDraft(
+        name: "Projected Persisted",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload",
+        startingWoundsRoll: 2,
+        startingFateRoll: 7
+    )
+
+    let preview = DHIICharacterCreationEngine.previewStartingPackage(for: draft)
+    let projected = try #require(preview.projectedCharacter)
+
+    #expect(projected.dhiiEngineState == DHIICharacterCreationEngine.persistedEngineState(for: draft))
+}
+
 @Test func startingPackageProjectionSupportsEveryBackgroundBranchWithResolvedSelections() throws {
     struct Scenario {
         let homeWorld: String

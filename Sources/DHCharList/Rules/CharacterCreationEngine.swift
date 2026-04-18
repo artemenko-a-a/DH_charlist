@@ -1233,6 +1233,126 @@ enum DHIICharacterCreationEngine {
         )
     }
 
+    static func creationDraft(from character: Character) -> DHIICreationDraft {
+        guard let engineState = character.dhiiEngineState,
+              engineState.schemaVersion == DHIICharacterEngineState.currentSchemaVersion,
+              let persisted = engineState.creation else {
+            return creationDraft(from: character.profile)
+        }
+
+        return DHIICreationDraft(
+            homeWorldID: persisted.homeWorldID,
+            backgroundID: persisted.backgroundID,
+            roleID: persisted.roleID,
+            backgroundAptitudeChoice: validatedChoice(
+                persisted.backgroundAptitudeChoice,
+                options: persisted.backgroundID.flatMap { id in
+                    canonicalBackgrounds.first { $0.id == id }?.aptitudeOptions
+                } ?? []
+            ),
+            roleAptitudeChoice: validatedChoice(
+                persisted.roleAptitudeChoice,
+                options: persisted.roleID.flatMap { id in
+                    canonicalRoles.first { $0.id == id }?.aptitudeRules.compactMap { rule -> String? in
+                        guard case .choice(let first, let second) = rule else {
+                            return nil
+                        }
+                        return [first, second].joined(separator: "||")
+                    }.first?.components(separatedBy: "||")
+                } ?? []
+            ),
+            homeWorldTalentChoice: validatedChoice(
+                persisted.homeWorldTalentChoice,
+                options: homeWorldTalentOptions(for: persisted.homeWorldID)
+            ),
+            backgroundSkillChoices: validatedIndexedChoices(
+                persisted.backgroundSkillChoices,
+                optionGroups: backgroundSkillOptionGroups(for: persisted.backgroundID)
+            ),
+            backgroundTalentChoice: validatedChoice(
+                persisted.backgroundTalentChoice,
+                options: backgroundTalentOptions(for: persisted.backgroundID)
+            ),
+            backgroundEquipmentChoices: validatedIndexedChoices(
+                persisted.backgroundEquipmentChoices,
+                optionGroups: backgroundEquipmentOptionGroups(for: persisted.backgroundID)
+            ),
+            roleTalentChoice: validatedChoice(
+                persisted.roleTalentChoice,
+                options: persisted.roleID.flatMap { id in
+                    canonicalRoles.first { $0.id == id }?.roleTalentChoices
+                } ?? []
+            ),
+            startingWoundsRoll: validatedStartingRoll(persisted.startingWoundsRoll, allowedRange: 1 ... 5),
+            startingFateRoll: validatedStartingRoll(persisted.startingFateRoll, allowedRange: 1 ... 10),
+            legacyFallbackAptitudes: stableUniqueAptitudes(persisted.legacyFallbackAptitudes),
+            unrecognizedHomeWorldInput: unrecognizedLegacyInput(
+                character.profile.homeWorld,
+                recognized: persisted.homeWorldID != nil
+            ),
+            unrecognizedBackgroundInput: unrecognizedLegacyInput(
+                character.profile.background,
+                recognized: persisted.backgroundID != nil
+            ),
+            unrecognizedRoleInput: unrecognizedLegacyInput(
+                character.profile.role,
+                recognized: persisted.roleID != nil
+            ),
+            characteristicGenerationState: characteristicGenerationState(
+                from: persisted.characteristicGenerationState
+            )
+        )
+    }
+
+    static func persistedEngineState(for draft: DHIICreationDraft) -> DHIICharacterEngineState {
+        DHIICharacterEngineState(
+            creation: DHIICreationPersistedState(
+                homeWorldID: draft.homeWorldID,
+                backgroundID: draft.backgroundID,
+                roleID: draft.roleID,
+                backgroundAptitudeChoice: validatedChoice(
+                    draft.backgroundAptitudeChoice,
+                    options: draft.backgroundDefinition?.aptitudeOptions ?? []
+                ),
+                roleAptitudeChoice: validatedChoice(
+                    draft.roleAptitudeChoice,
+                    options: draft.roleDefinition?.aptitudeRules.compactMap { rule -> String? in
+                        guard case .choice(let first, let second) = rule else {
+                            return nil
+                        }
+                        return [first, second].joined(separator: "||")
+                    }.first?.components(separatedBy: "||") ?? []
+                ),
+                homeWorldTalentChoice: validatedChoice(
+                    draft.homeWorldTalentChoice,
+                    options: draft.homeWorldTalentOptions
+                ),
+                backgroundSkillChoices: validatedIndexedChoices(
+                    draft.backgroundSkillChoices,
+                    optionGroups: draft.backgroundSkillOptionGroups
+                ),
+                backgroundTalentChoice: validatedChoice(
+                    draft.backgroundTalentChoice,
+                    options: draft.backgroundTalentOptions
+                ),
+                backgroundEquipmentChoices: validatedIndexedChoices(
+                    draft.backgroundEquipmentChoices,
+                    optionGroups: draft.backgroundEquipmentOptionGroups
+                ),
+                roleTalentChoice: validatedChoice(
+                    draft.roleTalentChoice,
+                    options: draft.roleTalentOptions
+                ),
+                startingWoundsRoll: validatedStartingRoll(draft.startingWoundsRoll, allowedRange: 1 ... 5),
+                startingFateRoll: validatedStartingRoll(draft.startingFateRoll, allowedRange: 1 ... 10),
+                legacyFallbackAptitudes: stableUniqueAptitudes(draft.legacyFallbackAptitudes),
+                characteristicGenerationState: persistedCharacteristicGenerationState(
+                    from: draft.characteristicGenerationState
+                )
+            )
+        )
+    }
+
     static func composeAptitudes(for profile: Profile) -> DHIIAptitudeComposition {
         composeAptitudes(for: creationDraft(from: profile))
     }
@@ -1480,6 +1600,68 @@ private func inferAndConsumeChoice(
         return aptitude
     case .unresolved, .notApplicable:
         return nil
+    }
+}
+
+private func persistedCharacteristicGenerationState(
+    from state: DHIICharacteristicGenerationState?
+) -> DHIIPersistedCharacteristicGenerationState? {
+    guard let state else {
+        return nil
+    }
+
+    switch state {
+    case .randomRoll(let randomState):
+        return .randomRoll(
+            DHIIPersistedRandomCharacteristicGenerationState(
+                generatedForHomeWorldID: randomState.generatedForHomeWorldID,
+                rollsByCharacteristic: DHIICreationCharacteristic.allCases.compactMap { characteristic in
+                    guard let rolls = randomState.rollsByCharacteristic[characteristic] else {
+                        return nil
+                    }
+                    return DHIIPersistedRandomCharacteristicRoll(
+                        characteristic: characteristic,
+                        rolls: rolls
+                    )
+                },
+                rerolledCharacteristic: randomState.rerolledCharacteristic
+            )
+        )
+    case .pointAllocation(let pointAllocationState):
+        return .pointAllocation(
+            DHIIPersistedPointAllocationCharacteristicGenerationState(
+                allocations: pointAllocationState.allocations
+            )
+        )
+    }
+}
+
+private func characteristicGenerationState(
+    from persistedState: DHIIPersistedCharacteristicGenerationState?
+) -> DHIICharacteristicGenerationState? {
+    guard let persistedState else {
+        return nil
+    }
+
+    switch persistedState {
+    case .randomRoll(let randomState):
+        return .randomRoll(
+            DHIIRandomCharacteristicGenerationState(
+                generatedForHomeWorldID: randomState.generatedForHomeWorldID,
+                rollsByCharacteristic: Dictionary(
+                    uniqueKeysWithValues: randomState.rollsByCharacteristic.map { roll in
+                        (roll.characteristic, roll.rolls)
+                    }
+                ),
+                rerolledCharacteristic: randomState.rerolledCharacteristic
+            )
+        )
+    case .pointAllocation(let pointAllocationState):
+        return .pointAllocation(
+            DHIIPointAllocationCharacteristicGenerationState(
+                allocations: pointAllocationState.allocations
+            )
+        )
     }
 }
 

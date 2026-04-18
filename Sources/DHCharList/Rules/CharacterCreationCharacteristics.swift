@@ -357,7 +357,7 @@ extension DHIICharacterCreationEngine {
     static let pointAllocationModifierDelta = 5
 }
 
-private extension DHIICharacterCreationEngine {
+extension DHIICharacterCreationEngine {
     static func previewRandomCharacteristicGeneration(
         _ state: DHIIRandomCharacteristicGenerationState,
         for draft: DHIICreationDraft

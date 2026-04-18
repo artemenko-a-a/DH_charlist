@@ -17,6 +17,9 @@
 - [x] Starting-package projection refuses unresolved or unsupported selections instead of guessing
 - [x] Existing saved data still opens after additive engine-state persistence lands
 - [x] Engine-backed characters round-trip through codable/import-export paths with persisted creation state intact
+- [x] Staged DHII create flow uses the engine-backed draft and projection path instead of manual origin/profile editing
+- [x] Staged DHII edit flow restores persisted engine state and can safely resave an engine-backed character
+- [x] Early-stage edits in the staged flow safely recompose later stages before save
 
 ## Rules / logic correctness
 - [x] Home-world facts are backed by the DH2 core rulebook
@@ -40,6 +43,8 @@
 - [x] Starting-package projection keeps unsupported rule effects explicit through compatibility diagnostics
 - [x] Persisted engine state restores canonical selections and characteristic-generation state through a sanitizing adapter
 - [x] Projected engine-backed characters persist bounded creation state explicitly instead of relying on legacy inference alone
+- [x] Engine-backed create/edit UI paths do not bypass the rules layer when composing or reprojecting characters
+- [x] Reprojecting an existing engine-backed character preserves identity and supported player-authored deltas
 
 ## Data safety
 - [x] Existing saved characters are not silently mutated
@@ -55,6 +60,8 @@
 - [x] Projected legacy `Character` remains codable and safe to round-trip
 - [x] No silent destructive migration path was introduced
 - [x] Missing `dhiiEngineState` still decodes safely as `nil`
+- [x] Engine-backed edit flow preserves character identity while updating the projected legacy snapshot
+- [x] Engine-owned origin selections are no longer expected to be hand-edited in the legacy profile form
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
@@ -64,6 +71,8 @@
 - [x] New generation-specific regression set is green
 - [x] New starting-package projection regression set is green
 - [x] Import/export smoke remains green with additive engine-state persistence
+- [x] Guided DHII creation/create-edit smoke remains green
+- [x] Engine-backed create/edit regression set is green
 
 ## UI / UX
 - [x] Preview is clearly informational and does not imply full automation
@@ -74,6 +83,8 @@
 - [x] Profile flow now reads composed aptitudes through the typed draft seam
 - [x] Any surfaced generation output stays explicitly informational until a later engine-backed creation flow lands
 - [x] No UI surface falsely implies that unsupported starting-package mechanics are fully automated
+- [x] Engine-backed characters are explicitly redirected to the DHII Creation flow for origin edits
+- [x] Guided flow exposes stage-local progression controls that remain reachable on compact screens
 
 ## Automation / quality gates
 - [x] `make fmt` passed
@@ -86,6 +97,7 @@
 - [x] T05 targeted DHII Engine tests passed
 - [x] T06 targeted DHII Engine tests passed
 - [x] T07 targeted DHII Engine tests passed
+- [x] T08 targeted DHII Engine tests passed
 
 ## Documentation / truthfulness
 - [x] DHII Engine roadmap doc added or updated
@@ -101,4 +113,5 @@
 ## Remaining conditions / follow-up
 - Background package application
 - Progression and dependency hardening against persisted engine state
-- Engine-backed staged creation/edit flow
+- First-class persisted `Influence`
+- Web parity or explicit long-term web limitation for the new DHII creation engine surface

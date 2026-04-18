@@ -2,6 +2,12 @@
 
 ## 2026-04-18
 
+### DHII Engine Task 08 — Engine-backed creation flow
+- **status:** accepted_with_conditions
+- **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift test --filter DHCharListTests`, `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=A91DD7E0-C2BD-4919-8398-B12E5F9748BD' -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testGuidedDHIIFlowCreatesEngineBackedCharacterAndAllowsReentry`, `swift build`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`
+- **results:** completed Task 08 with a real staged DHII Engine-backed create/edit flow. Added `DHIICreationFlowScreen` as a guided four-stage surface for canonical origin choices, required package slots, characteristic generation, and final review/save; wired Character List quick-start entry points and engine-backed edit re-entry; added create/update view-model commands that save projected characters through the rules-layer draft/projection seam; and added safe reprojection for existing engine-backed characters so supported player-authored deltas and identity survive edits. The legacy profile screen now treats engine-owned origin fields as read-only guidance for engine-backed characters instead of inviting contradictory manual edits. Added targeted regression tests for reprojection and engine-backed create/update flows, plus a host smoke that creates an engine-backed character, saves it, reopens it, and re-enters the DHII creation editor. Final local acceptance is green, including the long host/UI suite and truthful coverage policy (`25.94%` package surface, `96.91%` Domain, `94.32%` Rules) from the final `make ci`.
+- **blockers:** no blocker remains for Task 08. Residual scope limits stay intentional: the staged flow is bounded to supported creation mechanics only, `Influence` is still not a first-class persisted public field, web still does not consume the new creation engine seam, and no real-device verification was performed.
+
 ### DHII Engine Task 07 — Persistence and migration path
 - **status:** accepted_with_conditions
 - **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift test --filter DHCharListTests`, `swift build`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `make fmt`, `make lint`, `make typecheck`, `make test`, `make ci`

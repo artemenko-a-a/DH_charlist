@@ -3,8 +3,8 @@
 ## 1. Current State Assessment
 
 ### Current application state
-- The app is a usable local-first character companion with bounded rules helpers, not yet a full Dark Heresy II engine.
-- Character data is stored as a broad `Character` snapshot with manual `profile.homeWorld`, `profile.background`, `profile.role`, and `profile.aptitudes`.
+- The app is a usable local-first character companion with a bounded DHII Engine, including staged engine-backed creation/edit for the supported creation surface, but it is not yet a full Dark Heresy II engine.
+- Character data is still stored as a broad `Character` snapshot, now with additive `dhiiEngineState` preserving canonical creation truth for engine-backed characters.
 - Rules support already exists for explainable checks, modifiers/conditions, combat context, bounded damage, and bounded XP/progression.
 - Web is a separate bounded representation layer and currently duplicates parts of the domain/rules behavior.
 
@@ -17,17 +17,18 @@
 
 ### Current DHII scope
 - Implemented in bounded form:
+  - staged engine-backed DHII create/edit flow for supported home world/background/role/choice/generation packages
   - manual character profile editing
   - characteristics/resources/skills/notes/equipment/session state
   - explainable check resolution
   - bounded progression and damage helpers
   - local persistence/import/export/templates/history
 - Partial or missing:
-  - true character creation pipeline
-  - home world/background/role package application
+  - full character creation pipeline beyond the supported bounded surface
+  - complete home world/background/role package application
   - aptitude composition across creation stages
   - first-class Influence in the saved domain model
-  - migration-safe engine state for changing earlier choices
+  - web parity for the creation engine surface
 
 ### Current architectural constraints
 - `Character` is snapshot-first rather than a rich engine aggregate.
@@ -269,34 +270,36 @@
   - regression tests
   - UI smoke where available
 - Manual validation: create/edit/save/reopen flow
-- Status: pending
+- Status: completed
 
 ## 5. Execution Log
 
 ### Current task in work
-- T08 — Engine-backed creation flow
+- none; roadmap tasks T01-T08 are complete
 
 ### What is done so far
 - Current repository architecture and local process rules audited.
 - Existing rules roadmap and decision log aligned with the new DHII Engine direction.
-- Tasks 01-06 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, typed standard characteristic-generation foundation, and bounded starting-package projection are now in place.
+- Tasks 01-08 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, typed standard characteristic-generation foundation, bounded starting-package projection, additive engine-state persistence, and staged engine-backed create/edit flow are now in place.
 - Standard DHII random-roll and point-allocation characteristic generation now exist as transient creation-draft state with explicit `Influence`, explainable breakdowns, and honest invalidation on home-world changes.
 - Starting-package projection now derives a bounded engine-backed starting character package from resolved canonical selections, explicit choice slots, generated characteristics, and starting wounds/fate rolls while keeping unsupported rule areas honest.
 - Additive `dhiiEngineState` persistence now preserves bounded creation truth, starting rolls, choice slots, and characteristic-generation provenance across save/reload/import/export while keeping legacy schema `1` imports readable and exporting schema `2` explicitly.
+- The app now exposes a guided DHII Creation flow for create and edit, uses persisted engine state to restore engine-backed drafts, and explicitly redirects origin edits away from contradictory manual profile fields.
 
 ### Gate status
 - Acceptance gate for T07: passed locally.
-- Next task is T08: engine-backed staged creation/edit flow.
+- Acceptance gate for T08: passed locally.
+- Roadmap implementation is complete within the bounded scope.
 
 ## 6. Final Delivery Summary
 
-This roadmap defines a practical path from the existing bounded rules helper application to a genuine DHII Engine. The critical path is:
+This roadmap defined a practical path from the existing bounded rules helper application to a genuine bounded DHII Engine and that implementation path is now complete. The critical path that was executed was:
 
 1. Canonical catalogs
 2. Package composition
 3. Creation aggregate
 4. Projection/migration
-5. Progression hardening
+5. Persistence-safe engine state
 6. Engine-backed UI flows
 
-The first implementation slice intentionally stays small and safe: home worlds only, read-only projection only, and no persistence migration yet.
+The delivered engine now supports bounded DHII creation truth end-to-end for the implemented scope: canonical selections, explainable composition, characteristic generation, starting-package projection, persisted engine state, and guided create/edit/re-entry. Remaining follow-up is no longer roadmap execution but next-phase expansion: progression/dependency hardening, broader package automation, first-class `Influence`, and any explicit web strategy.

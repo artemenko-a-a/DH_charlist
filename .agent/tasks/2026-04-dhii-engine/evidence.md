@@ -2,7 +2,7 @@
 
 ## Task
 - ID: 2026-04-dhii-engine
-- Title: DHII Engine architecture freeze with Tasks 01-07 creation foundations and persistence seam
+- Title: DHII Engine architecture freeze with Tasks 01-08 creation foundations, persistence seam, and engine-backed flow
 
 ## What was implemented
 - Repo architecture, DHII engine target state, phased roadmap, and ordered task decomposition are documented in [`Docs/dhii-engine-roadmap.md`](/Users/andrey_artemenko/repos/DH_charlist/Docs/dhii-engine-roadmap.md).
@@ -44,16 +44,27 @@
 - Export/import now remains backward-compatible:
   - schema `1` imports still load
   - schema `2` exports round-trip `dhiiEngineState`
-- Profile preview surfaces remain informational in [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift); no full engine-backed creation UI has been claimed or introduced yet.
+- Task 08 introduced the staged DHII Engine-backed create/edit flow in:
+  - [`Sources/DHCharList/Presentation/Features/CharacterCreation/DHIICreationFlowScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterCreation/DHIICreationFlowScreen.swift)
+  - [`Sources/DHCharList/Presentation/Features/CharacterList/CharacterListScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterList/CharacterListScreen.swift)
+  - [`Sources/DHCharList/Rules/CharacterCreationProjection.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationProjection.swift)
+  - [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift)
+- The new flow now provides:
+  - guided staged creation for supported canonical origin choices, package slots, and characteristic generation
+  - safe edit/re-entry for engine-backed characters using persisted `dhiiEngineState`
+  - reprojection of existing engine-backed characters while preserving identity and supported player-authored deltas
+  - explicit redirection away from contradictory manual origin editing in the legacy profile screen
 
 ## Test files added or expanded
 - [`Tests/DHCharListTests/CharacterCreationEngineTests.swift`](/Users/andrey_artemenko/repos/DH_charlist/Tests/DHCharListTests/CharacterCreationEngineTests.swift)
 - [`Tests/DHCharListTests/DHCharListTests.swift`](/Users/andrey_artemenko/repos/DH_charlist/Tests/DHCharListTests/DHCharListTests.swift)
+- [`DHCharListHost/DHCharListHostUITests/DHCharListHostSmokeUITests.swift`](/Users/andrey_artemenko/repos/DH_charlist/DHCharListHost/DHCharListHostUITests/DHCharListHostSmokeUITests.swift)
 - Existing web regression tests remained part of the validation gate
 
 ## Commands actually run
 - `swift test --filter CharacterCreationEngineTests`
 - `swift test --filter DHCharListTests`
+- `xcodebuild test -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -destination 'id=A91DD7E0-C2BD-4919-8398-B12E5F9748BD' -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testGuidedDHIIFlowCreatesEngineBackedCharacterAndAllowsReentry`
 - `swift build`
 - `swift test`
 - `cd web && npm test`
@@ -68,8 +79,9 @@
 ## Results
 - `swift test --filter CharacterCreationEngineTests`: passed
 - `swift test --filter DHCharListTests`: passed
+- targeted `xcodebuild` guided-flow smoke: passed
 - `swift build`: passed
-- `swift test`: passed (`198` tests)
+- `swift test`: passed (`202` tests)
 - `cd web && npm test`: passed (`17` tests)
 - `cd web && npm run typecheck`: passed
 - `cd web && npm run build`: passed
@@ -80,9 +92,9 @@
 - `make ci`: passed
 - Coverage policy: passed
 - Coverage highlights from the final `make ci` run:
-  - package surface coverage: `27.06%`
+  - package surface coverage: `25.94%`
   - Domain: `96.91%`
-  - Rules: `94.27%`
+  - Rules: `94.32%`
 
 ## Rules / logic evidence
 - Canonical engine catalogs cover the full DHII core sets already targeted by the roadmap:
@@ -97,6 +109,8 @@
 - Starting-package projection refuses unresolved or unsupported states instead of guessing.
 - Persisted creation-state restoration is sanitized; stale/unknown canonical ids do not get blindly trusted as valid DHII state.
 - Engine-backed projection now persists its bounded creation truth explicitly, instead of forcing later reloads to rely only on ambiguous legacy `Profile` text.
+- Engine-backed create/edit flows now route supported creation decisions through the typed draft and projection layers instead of writing origin truth directly into raw legacy profile fields.
+- Reprojection of existing engine-backed characters requires persisted engine state and preserves supported player-authored deltas instead of flattening them away.
 
 ## Data safety evidence
 - Existing saved characters still decode if `dhiiEngineState` is absent.
@@ -106,9 +120,11 @@
 - `Character` codable round-trip preserves `dhiiEngineState` when present and defaults it to `nil` when absent.
 - Projected engine-backed characters round-trip without losing persisted creation state.
 - No silent destructive migration path was introduced.
+- Engine-backed edit flow preserves character identity while refreshing the projected snapshot from persisted creation truth.
 
 ## Runtime / UI evidence
-- Existing profile flow remains intact and still treats DHII previews as informational.
+- Existing profile flow remains intact; engine-backed characters now get explicit guidance to revise origin selections through the DHII creation flow.
+- Guided DHII creation can create an engine-backed character, save it, reopen it, and re-enter edit mode through the host smoke suite.
 - Host/UI regression coverage stayed green through the final `make ci` run, including the long smoke suite.
 - No new contradictory user-visible state was observed in the bounded flows covered by the regression suite.
 - Manual screenshot review was not performed.
@@ -121,17 +137,17 @@
 
 ## Not verified in this environment
 - Real-device behavior
-- Full engine-backed staged creation/edit UI flow
+- Manual visual review of the engine-backed creation/edit flow
 - Progression/dependency hardening beyond the currently bounded helpers
 
 ## Residual issues
 - `Influence` still is not a first-class persisted field on the public `Character` snapshot.
-- The app still does not provide a full engine-backed creation/edit flow.
 - Background and role package automation outside the currently supported bounded projection surface remains unfinished.
+- The staged flow is intentionally bounded to supported creation mechanics; unsupported package effects still remain explicit rather than automated.
 - Web still does not consume the new creation engine seam directly.
 
 ## Recommended verdict
 - accepted_with_conditions
 
 ## Recommended next step
-- Proceed to Task 08: replace the current manual creation illusion with a staged engine-backed creation/edit flow that reads and writes the persisted DHII engine state safely.
+- Harden progression and dependency evaluation against persisted engine state, then decide whether the longer-term follow-up is first-class `Influence`, broader package automation, or explicit web limitation.

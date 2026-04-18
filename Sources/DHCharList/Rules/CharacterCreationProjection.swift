@@ -203,6 +203,66 @@ extension DHIICharacterCreationEngine {
         )
     }
 
+    static func reprojectExistingCharacter(
+        _ existingCharacter: Character,
+        with draft: DHIICreationDraft,
+        weaponCatalog: WeaponCompendiumCatalog = .demo,
+        armourCatalog: ArmourCompendiumCatalog = .demo
+    ) -> DHIICreationStartingPackagePreview {
+        guard existingCharacter.dhiiEngineState?.creation != nil else {
+            return DHIICreationStartingPackagePreview(
+                projectedCharacter: nil,
+                projectedInfluence: nil,
+                compatibility: .init(),
+                validationMessages: [
+                    "Existing character does not carry persisted DHII engine state, so safe reprojection is unavailable."
+                ]
+            )
+        }
+
+        let previousDraft = creationDraft(from: existingCharacter)
+        let previousBaseline = previewStartingPackage(
+            for: previousDraft,
+            baseCharacter: reprojectableBaseCharacter(from: existingCharacter),
+            weaponCatalog: weaponCatalog,
+            armourCatalog: armourCatalog
+        )
+        guard let previousProjected = previousBaseline.projectedCharacter,
+              previousBaseline.validationMessages.isEmpty else {
+            return DHIICreationStartingPackagePreview(
+                projectedCharacter: nil,
+                projectedInfluence: previousBaseline.projectedInfluence,
+                compatibility: previousBaseline.compatibility,
+                validationMessages: [
+                    "Persisted DHII engine state could not be restored into a safe starting-package baseline."
+                ]
+            )
+        }
+
+        let updatedBaseline = previewStartingPackage(
+            for: draft,
+            baseCharacter: reprojectableBaseCharacter(from: existingCharacter),
+            weaponCatalog: weaponCatalog,
+            armourCatalog: armourCatalog
+        )
+        guard let updatedProjected = updatedBaseline.projectedCharacter,
+              updatedBaseline.validationMessages.isEmpty else {
+            return updatedBaseline
+        }
+
+        let merged = mergeExistingCharacterProgress(
+            existingCharacter,
+            previousBaseline: previousProjected,
+            newBaseline: updatedProjected
+        )
+        return DHIICreationStartingPackagePreview(
+            projectedCharacter: merged,
+            projectedInfluence: updatedBaseline.projectedInfluence,
+            compatibility: updatedBaseline.compatibility,
+            validationMessages: []
+        )
+    }
+
     private static func missingChoiceMessages(for draft: DHIICreationDraft) -> [String] {
         var messages: [String] = []
 
@@ -271,6 +331,232 @@ extension DHIICharacterCreationEngine {
         package.notes.specialAbilities = stableUniqueStrings(package.notes.specialAbilities)
         package.inventory = stableUniqueInventory(package.inventory)
         return package
+    }
+
+    private static func reprojectableBaseCharacter(from existingCharacter: Character) -> Character {
+        Character(
+            id: existingCharacter.id,
+            profile: Profile(
+                name: existingCharacter.profile.name,
+                description: existingCharacter.profile.description
+            ),
+            session: existingCharacter.session,
+            history: existingCharacter.history,
+            updatedAt: existingCharacter.updatedAt
+        )
+    }
+
+    private static func mergeExistingCharacterProgress(
+        _ existingCharacter: Character,
+        previousBaseline: Character,
+        newBaseline: Character
+    ) -> Character {
+        var merged = newBaseline
+        merged.profile.name = existingCharacter.profile.name
+        merged.profile.description = existingCharacter.profile.description
+        merged.characteristics = mergedCharacteristics(
+            existing: existingCharacter.characteristics,
+            previousBaseline: previousBaseline.characteristics,
+            newBaseline: newBaseline.characteristics
+        )
+        merged.resources = mergedResources(
+            existing: existingCharacter.resources,
+            newBaseline: newBaseline.resources
+        )
+        merged.skills = mergedSkills(
+            existing: existingCharacter.skills,
+            previousBaseline: previousBaseline.skills,
+            newBaseline: newBaseline.skills
+        )
+        merged.notes = mergedNotes(
+            existing: existingCharacter.notes,
+            previousBaseline: previousBaseline.notes,
+            newBaseline: newBaseline.notes
+        )
+        merged.equipment = mergedEquipment(
+            existing: existingCharacter.equipment,
+            previousBaseline: previousBaseline.equipment,
+            newBaseline: newBaseline.equipment
+        )
+        merged.session = existingCharacter.session
+        merged.history = existingCharacter.history
+        return merged
+    }
+
+    private static func mergedCharacteristics(
+        existing: CharacteristicSet,
+        previousBaseline: CharacteristicSet,
+        newBaseline: CharacteristicSet
+    ) -> CharacteristicSet {
+        CharacteristicSet(
+            weaponSkill: max(0, newBaseline.weaponSkill + (existing.weaponSkill - previousBaseline.weaponSkill)),
+            ballisticSkill: max(0, newBaseline.ballisticSkill + (existing.ballisticSkill - previousBaseline.ballisticSkill)),
+            strength: max(0, newBaseline.strength + (existing.strength - previousBaseline.strength)),
+            toughness: max(0, newBaseline.toughness + (existing.toughness - previousBaseline.toughness)),
+            agility: max(0, newBaseline.agility + (existing.agility - previousBaseline.agility)),
+            intelligence: max(0, newBaseline.intelligence + (existing.intelligence - previousBaseline.intelligence)),
+            perception: max(0, newBaseline.perception + (existing.perception - previousBaseline.perception)),
+            willpower: max(0, newBaseline.willpower + (existing.willpower - previousBaseline.willpower)),
+            fellowship: max(0, newBaseline.fellowship + (existing.fellowship - previousBaseline.fellowship))
+        )
+    }
+
+    private static func mergedResources(
+        existing: ResourceState,
+        newBaseline: ResourceState
+    ) -> ResourceState {
+        ResourceState(
+            currentWounds: min(existing.currentWounds, newBaseline.maxWounds),
+            maxWounds: newBaseline.maxWounds,
+            fatigue: existing.fatigue,
+            corruption: existing.corruption,
+            insanity: existing.insanity,
+            currentFate: min(existing.currentFate, newBaseline.maxFate),
+            maxFate: newBaseline.maxFate,
+            experienceSpent: existing.experienceSpent,
+            experienceTotal: existing.experienceTotal
+        )
+    }
+
+    private static func mergedSkills(
+        existing: [Skill],
+        previousBaseline: [Skill],
+        newBaseline: [Skill]
+    ) -> [Skill] {
+        let previousKeys = Set(previousBaseline.map(skillMergeKey(for:)))
+        let existingByKey = Dictionary(uniqueKeysWithValues: existing.map { (skillMergeKey(for: $0), $0) })
+        let newKeys = Set(newBaseline.map(skillMergeKey(for:)))
+
+        var merged: [Skill] = newBaseline.map { baseline in
+            guard let existingMatch = existingByKey[skillMergeKey(for: baseline)] else {
+                return baseline
+            }
+
+            var preserved = baseline
+            preserved.training = higherTrainingLevel(existingMatch.training, baseline.training)
+            preserved.specialisations = stableUniqueStrings(baseline.specialisations + existingMatch.specialisations)
+            return preserved
+        }
+
+        for skill in existing {
+            let key = skillMergeKey(for: skill)
+            let existedInPreviousBaseline = previousKeys.contains(key)
+            let existsInNewBaseline = newKeys.contains(key)
+            if existsInNewBaseline == false && existedInPreviousBaseline == false {
+                merged.append(skill)
+            }
+        }
+
+        return stableUniqueSkills(merged)
+    }
+
+    private static func mergedNotes(
+        existing: NotesState,
+        previousBaseline: NotesState,
+        newBaseline: NotesState
+    ) -> NotesState {
+        NotesState(
+            talents: stableUniqueStrings(newBaseline.talents + subtract(previousBaseline.talents, from: existing.talents)),
+            traits: stableUniqueStrings(newBaseline.traits + subtract(previousBaseline.traits, from: existing.traits)),
+            mutations: stableUniqueStrings(newBaseline.mutations + subtract(previousBaseline.mutations, from: existing.mutations)),
+            disorders: stableUniqueStrings(newBaseline.disorders + subtract(previousBaseline.disorders, from: existing.disorders)),
+            psychicPowers: stableUniqueStrings(newBaseline.psychicPowers + subtract(previousBaseline.psychicPowers, from: existing.psychicPowers)),
+            specialAbilities: stableUniqueStrings(newBaseline.specialAbilities + subtract(previousBaseline.specialAbilities, from: existing.specialAbilities)),
+            notes: existing.notes
+        )
+    }
+
+    private static func mergedEquipment(
+        existing: EquipmentState,
+        previousBaseline: EquipmentState,
+        newBaseline: EquipmentState
+    ) -> EquipmentState {
+        EquipmentState(
+            weapons: stableUniqueWeapons(
+                newBaseline.weapons + subtract(previousBaseline.weapons, from: existing.weapons, key: weaponMergeKey(for:))
+            ),
+            armour: stableUniqueArmour(
+                newBaseline.armour + subtract(previousBaseline.armour, from: existing.armour, key: armourMergeKey(for:))
+            ),
+            movement: newBaseline.movement,
+            inventory: stableUniqueInventory(
+                newBaseline.inventory + subtract(previousBaseline.inventory, from: existing.inventory, key: inventoryMergeKey(for:))
+            )
+        )
+    }
+
+    private static func skillMergeKey(for skill: Skill) -> String {
+        let specialisations = skill.specialisations.map(normalizedToken).sorted().joined(separator: "|")
+        return [
+            normalizedToken(skill.name),
+            skill.characteristic.rawValue,
+            specialisations
+        ].joined(separator: "::")
+    }
+
+    private static func weaponMergeKey(for weapon: Weapon) -> String {
+        [
+            normalizedToken(weapon.name),
+            normalizedToken(weapon.type),
+            normalizedToken(weapon.range),
+            normalizedToken(weapon.damage),
+            normalizedToken(weapon.penetration),
+            normalizedToken(weapon.clip),
+            normalizedToken(weapon.reload),
+            normalizedToken(weapon.traits)
+        ].joined(separator: "::")
+    }
+
+    private static func armourMergeKey(for armour: Armour) -> String {
+        "\(normalizedToken(armour.location))::\(armour.armourPoints)"
+    }
+
+    private static func inventoryMergeKey(for item: InventoryItem) -> String {
+        "\(normalizedToken(item.name))::\(item.quantity)::\(item.weight)"
+    }
+
+    private static func normalizedToken(_ value: String) -> String {
+        value
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+    }
+
+    private static func subtract(_ baseline: [String], from existing: [String]) -> [String] {
+        let baselineCounts = Dictionary(existingValues: baseline.map(normalizedToken))
+        var remainingCounts = baselineCounts
+        var extras: [String] = []
+
+        for value in existing {
+            let key = normalizedToken(value)
+            if let count = remainingCounts[key], count > 0 {
+                remainingCounts[key] = count - 1
+            } else {
+                extras.append(value)
+            }
+        }
+
+        return extras
+    }
+
+    private static func subtract<Element>(
+        _ baseline: [Element],
+        from existing: [Element],
+        key: (Element) -> String
+    ) -> [Element] {
+        let baselineCounts = Dictionary(existingValues: baseline.map(key))
+        var remainingCounts = baselineCounts
+        var extras: [Element] = []
+
+        for element in existing {
+            let elementKey = key(element)
+            if let count = remainingCounts[elementKey], count > 0 {
+                remainingCounts[elementKey] = count - 1
+            } else {
+                extras.append(element)
+            }
+        }
+
+        return extras
     }
 
     private static func projectedBackgroundSkills(
@@ -404,6 +690,28 @@ extension DHIICharacterCreationEngine {
         }
 
         _ = armourCatalog
+    }
+}
+
+private extension Dictionary where Key == String, Value == Int {
+    init(existingValues keys: [String]) {
+        self = keys.reduce(into: [:]) { partialResult, key in
+            partialResult[key, default: 0] += 1
+        }
+    }
+}
+
+private func higherTrainingLevel(_ lhs: SkillTrainingLevel, _ rhs: SkillTrainingLevel) -> SkillTrainingLevel {
+    trainingRank(lhs) >= trainingRank(rhs) ? lhs : rhs
+}
+
+private func trainingRank(_ level: SkillTrainingLevel) -> Int {
+    switch level {
+    case .untrained: 0
+    case .known: 1
+    case .trained: 2
+    case .experienced: 3
+    case .veteran: 4
     }
 }
 
@@ -565,6 +873,39 @@ private func stableUniqueInventory(_ items: [InventoryItem]) -> [InventoryItem] 
     var seen: Set<String> = []
     for item in items {
         let token = normalizedProjectionToken(item.name)
+        if seen.insert(token).inserted {
+            resolved.append(item)
+        }
+    }
+    return resolved
+}
+
+private func stableUniqueWeapons(_ weapons: [Weapon]) -> [Weapon] {
+    var resolved: [Weapon] = []
+    var seen: Set<String> = []
+    for weapon in weapons {
+        let token = [
+            normalizedProjectionToken(weapon.name),
+            normalizedProjectionToken(weapon.type),
+            normalizedProjectionToken(weapon.range),
+            normalizedProjectionToken(weapon.damage),
+            normalizedProjectionToken(weapon.penetration),
+            normalizedProjectionToken(weapon.clip),
+            normalizedProjectionToken(weapon.reload),
+            normalizedProjectionToken(weapon.traits)
+        ].joined(separator: "::")
+        if seen.insert(token).inserted {
+            resolved.append(weapon)
+        }
+    }
+    return resolved
+}
+
+private func stableUniqueArmour(_ armour: [Armour]) -> [Armour] {
+    var resolved: [Armour] = []
+    var seen: Set<String> = []
+    for item in armour {
+        let token = "\(normalizedProjectionToken(item.location))::\(item.armourPoints)"
         if seen.insert(token).inserted {
             resolved.append(item)
         }

@@ -1,5 +1,14 @@
 # Problems Found During Verification
 
+## 2026-04-18 — Guided DHII creation smoke needed compact-screen progression affordances
+
+- **Where:** `Sources/DHCharList/Presentation/Features/CharacterCreation/DHIICreationFlowScreen.swift` and `DHCharListHost/DHCharListHostUITests/DHCharListHostSmokeUITests.swift`
+- **Observed during:** focused `xcodebuild` reruns and the first full `make ci` passes around Task 08 stabilization
+- **Symptom:** the new guided DHII creation smoke was overly dependent on segmented-stage navigation and on-screen visibility of offscreen choice controls. Under simulator load, the flow could appear flaky even though the underlying draft/projection logic was correct.
+- **Root cause:** the first UI pass relied too much on a top segmented control and generic scrolling expectations for a long, multi-stage form. On compact screens, that was a weak readiness/interaction contract for both users and smoke tests.
+- **Classification:** verification/runtime UX hardening issue, not a DHII rules regression.
+- **Resolution:** added explicit stage-local progression buttons (`advance-to-choices`, `advance-to-characteristics`, `advance-to-review`), kept generic back/next affordances, and strengthened the host smoke to reveal the required controls before interaction. The final targeted guided-flow smoke and full `make ci` both passed.
+
 ## 2026-04-18 — Host UI smoke expectation drift
 
 - **Where:** `DHCharListHost/DHCharListHostUITests/DHCharListHostSmokeUITests.swift`

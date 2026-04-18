@@ -1040,6 +1040,93 @@ import Testing
     #expect(validatedStartingRoll(0, allowedRange: 1 ... 5) == nil)
 }
 
+@Test func reprojectingExistingEngineCharacterPreservesPlayerDeltasAndCustomEntries() throws {
+    let originalDraft = try fullyResolvedStartingPackageDraft(
+        name: "Veteran",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload",
+        startingWoundsRoll: 2,
+        startingFateRoll: 7
+    )
+    var existing = try #require(
+        DHIICharacterCreationEngine.previewStartingPackage(for: originalDraft).projectedCharacter
+    )
+    existing.profile.name = "Veteran Acolyte"
+    existing.profile.description = "Custom description"
+    existing.characteristics.weaponSkill += 5
+    existing.resources.currentWounds = 4
+    existing.resources.experienceSpent = 200
+    existing.resources.experienceTotal = 1_200
+    existing.skills = existing.skills.map { skill in
+        guard skill.name == "Athletics" else { return skill }
+        var upgraded = skill
+        upgraded.training = .trained
+        return upgraded
+    } + [Skill(name: "Awareness", characteristic: .perception, training: .trained)]
+    existing.notes.talents.append("Meditation")
+    existing.notes.notes = "Custom dossier note"
+    existing.equipment.inventory.append(.init(name: "Field Kit", quantity: 1))
+
+    let updatedDraft = originalDraft
+        .settingHomeWorld(.forgeWorld)
+        .settingHomeWorldTalentChoice("Weapon-Tech")
+    let updatedBaseline = try #require(
+        DHIICharacterCreationEngine.previewStartingPackage(for: updatedDraft).projectedCharacter
+    )
+
+    let reprojection = DHIICharacterCreationEngine.reprojectExistingCharacter(existing, with: updatedDraft)
+    let projected = try #require(reprojection.projectedCharacter)
+
+    #expect(reprojection.isValid)
+    #expect(projected.profile.name == "Veteran Acolyte")
+    #expect(projected.profile.description == "Custom description")
+    #expect(projected.profile.homeWorld == "Forge World")
+    #expect(projected.profile.background == "Imperial Guard")
+    #expect(projected.characteristics.weaponSkill == updatedBaseline.characteristics.weaponSkill + 5)
+    #expect(projected.resources.currentWounds == 4)
+    #expect(projected.resources.maxWounds == updatedBaseline.resources.maxWounds)
+    #expect(projected.resources.experienceSpent == 200)
+    #expect(projected.resources.experienceTotal == 1_200)
+    #expect(projected.skills.contains {
+        $0.name == "Athletics" && $0.training == .trained
+    })
+    #expect(projected.skills.contains {
+        $0.name == "Awareness" && $0.training == .trained
+    })
+    #expect(projected.notes.talents.contains("Meditation"))
+    #expect(projected.notes.notes == "Custom dossier note")
+    #expect(projected.equipment.inventory.contains { $0.name == "Field Kit" && $0.quantity == 1 })
+    #expect(projected.dhiiEngineState == DHIICharacterCreationEngine.persistedEngineState(for: updatedDraft))
+}
+
+@Test func reprojectingExistingCharacterRequiresPersistedEngineState() throws {
+    let updatedDraft = try fullyResolvedStartingPackageDraft(
+        name: "Missing State",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload"
+    )
+
+    let preview = DHIICharacterCreationEngine.reprojectExistingCharacter(
+        Character(profile: Profile(name: "Legacy Only")),
+        with: updatedDraft
+    )
+
+    #expect(preview.projectedCharacter == nil)
+    #expect(preview.validationMessages == [
+        "Existing character does not carry persisted DHII engine state, so safe reprojection is unavailable."
+    ])
+}
+
 private func fullyResolvedStartingPackageDraft(
     name: String,
     homeWorld: String,

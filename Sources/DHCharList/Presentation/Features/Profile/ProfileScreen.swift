@@ -18,21 +18,39 @@ struct ProfileScreen: View {
 
     public var body: some View {
         Form {
+            if isEngineBackedProfile {
+                Section {
+                    Text("Home world, background, and role are managed by the DHII Engine for this character. Revise those choices from the DHII Creation flow to keep the persisted engine state and projected profile aligned.")
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+                } header: {
+                    CogitatorSectionHeader("Engine-backed Origin", subtitle: "Read-only Here")
+                }
+            }
+
             Section {
                 TextField("Name", text: $draft.name)
                     .accessibilityLabel("Character Name")
                     .cogitatorPanelRow()
                 TextField("Home world", text: $draft.homeWorld)
                     .accessibilityLabel("Home World")
+                    .disabled(isEngineBackedProfile)
                     .cogitatorPanelRow()
                 TextField("Background", text: $draft.background)
                     .accessibilityLabel("Background")
+                    .disabled(isEngineBackedProfile)
                     .cogitatorPanelRow()
                 TextField("Role", text: $draft.role)
                     .accessibilityLabel("Role")
+                    .disabled(isEngineBackedProfile)
                     .cogitatorPanelRow()
             } header: {
                 CogitatorSectionHeader("Identity", subtitle: "Primary Dossier Fields")
+            } footer: {
+                if isEngineBackedProfile {
+                    Text("These origin fields mirror the current DHII Engine projection. Use the dedicated DHII Creation flow from the character detail screen to edit canonical selections.")
+                        .cogitatorSupportingText()
+                }
             }
 
             if let homeWorldPreview = DHIICharacterCreationEngine.previewHomeWorldSelection(rawValue: draft.homeWorld) {
@@ -246,6 +264,10 @@ struct ProfileScreen: View {
             || composition.effectiveAptitudes.isEmpty == false
             || composition.unresolvedChoices.isEmpty == false
             || composition.compatibility.contextualMessages.isEmpty == false
+    }
+
+    private var isEngineBackedProfile: Bool {
+        viewModel.character(by: characterID)?.dhiiEngineState?.creation != nil
     }
 }
 #endif

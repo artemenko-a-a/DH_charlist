@@ -428,7 +428,7 @@ struct XPSpendScreen: View {
             }
 
             let entry = SkillAdvanceCatalogRegistry.entry(for: selectedSkill, targetTraining: targetTraining)
-            setXPSpendCost(entry.defaultCost(for: character.profile.aptitudes) ?? 0)
+            setXPSpendCost(entry.defaultCost(for: character) ?? 0)
         }
     }
 

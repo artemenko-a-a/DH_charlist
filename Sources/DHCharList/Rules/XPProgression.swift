@@ -337,13 +337,25 @@ enum XPProgressionResolver {
 
         case .requiredAptitude(let aptitude):
             let required = aptitude.trimmedOrPlaceholder("Unnamed Aptitude")
-            let hasAptitude = character.profile.aptitudes.contains {
+            let composition = DHIICharacterCreationEngine.composeAptitudes(for: character.profile)
+            let hasEngineAptitude = composition.resolvedAptitudes.contains {
+                normalizedProgressionToken($0) == normalizedProgressionToken(required)
+            }
+            let hasAptitude = composition.effectiveAptitudes.contains {
                 normalizedProgressionToken($0) == normalizedProgressionToken(required)
             }
             return XPPrerequisiteEvaluation(
                 prerequisite: prerequisite,
                 isSatisfied: hasAptitude,
-                detail: hasAptitude ? "Character already has \(required)." : "\(required) is not listed on the profile."
+                detail: {
+                    if hasEngineAptitude {
+                        return "Character already has \(required) via DHII creation composition."
+                    }
+                    if hasAptitude {
+                        return "Character already has \(required)."
+                    }
+                    return "\(required) is not present in DHII creation composition or listed on the profile."
+                }()
             )
 
         case .requiredTalent(let talent):

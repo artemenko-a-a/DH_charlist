@@ -106,3 +106,84 @@ import Testing
     #expect(Set(definitions.map(\.id)).count == definitions.count)
     #expect(Set(definitions.map(\.displayName)).count == definitions.count)
 }
+
+@Test func rolePreviewResolvesCanonicalNamesAndAliases() {
+    let seeker = try! #require(
+        DHIICharacterCreationEngine.previewRoleSelection(
+            rawValue: " seeker ",
+            backgroundRawValue: "Adeptus Administratum"
+        )
+    )
+    let mystic = try! #require(
+        DHIICharacterCreationEngine.previewRoleSelection(
+            rawValue: "Mystic",
+            backgroundRawValue: "Adeptus Astra Telepathica"
+        )
+    )
+
+    #expect(seeker.definition.id == .seeker)
+    #expect(seeker.definition.displayName == "Seeker")
+    #expect(seeker.compatibility.contextualMessages.contains("Current background preview recommends this role."))
+
+    #expect(mystic.definition.id == .mystic)
+    #expect(DHIICharacterCreationEngine.previewRoleSelection(rawValue: "Unknown Role") == nil)
+}
+
+@Test func mysticRolePreviewCarriesRulebookBackedPackageSummary() {
+    let preview = try! #require(DHIICharacterCreationEngine.previewRoleSelection(rawValue: "Mystic"))
+
+    #expect(preview.definition.aptitudeSummary == "Defence, Intelligence, Knowledge, Perception, Willpower")
+    #expect(preview.definition.roleTalentChoiceSummary == "Resistance (Psychic Powers) or Warp Sense")
+    #expect(preview.definition.roleBonus.name == "Stare into the Warp")
+    #expect(preview.definition.roleBonus.summary.contains("Psyker elite advance"))
+    #expect(preview.compatibility.unsupportedRuleKeys.contains("psyker_elite_advance_hook"))
+    #expect(preview.compatibility.warningMessages.contains { $0.contains("Psyker elite advance") })
+}
+
+@Test func canonicalRoleCatalogStaysCompleteAndUnique() {
+    let definitions = DHIICharacterCreationEngine.canonicalRoles
+
+    #expect(definitions.count == 8)
+    #expect(Set(definitions.map(\.id)).count == definitions.count)
+    #expect(Set(definitions.map(\.displayName)).count == definitions.count)
+}
+
+@Test func aptitudeCompositionUsesCanonicalSelectionsAndLegacyFallbackForChoiceSlots() {
+    let profile = Profile(
+        name: "Resolver",
+        homeWorld: "Hive World",
+        background: "Adeptus Administratum",
+        role: "Seeker",
+        aptitudes: ["Knowledge"],
+        description: ""
+    )
+
+    let composition = DHIICharacterCreationEngine.composeAptitudes(for: profile)
+
+    #expect(composition.resolvedAptitudes == ["Perception", "Knowledge", "Fellowship", "Intelligence", "Social", "Tech"])
+    #expect(composition.effectiveAptitudes == ["Perception", "Knowledge", "Fellowship", "Intelligence", "Social", "Tech"])
+    #expect(composition.isFullyResolved)
+    #expect(composition.unresolvedChoices.isEmpty)
+    #expect(composition.compatibility.warningMessages.isEmpty)
+}
+
+@Test func aptitudeCompositionFlagsUnresolvedChoiceSlotsWhenSelectionsNeedTypedChoices() {
+    let profile = Profile(
+        name: "Partial",
+        homeWorld: "Hive World",
+        background: "Adeptus Administratum",
+        role: "Assassin",
+        aptitudes: [],
+        description: ""
+    )
+
+    let composition = DHIICharacterCreationEngine.composeAptitudes(for: profile)
+
+    #expect(composition.resolvedAptitudes == ["Perception", "Agility", "Fieldcraft", "Finesse"])
+    #expect(composition.effectiveAptitudes == ["Perception", "Agility", "Fieldcraft", "Finesse"])
+    #expect(composition.isFullyResolved == false)
+    #expect(composition.unresolvedChoices.count == 2)
+    #expect(composition.unresolvedChoices.contains { $0.contains("Adeptus Administratum") })
+    #expect(composition.unresolvedChoices.contains { $0.contains("Assassin") })
+    #expect(composition.compatibility.warningMessages.count == 2)
+}

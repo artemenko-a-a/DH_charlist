@@ -80,6 +80,22 @@ import Testing
     #expect(skillEntry.source == "Bounded Advance Registry")
 }
 
+@Test func skillAdvanceDefaultCostCanReadEngineBackedEffectiveAptitudes() {
+    let awareness = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let skillEntry = SkillAdvanceCatalogRegistry.entry(for: awareness, targetTraining: .veteran)
+    let character = Character(
+        profile: Profile(
+            name: "Catalog",
+            homeWorld: "Hive World",
+            background: "Imperial Guard",
+            role: "Warrior",
+            aptitudes: ["Fieldcraft"]
+        )
+    )
+
+    #expect(skillEntry.defaultCost(for: character) == 400)
+}
+
 @Test func weaponMetadataRegistriesResolveTypesAndTraitsForCombatContext() {
     let weapon = Weapon(
         name: "Chainsword",

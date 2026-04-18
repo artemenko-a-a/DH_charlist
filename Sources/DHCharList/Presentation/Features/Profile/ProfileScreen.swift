@@ -120,6 +120,82 @@ struct ProfileScreen: View {
                 }
             }
 
+            if let rolePreview = DHIICharacterCreationEngine.previewRoleSelection(
+                rawValue: draft.role,
+                backgroundRawValue: draft.background
+            ) {
+                Section {
+                    LabeledContent("Canonical role", value: rolePreview.definition.displayName)
+                        .cogitatorPanelRow()
+                    LabeledContent("Role Aptitudes", value: rolePreview.definition.aptitudeSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Role talents", value: rolePreview.definition.roleTalentChoiceSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Role Bonus", value: rolePreview.definition.roleBonus.name)
+                        .cogitatorPanelRow()
+
+                    Text(rolePreview.definition.roleBonus.summary)
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+
+                    ForEach(rolePreview.compatibility.contextualMessages, id: \.self) { message in
+                        Text(message)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+
+                    ForEach(rolePreview.compatibility.warningMessages, id: \.self) { warning in
+                        Text(warning)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+                } header: {
+                    CogitatorSectionHeader("DHII Role", subtitle: "Rulebook-backed Preview")
+                } footer: {
+                    Text("This preview is informational only. Typed role choices, role bonus hooks, and creation-time elite advances land in later DHII Engine phases.")
+                        .cogitatorSupportingText()
+                }
+            }
+
+            if shouldShowAptitudeComposition {
+                let composition = DHIICharacterCreationEngine.composeAptitudes(for: draft)
+
+                Section {
+                    if composition.resolvedAptitudes.isEmpty == false {
+                        LabeledContent("Engine-resolved", value: composition.resolvedAptitudes.joined(separator: ", "))
+                            .cogitatorPanelRow()
+                    }
+
+                    if composition.effectiveAptitudes.isEmpty == false {
+                        LabeledContent("Effective Aptitudes", value: composition.effectiveAptitudes.joined(separator: ", "))
+                            .cogitatorPanelRow()
+                    }
+
+                    if composition.legacyFallbackAptitudes.isEmpty == false {
+                        Text("Legacy profile fallback: \(composition.legacyFallbackAptitudes.joined(separator: ", "))")
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+
+                    ForEach(composition.unresolvedChoices, id: \.self) { warning in
+                        Text(warning)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+
+                    ForEach(composition.compatibility.contextualMessages, id: \.self) { message in
+                        Text(message)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+                } header: {
+                    CogitatorSectionHeader("DHII Aptitudes", subtitle: "Composed Creation Preview")
+                } footer: {
+                    Text("Fixed DHII package aptitudes are composed automatically here. Choice-driven aptitude slots still require a later typed creation state, so unresolved slots remain explicit until that engine phase lands.")
+                        .cogitatorSupportingText()
+                }
+            }
+
             Section {
                 TextField("Description", text: $draft.description, axis: .vertical)
                     .lineLimit(3...6)
@@ -151,6 +227,24 @@ struct ProfileScreen: View {
                 }
             }
         }
+    }
+
+    private var shouldShowAptitudeComposition: Bool {
+        let draftHasCreationInput =
+            draft.homeWorld.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            || draft.background.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            || draft.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            || draft.aptitudes.isEmpty == false
+
+        guard draftHasCreationInput else {
+            return false
+        }
+
+        let composition = DHIICharacterCreationEngine.composeAptitudes(for: draft)
+        return composition.resolvedAptitudes.isEmpty == false
+            || composition.effectiveAptitudes.isEmpty == false
+            || composition.unresolvedChoices.isEmpty == false
+            || composition.compatibility.contextualMessages.isEmpty == false
     }
 }
 #endif

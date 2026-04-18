@@ -214,6 +214,11 @@ struct SkillAdvanceCatalogEntry: Identifiable, Equatable, Sendable {
         }
     }
 
+    func defaultCost(for character: Character) -> Int? {
+        let effectiveAptitudes = DHIICharacterCreationEngine.composeAptitudes(for: character.profile).effectiveAptitudes
+        return defaultCost(for: effectiveAptitudes)
+    }
+
     func makeAdvance(
         skill: Skill,
         costOverride: Int? = nil,

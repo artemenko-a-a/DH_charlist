@@ -171,6 +171,78 @@ struct DHIIBackgroundPreview: Equatable, Sendable {
     let compatibility: DHIICharacterModelCompatibilityReport
 }
 
+struct DHIIRoleBonusRule: Equatable, Sendable {
+    let name: String
+    let summary: String
+}
+
+enum DHIIRoleID: String, CaseIterable, Codable, Sendable {
+    case assassin
+    case chirurgeon
+    case desperado
+    case hierophant
+    case mystic
+    case sage
+    case seeker
+    case warrior
+
+    var displayName: String {
+        switch self {
+        case .assassin: "Assassin"
+        case .chirurgeon: "Chirurgeon"
+        case .desperado: "Desperado"
+        case .hierophant: "Hierophant"
+        case .mystic: "Mystic"
+        case .sage: "Sage"
+        case .seeker: "Seeker"
+        case .warrior: "Warrior"
+        }
+    }
+}
+
+enum DHIIRoleAptitudeRule: Equatable, Sendable {
+    case fixed(String)
+    case choice(String, String)
+
+    var summary: String {
+        switch self {
+        case .fixed(let aptitude):
+            aptitude
+        case .choice(let first, let second):
+            "\(first) or \(second)"
+        }
+    }
+}
+
+struct DHIIRoleDefinition: Identifiable, Equatable, Sendable {
+    let id: DHIIRoleID
+    let aliases: [String]
+    let aptitudeRules: [DHIIRoleAptitudeRule]
+    let roleTalentChoices: [String]
+    let roleBonus: DHIIRoleBonusRule
+    let unsupportedProjectionRuleKeys: [String]
+    let sourceCitation: String
+
+    var displayName: String { id.displayName }
+    var aptitudeSummary: String { aptitudeRules.map(\.summary).joined(separator: ", ") }
+    var roleTalentChoiceSummary: String { roleTalentChoices.joined(separator: " or ") }
+}
+
+struct DHIIRolePreview: Equatable, Sendable {
+    let definition: DHIIRoleDefinition
+    let compatibility: DHIICharacterModelCompatibilityReport
+}
+
+struct DHIIAptitudeComposition: Equatable, Sendable {
+    let resolvedAptitudes: [String]
+    let effectiveAptitudes: [String]
+    let legacyFallbackAptitudes: [String]
+    let unresolvedChoices: [String]
+    let compatibility: DHIICharacterModelCompatibilityReport
+
+    var isFullyResolved: Bool { unresolvedChoices.isEmpty }
+}
+
 enum DHIICharacterCreationEngine {
     static let backgroundCreationNotes: [String] = [
         "Starting skills from a background are gained at Known (+0).",
@@ -488,6 +560,153 @@ enum DHIICharacterCreationEngine {
         )
     ]
 
+    static let canonicalRoles: [DHIIRoleDefinition] = [
+        DHIIRoleDefinition(
+            id: .assassin,
+            aliases: ["Assassin"],
+            aptitudeRules: [
+                .fixed("Agility"),
+                .choice("Ballistic Skill", "Weapon Skill"),
+                .fixed("Fieldcraft"),
+                .fixed("Finesse"),
+                .fixed("Perception")
+            ],
+            roleTalentChoices: ["Jaded", "Leap Up"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Sure Kill",
+                summary: "After a successful hit, the character can spend a Fate point to add the attack roll's degrees of success to the damage of the first hit."
+            ),
+            unsupportedProjectionRuleKeys: ["aptitude_choice_provenance", "role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 58-59"
+        ),
+        DHIIRoleDefinition(
+            id: .chirurgeon,
+            aliases: ["Chirurgeon"],
+            aptitudeRules: [
+                .fixed("Fieldcraft"),
+                .fixed("Intelligence"),
+                .fixed("Knowledge"),
+                .fixed("Strength"),
+                .fixed("Toughness")
+            ],
+            roleTalentChoices: ["Resistance (Pick One)", "Takedown"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Dedicated Healer",
+                summary: "After failing a First Aid test, the character can spend a Fate point to automatically succeed with degrees of success equal to Intelligence bonus."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 59"
+        ),
+        DHIIRoleDefinition(
+            id: .desperado,
+            aliases: ["Desperado"],
+            aptitudeRules: [
+                .fixed("Agility"),
+                .fixed("Ballistic Skill"),
+                .fixed("Defence"),
+                .fixed("Fellowship"),
+                .fixed("Finesse")
+            ],
+            roleTalentChoices: ["Catfall", "Quick Draw"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Move and Shoot",
+                summary: "Once per round, after a Move action, the character can make a Standard Attack with a wielded pistol as a Free Action."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 60"
+        ),
+        DHIIRoleDefinition(
+            id: .hierophant,
+            aliases: ["Hierophant"],
+            aptitudeRules: [
+                .fixed("Fellowship"),
+                .fixed("Offence"),
+                .fixed("Social"),
+                .fixed("Toughness"),
+                .fixed("Willpower")
+            ],
+            roleTalentChoices: ["Double Team", "Hatred (Pick One)"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Sway the Masses",
+                summary: "The character can spend a Fate point to automatically succeed at Charm, Command, or Intimidate with degrees of success equal to Willpower bonus."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 61"
+        ),
+        DHIIRoleDefinition(
+            id: .mystic,
+            aliases: ["Mystic"],
+            aptitudeRules: [
+                .fixed("Defence"),
+                .fixed("Intelligence"),
+                .fixed("Knowledge"),
+                .fixed("Perception"),
+                .fixed("Willpower")
+            ],
+            roleTalentChoices: ["Resistance (Psychic Powers)", "Warp Sense"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Stare into the Warp",
+                summary: "The character starts with the Psyker elite advance; the rulebook also recommends Willpower 35+ for this role."
+            ),
+            unsupportedProjectionRuleKeys: ["psyker_elite_advance_hook", "role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 62"
+        ),
+        DHIIRoleDefinition(
+            id: .sage,
+            aliases: ["Sage"],
+            aptitudeRules: [
+                .fixed("Intelligence"),
+                .fixed("Knowledge"),
+                .fixed("Perception"),
+                .fixed("Tech"),
+                .fixed("Willpower")
+            ],
+            roleTalentChoices: ["Ambidextrous", "Clues from the Crowds"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Quest for Knowledge",
+                summary: "The character can spend a Fate point to automatically succeed at Logic or any Lore test with degrees of success equal to Intelligence bonus."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 63"
+        ),
+        DHIIRoleDefinition(
+            id: .seeker,
+            aliases: ["Seeker"],
+            aptitudeRules: [
+                .fixed("Fellowship"),
+                .fixed("Intelligence"),
+                .fixed("Perception"),
+                .fixed("Social"),
+                .fixed("Tech")
+            ],
+            roleTalentChoices: ["Keen Intuition", "Disarm"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Nothing Escapes My Sight",
+                summary: "The character can spend a Fate point to automatically succeed at Awareness or Inquiry with degrees of success equal to Perception bonus."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 64"
+        ),
+        DHIIRoleDefinition(
+            id: .warrior,
+            aliases: ["Warrior"],
+            aptitudeRules: [
+                .fixed("Ballistic Skill"),
+                .fixed("Defence"),
+                .fixed("Offence"),
+                .fixed("Strength"),
+                .fixed("Weapon Skill")
+            ],
+            roleTalentChoices: ["Iron Jaw", "Rapid Reload"],
+            roleBonus: DHIIRoleBonusRule(
+                name: "Expert at Violence",
+                summary: "After a successful attack and before hits are determined, the character can spend a Fate point to replace attack-roll degrees of success with Weapon Skill bonus or Ballistic Skill bonus."
+            ),
+            unsupportedProjectionRuleKeys: ["role_talent_choice", "role_bonus_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook p. 65"
+        )
+    ]
+
     static func canonicalHomeWorld(for rawValue: String) -> DHIIHomeWorldDefinition? {
         let normalized = normalizedCatalogToken(rawValue)
         guard normalized != nil else {
@@ -508,6 +727,19 @@ enum DHIICharacterCreationEngine {
         }
 
         return canonicalBackgrounds.first { definition in
+            definition.aliases.contains { alias in
+                normalizedCatalogToken(alias) == normalized
+            } || normalizedCatalogToken(definition.displayName) == normalized
+        }
+    }
+
+    static func canonicalRole(for rawValue: String) -> DHIIRoleDefinition? {
+        let normalized = normalizedCatalogToken(rawValue)
+        guard normalized != nil else {
+            return nil
+        }
+
+        return canonicalRoles.first { definition in
             definition.aliases.contains { alias in
                 normalizedCatalogToken(alias) == normalized
             } || normalizedCatalogToken(definition.displayName) == normalized
@@ -536,6 +768,89 @@ enum DHIICharacterCreationEngine {
         return DHIIBackgroundPreview(
             definition: definition,
             compatibility: compatibilityReport(for: definition, homeWorldRawValue: homeWorldRawValue)
+        )
+    }
+
+    static func previewRoleSelection(
+        rawValue: String,
+        backgroundRawValue: String? = nil
+    ) -> DHIIRolePreview? {
+        guard let definition = canonicalRole(for: rawValue) else {
+            return nil
+        }
+
+        return DHIIRolePreview(
+            definition: definition,
+            compatibility: compatibilityReport(for: definition, backgroundRawValue: backgroundRawValue)
+        )
+    }
+
+    static func composeAptitudes(for profile: Profile) -> DHIIAptitudeComposition {
+        let legacyAptitudes = sanitizedLegacyAptitudes(from: profile.aptitudes)
+        var resolvedAptitudes: [String] = []
+        var unresolvedChoices: [String] = []
+        var unsupportedRuleKeys: [String] = []
+        var contextualMessages: [String] = []
+
+        if let homeWorld = canonicalHomeWorld(for: profile.homeWorld) {
+            appendAptitude(homeWorld.aptitude, into: &resolvedAptitudes)
+        } else if profile.homeWorld.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            contextualMessages.append("Home world is not yet a canonical DHII selection, so its aptitude could not be composed.")
+        }
+
+        if let background = canonicalBackground(for: profile.background) {
+            switch resolveChoice(
+                options: background.aptitudeOptions,
+                using: legacyAptitudes
+            ) {
+            case .resolved(let aptitude):
+                appendAptitude(aptitude, into: &resolvedAptitudes)
+            case .unresolved(let message):
+                unresolvedChoices.append("\(background.displayName): \(message)")
+                unsupportedRuleKeys.append("background_aptitude_choice")
+            case .notApplicable:
+                break
+            }
+        } else if profile.background.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            contextualMessages.append("Background is not yet a canonical DHII selection, so its aptitude choice could not be composed.")
+        }
+
+        if let role = canonicalRole(for: profile.role) {
+            for rule in role.aptitudeRules {
+                switch rule {
+                case .fixed(let aptitude):
+                    appendAptitude(aptitude, into: &resolvedAptitudes)
+                case .choice(let first, let second):
+                    switch resolveChoice(options: [first, second], using: legacyAptitudes) {
+                    case .resolved(let aptitude):
+                        appendAptitude(aptitude, into: &resolvedAptitudes)
+                    case .unresolved(let message):
+                        unresolvedChoices.append("\(role.displayName): \(message)")
+                        unsupportedRuleKeys.append("role_aptitude_choice")
+                    case .notApplicable:
+                        break
+                    }
+                }
+            }
+        } else if profile.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+            contextualMessages.append("Role is not yet a canonical DHII selection, so its aptitudes could not be composed.")
+        }
+
+        let effectiveAptitudes = stableUniqueAptitudes(resolvedAptitudes + legacyAptitudes)
+        let legacyFallbackAptitudes = effectiveAptitudes.filter { aptitude in
+            resolvedAptitudes.contains { normalizedCatalogToken($0) == normalizedCatalogToken(aptitude) } == false
+        }
+
+        return DHIIAptitudeComposition(
+            resolvedAptitudes: resolvedAptitudes,
+            effectiveAptitudes: effectiveAptitudes,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unresolvedChoices: unresolvedChoices,
+            compatibility: DHIICharacterModelCompatibilityReport(
+                unsupportedRuleKeys: unsupportedRuleKeys,
+                warningMessages: unresolvedChoices,
+                contextualMessages: contextualMessages
+            )
         )
     }
 
@@ -584,6 +899,31 @@ enum DHIICharacterCreationEngine {
         )
     }
 
+    static func compatibilityReport(
+        for definition: DHIIRoleDefinition,
+        backgroundRawValue: String?
+    ) -> DHIICharacterModelCompatibilityReport {
+        let warningMessages = definition.unsupportedProjectionRuleKeys.map { ruleKey in
+            roleProjectionWarning(for: ruleKey, definition: definition)
+        }
+
+        var contextualMessages: [String] = []
+        if let backgroundRawValue,
+           let background = canonicalBackground(for: backgroundRawValue) {
+            if background.recommendedRoles.contains(definition.displayName) {
+                contextualMessages.append("Current background preview recommends this role.")
+            } else {
+                contextualMessages.append("Current background preview does not list this among its recommended roles.")
+            }
+        }
+
+        return DHIICharacterModelCompatibilityReport(
+            unsupportedRuleKeys: definition.unsupportedProjectionRuleKeys,
+            warningMessages: warningMessages,
+            contextualMessages: contextualMessages
+        )
+    }
+
     static func backgroundProjectionWarning(
         for ruleKey: String,
         definition: DHIIBackgroundDefinition
@@ -611,6 +951,24 @@ enum DHIICharacterCreationEngine {
             "\(definition.displayName) includes a creation rule the current engine does not yet project safely."
         }
     }
+
+    static func roleProjectionWarning(
+        for ruleKey: String,
+        definition: DHIIRoleDefinition
+    ) -> String {
+        switch ruleKey {
+        case "aptitude_choice_provenance":
+            "\(definition.displayName) contains an aptitude choice slot, but the current engine does not yet persist typed role-choice provenance."
+        case "role_talent_choice":
+            "\(definition.displayName) grants a role-talent choice, but the current engine does not yet project role-talent selection state."
+        case "role_bonus_hook":
+            "\(definition.displayName) grants a role bonus, but the current engine does not yet project that Fate- or combat-hook into the saved character model."
+        case "psyker_elite_advance_hook":
+            "\(definition.displayName) starts with the Psyker elite advance, but the current engine does not yet project that creation-time hook."
+        default:
+            "\(definition.displayName) includes a role rule the current engine does not yet project safely."
+        }
+    }
 }
 
 private func normalizedCatalogToken(_ value: String) -> String? {
@@ -630,4 +988,63 @@ private func normalizedCatalogToken(_ value: String) -> String? {
         .split(separator: "-", omittingEmptySubsequences: true)
         .joined(separator: "-")
     return normalized.isEmpty ? nil : normalized
+}
+
+private enum DHIICanonicalChoiceResolution {
+    case resolved(String)
+    case unresolved(String)
+    case notApplicable
+}
+
+private func resolveChoice(
+    options: [String],
+    using legacyAptitudes: [String]
+) -> DHIICanonicalChoiceResolution {
+    guard options.isEmpty == false else {
+        return .notApplicable
+    }
+
+    let normalizedLegacy = Set(legacyAptitudes.compactMap(normalizedCatalogToken))
+    let matchingOptions = options.filter { option in
+        guard let normalizedOption = normalizedCatalogToken(option) else {
+            return false
+        }
+        return normalizedLegacy.contains(normalizedOption)
+    }
+
+    switch matchingOptions.count {
+    case 1:
+        return .resolved(matchingOptions[0])
+    case let count where count > 1:
+        return .unresolved("multiple legacy aptitudes match the available choice slot (\(options.joined(separator: " or "))).")
+    default:
+        return .unresolved("requires an explicit aptitude choice (\(options.joined(separator: " or "))) that the current typed creation state does not yet store.")
+    }
+}
+
+private func appendAptitude(_ aptitude: String, into aptitudes: inout [String]) {
+    guard let normalized = normalizedCatalogToken(aptitude) else {
+        return
+    }
+
+    if aptitudes.contains(where: { normalizedCatalogToken($0) == normalized }) == false {
+        aptitudes.append(aptitude)
+    }
+}
+
+private func stableUniqueAptitudes(_ aptitudes: [String]) -> [String] {
+    var resolved: [String] = []
+    for aptitude in aptitudes {
+        appendAptitude(aptitude, into: &resolved)
+    }
+    return resolved
+}
+
+private func sanitizedLegacyAptitudes(from aptitudes: [String]) -> [String] {
+    stableUniqueAptitudes(
+        aptitudes.compactMap { aptitude in
+            let trimmed = aptitude.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }
+    )
 }

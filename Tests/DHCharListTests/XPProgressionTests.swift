@@ -444,6 +444,31 @@ import Testing
     #expect(result.breakdown.prerequisiteEvaluations[7].detail == "tech use is currently Veteran.")
 }
 
+@Test func requiredAptitudeUsesEngineBackedCompositionBeforeRawProfileFallback() {
+    var character = progressionSampleCharacter(name: "Engine Aptitudes")
+    character.profile.homeWorld = "Hive World"
+    character.profile.background = "Adeptus Administratum"
+    character.profile.role = "Seeker"
+    character.profile.aptitudes = ["Knowledge"]
+
+    let result = XPProgressionResolver.validate(
+        XPSpendRequest(
+            character: character,
+            upgrade: .characteristicAdvance(
+                CharacteristicAdvance(
+                    characteristic: .fellowship,
+                    delta: 5,
+                    cost: 50,
+                    prerequisites: [.requiredAptitude("Tech")]
+                )
+            )
+        )
+    )
+
+    #expect(result.isValid)
+    #expect(result.breakdown.prerequisiteEvaluations[1].detail == "Character already has Tech via DHII creation composition.")
+}
+
 @Test func characteristicAdvanceCanApplyAcrossAllCharacteristics() {
     let character = progressionSampleCharacter(name: "All Characteristics")
     let expectations: [(SkillCharacteristic, KeyPath<CharacteristicSet, Int>)] = [

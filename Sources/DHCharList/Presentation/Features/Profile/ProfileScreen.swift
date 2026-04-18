@@ -72,6 +72,54 @@ struct ProfileScreen: View {
                 }
             }
 
+            if let backgroundPreview = DHIICharacterCreationEngine.previewBackgroundSelection(
+                rawValue: draft.background,
+                homeWorldRawValue: draft.homeWorld
+            ) {
+                Section {
+                    LabeledContent("Canonical background", value: backgroundPreview.definition.displayName)
+                        .cogitatorPanelRow()
+                    LabeledContent("Background Aptitude", value: backgroundPreview.definition.aptitudeSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Starting skills", value: backgroundPreview.definition.startingSkillSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Starting talents", value: backgroundPreview.definition.startingTalentSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Starting traits", value: backgroundPreview.definition.startingTraitSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Starting equipment", value: backgroundPreview.definition.startingEquipmentSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Background Bonus", value: backgroundPreview.definition.backgroundBonus.name)
+                        .cogitatorPanelRow()
+
+                    Text(backgroundPreview.definition.backgroundBonus.summary)
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+
+                    LabeledContent("Recommended roles", value: backgroundPreview.definition.recommendedRoleSummary)
+                        .cogitatorPanelRow()
+
+                    ForEach(backgroundPreview.compatibility.contextualMessages, id: \.self) { message in
+                        Text(message)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+
+                    ForEach(backgroundPreview.compatibility.warningMessages, id: \.self) { warning in
+                        Text(warning)
+                            .cogitatorSupportingText()
+                            .cogitatorPanelRow()
+                    }
+                } header: {
+                    CogitatorSectionHeader("DHII Background", subtitle: "Rulebook-backed Preview")
+                } footer: {
+                    Text(([
+                        "This preview is informational only. Background package application, role composition, and creation-time branching choices land in later DHII Engine phases."
+                    ] + DHIICharacterCreationEngine.backgroundCreationNotes).joined(separator: " "))
+                        .cogitatorSupportingText()
+                }
+            }
+
             Section {
                 TextField("Description", text: $draft.description, axis: .vertical)
                     .lineLimit(3...6)

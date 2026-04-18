@@ -168,7 +168,7 @@
   - compatibility diagnostics tests
   - full Swift/web regression gates
 - Manual validation: none
-- Status: in progress
+- Status: completed
 
 ### T02 — Background catalog foundation
 - Description: Add canonical background identifiers, package metadata, and compatibility diagnostics.
@@ -182,7 +182,7 @@
   - alias recognition
   - package summary assertions
 - Manual validation: none
-- Status: pending
+- Status: completed
 
 ### T03 — Role catalog and aptitude composition
 - Description: Add role catalog and compose aptitudes from home world, background, and role selections.

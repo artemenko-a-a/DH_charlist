@@ -3,12 +3,15 @@
 ## Functional correctness
 - [x] Current-state assessment and target architecture are documented in-repo
 - [x] Home-world preview works as described in the spec
+- [x] Background preview works as described in the spec
 - [x] Existing accepted profile editing flow remains intact
 - [x] Out-of-scope creation automation was not silently introduced
 
 ## Rules / logic correctness
 - [x] Home-world facts are backed by the DH2 core rulebook
 - [x] Typed catalog covers all six core home worlds
+- [x] Background facts are backed by the DH2 core rulebook
+- [x] Typed catalog covers all seven core backgrounds
 - [x] Compatibility diagnostics explicitly flag unsupported current-model effects
 - [x] No new silent calculation path bypasses the accepted rules layer
 
@@ -17,6 +20,7 @@
 - [x] Persistence shape remains unchanged
 - [x] Import/export semantics remain unchanged
 - [x] Current freeform profile fields continue to round-trip
+- [x] No persisted background identifier or dual source of truth was introduced
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
@@ -51,6 +55,6 @@
 - [ ] Rejected
 
 ## Remaining conditions / follow-up
-- Background package catalog
 - Role package catalog
 - Full creation aggregate and migration path
+- Background package application

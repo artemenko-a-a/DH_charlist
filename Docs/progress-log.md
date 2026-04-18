@@ -2,6 +2,12 @@
 
 ## 2026-04-18
 
+### DHII Engine Task 02 — Background catalog foundation
+- **status:** accepted_with_conditions
+- **checks run:** `swift build`, `swift test --filter CharacterCreationEngineTests`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, first `make ci` (failed on stale/flaky host smoke assertion), targeted `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testSmokeCoreFlowsAndEntryPoints`, second `make ci`
+- **results:** completed Task 02 with a typed seven-background DH2 catalog in the rules layer, alias normalization over the existing raw `profile.background` field, rulebook-backed package summaries, recommended-role metadata, and explicit unsupported-mechanics diagnostics for effects the current snapshot model cannot yet project safely. Added read-only informational background preview UX to the existing Profile flow without changing persistence shape or implying automatic package application. Extended the shared creation-engine tests for catalog completeness, alias recognition, package summaries, and current-home-world context. During verification, identified that the only red gate was a flaky host smoke assertion for create-flow readiness, isolated it to a brittle navigation-bar-only expectation, stabilized that test around the actual quick-start readiness contract, and reran the full acceptance gate successfully.
+- **blockers:** no blocker remains for Task 02. Residual scope limits stay intentional: no role catalog, no aptitude composition, no automatic package application, no full creation aggregate, and no real-device verification.
+
 ### DHII Engine Task 01 — Roadmap freeze + home-world foundation
 - **status:** accepted_with_conditions
 - **checks run:** `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, targeted `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testXPSpendingValidationScreenShowsManualCharacteristicCostEntry`, `make ci`

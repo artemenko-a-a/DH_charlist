@@ -91,10 +91,24 @@ struct DHIIHomeWorldDefinition: Identifiable, Equatable, Sendable {
 
 struct DHIICharacterModelCompatibilityReport: Equatable, Sendable {
     let unsupportedTargets: [DHIICreationEffectTarget]
+    let unsupportedRuleKeys: [String]
     let warningMessages: [String]
+    let contextualMessages: [String]
 
     var isFullySupported: Bool {
-        unsupportedTargets.isEmpty
+        unsupportedTargets.isEmpty && unsupportedRuleKeys.isEmpty
+    }
+
+    init(
+        unsupportedTargets: [DHIICreationEffectTarget] = [],
+        unsupportedRuleKeys: [String] = [],
+        warningMessages: [String] = [],
+        contextualMessages: [String] = []
+    ) {
+        self.unsupportedTargets = unsupportedTargets
+        self.unsupportedRuleKeys = unsupportedRuleKeys
+        self.warningMessages = warningMessages
+        self.contextualMessages = contextualMessages
     }
 }
 
@@ -103,7 +117,67 @@ struct DHIIHomeWorldPreview: Equatable, Sendable {
     let compatibility: DHIICharacterModelCompatibilityReport
 }
 
+struct DHIIBackgroundBonusRule: Equatable, Sendable {
+    let name: String
+    let summary: String
+}
+
+enum DHIIBackgroundID: String, CaseIterable, Codable, Sendable {
+    case adeptusAdministratum
+    case adeptusArbites
+    case adeptusAstraTelepathica
+    case adeptusMechanicus
+    case adeptusMinistorum
+    case imperialGuard
+    case outcast
+
+    var displayName: String {
+        switch self {
+        case .adeptusAdministratum: "Adeptus Administratum"
+        case .adeptusArbites: "Adeptus Arbites"
+        case .adeptusAstraTelepathica: "Adeptus Astra Telepathica"
+        case .adeptusMechanicus: "Adeptus Mechanicus"
+        case .adeptusMinistorum: "Adeptus Ministorum"
+        case .imperialGuard: "Imperial Guard"
+        case .outcast: "Outcast"
+        }
+    }
+}
+
+struct DHIIBackgroundDefinition: Identifiable, Equatable, Sendable {
+    let id: DHIIBackgroundID
+    let aliases: [String]
+    let aptitudeOptions: [String]
+    let startingSkills: [String]
+    let startingTalents: [String]
+    let startingTraits: [String]
+    let startingEquipment: [String]
+    let backgroundBonus: DHIIBackgroundBonusRule
+    let recommendedRoles: [String]
+    let unsupportedProjectionRuleKeys: [String]
+    let sourceCitation: String
+
+    var displayName: String { id.displayName }
+    var aptitudeSummary: String { aptitudeOptions.joined(separator: " or ") }
+    var startingSkillSummary: String { startingSkills.joined(separator: ", ") }
+    var startingTalentSummary: String { startingTalents.joined(separator: ", ") }
+    var startingTraitSummary: String { startingTraits.isEmpty ? "None" : startingTraits.joined(separator: ", ") }
+    var startingEquipmentSummary: String { startingEquipment.joined(separator: ", ") }
+    var recommendedRoleSummary: String { recommendedRoles.joined(separator: ", ") }
+}
+
+struct DHIIBackgroundPreview: Equatable, Sendable {
+    let definition: DHIIBackgroundDefinition
+    let compatibility: DHIICharacterModelCompatibilityReport
+}
+
 enum DHIICharacterCreationEngine {
+    static let backgroundCreationNotes: [String] = [
+        "Starting skills from a background are gained at Known (+0).",
+        "Starting talents granted by a background ignore normal prerequisites during character creation.",
+        "Starting ranged weapons from a background come with two clips of their standard ammunition, which the current character model does not yet track structurally."
+    ]
+
     static let canonicalHomeWorlds: [DHIIHomeWorldDefinition] = [
         DHIIHomeWorldDefinition(
             id: .feralWorld,
@@ -215,16 +289,228 @@ enum DHIICharacterCreationEngine {
         )
     ]
 
+    static let canonicalBackgrounds: [DHIIBackgroundDefinition] = [
+        DHIIBackgroundDefinition(
+            id: .adeptusAdministratum,
+            aliases: ["Administratum", "Adeptus Administratum"],
+            aptitudeOptions: ["Knowledge", "Social"],
+            startingSkills: [
+                "Commerce or Medicae",
+                "Common Lore (Adeptus Administratum)",
+                "Linguistics (High Gothic)",
+                "Logic",
+                "Scholastic Lore (Pick One)"
+            ],
+            startingTalents: ["Weapon Training (Las or Solid Projectile)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Laspistol or stub automatic",
+                "Imperial robes",
+                "autoquill",
+                "chrono",
+                "dataslate",
+                "medi-kit"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "Master of Paperwork",
+                summary: "Availability of all items is treated as one level more available."
+            ),
+            recommendedRoles: ["Chirurgeon", "Hierophant", "Sage", "Seeker"],
+            unsupportedProjectionRuleKeys: ["availability_modifier"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 44-45"
+        ),
+        DHIIBackgroundDefinition(
+            id: .adeptusArbites,
+            aliases: ["Arbites", "Adeptus Arbites"],
+            aptitudeOptions: ["Offence", "Defence"],
+            startingSkills: [
+                "Awareness",
+                "Common Lore (Adeptus Arbites, Underworld)",
+                "Inquiry or Interrogation",
+                "Intimidate",
+                "Scrutiny"
+            ],
+            startingTalents: ["Weapon Training (Shock or Solid Projectile)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Shotgun or shock maul",
+                "Enforcer light carapace armour or carapace chestplate",
+                "3 doses of stimm",
+                "manacles",
+                "12 lho sticks"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "The Face of the Law",
+                summary: "The character can re-roll Intimidate and Interrogation tests, and can substitute Willpower bonus for degrees of success on those tests."
+            ),
+            recommendedRoles: ["Assassin", "Desperado", "Seeker", "Warrior"],
+            unsupportedProjectionRuleKeys: ["skill_specific_reroll", "degrees_of_success_substitution"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 46-47"
+        ),
+        DHIIBackgroundDefinition(
+            id: .adeptusAstraTelepathica,
+            aliases: ["Telepathica", "Adeptus Astra Telepathica", "Astra Telepathica"],
+            aptitudeOptions: ["Defence", "Psyker"],
+            startingSkills: [
+                "Awareness",
+                "Common Lore (Adeptus Astra Telepathica)",
+                "Deceive or Interrogation",
+                "Forbidden Lore (the Warp)",
+                "Psyniscience or Scrutiny"
+            ],
+            startingTalents: ["Weapon Training (Las, Low-Tech)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Laspistol",
+                "staff or whip",
+                "light flak cloak or flak vest",
+                "micro-bead or psy focus"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "The Constant Threat / Tested on Terra",
+                summary: "Psychic Phenomenon results within 10m can be adjusted by Willpower bonus, and a Psyker elite advance taken during character creation also grants Sanctioned."
+            ),
+            recommendedRoles: ["Chirurgeon", "Mystic", "Sage", "Seeker"],
+            unsupportedProjectionRuleKeys: ["psychic_phenomena_modifier", "conditional_creation_hook"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 48-49"
+        ),
+        DHIIBackgroundDefinition(
+            id: .adeptusMechanicus,
+            aliases: ["Mechanicus", "Adeptus Mechanicus"],
+            aptitudeOptions: ["Knowledge", "Tech"],
+            startingSkills: [
+                "Awareness or Operate (Pick One)",
+                "Common Lore (Adeptus Mechanicus)",
+                "Logic",
+                "Security",
+                "Tech-Use"
+            ],
+            startingTalents: ["Mechadendrite Use (Utility)", "Weapon Training (Solid Projectile)"],
+            startingTraits: ["Mechanicus Implants"],
+            startingEquipment: [
+                "Autogun or hand cannon",
+                "monotask servo-skull (utility) or optical mechadendrite",
+                "Imperial robes",
+                "2 vials of sacred unguents"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "Replace the Weak Flesh",
+                summary: "Availability of all cybernetics is treated as two levels more available."
+            ),
+            recommendedRoles: ["Chirurgeon", "Hierophant", "Sage", "Seeker"],
+            unsupportedProjectionRuleKeys: ["cybernetic_availability_modifier"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 50-51"
+        ),
+        DHIIBackgroundDefinition(
+            id: .adeptusMinistorum,
+            aliases: ["Ministorum", "Adeptus Ministorum"],
+            aptitudeOptions: ["Leadership", "Social"],
+            startingSkills: [
+                "Charm",
+                "Command",
+                "Common Lore (Adeptus Ministorum)",
+                "Inquiry or Scrutiny",
+                "Linguistics (High Gothic)"
+            ],
+            startingTalents: ["Weapon Training (Flame) or Weapon Training (Low-Tech, Solid Projectile)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Hand flamer (or warhammer and stub revolver)",
+                "Imperial robes or flak vest",
+                "backpack",
+                "glow-globe",
+                "monotask servo-skull (laud hailer)"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "Faith is All",
+                summary: "When spending a Fate point for +10 to a test, the character gains +20 instead."
+            ),
+            recommendedRoles: ["Chirurgeon", "Hierophant", "Seeker", "Warrior"],
+            unsupportedProjectionRuleKeys: ["fate_spend_modifier"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 52-53"
+        ),
+        DHIIBackgroundDefinition(
+            id: .imperialGuard,
+            aliases: ["Guard", "Imperial Guard"],
+            aptitudeOptions: ["Fieldcraft", "Leadership"],
+            startingSkills: [
+                "Athletics",
+                "Command",
+                "Common Lore (Imperial Guard)",
+                "Medicae or Operate (Surface)",
+                "Navigate (Surface)"
+            ],
+            startingTalents: ["Weapon Training (Las, Low-Tech)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Lasgun (or laspistol and sword)",
+                "combat vest",
+                "Imperial Guard flak armour",
+                "grapnel and line",
+                "12 lho sticks",
+                "magnoculars"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "Hammer of the Emperor",
+                summary: "Damage dice showing 1 or 2 can be re-rolled against a target an ally attacked since the end of the character's last turn."
+            ),
+            recommendedRoles: ["Assassin", "Desperado", "Hierophant", "Warrior"],
+            unsupportedProjectionRuleKeys: ["combat_state_dependent_damage_reroll"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 54-55"
+        ),
+        DHIIBackgroundDefinition(
+            id: .outcast,
+            aliases: ["Outcast"],
+            aptitudeOptions: ["Fieldcraft", "Social"],
+            startingSkills: [
+                "Acrobatics or Sleight of Hand",
+                "Common Lore (Underworld)",
+                "Deceive",
+                "Dodge",
+                "Stealth"
+            ],
+            startingTalents: ["Weapon Training (Chain, and Las or Solid Projectile)"],
+            startingTraits: [],
+            startingEquipment: [
+                "Autopistol or laspistol",
+                "chainsword",
+                "armoured bodyglove or flak vest",
+                "injector",
+                "2 doses of obscura or slaught"
+            ],
+            backgroundBonus: DHIIBackgroundBonusRule(
+                name: "Never Quit",
+                summary: "The character counts Toughness bonus as two higher when determining Fatigue."
+            ),
+            recommendedRoles: ["Assassin", "Desperado", "Seeker"],
+            unsupportedProjectionRuleKeys: ["fatigue_threshold_modifier"],
+            sourceCitation: "Dark Heresy Second Edition Core Rulebook pp. 56-57"
+        )
+    ]
+
     static func canonicalHomeWorld(for rawValue: String) -> DHIIHomeWorldDefinition? {
-        let normalized = normalizedHomeWorldToken(rawValue)
+        let normalized = normalizedCatalogToken(rawValue)
         guard normalized != nil else {
             return nil
         }
 
         return canonicalHomeWorlds.first { definition in
             definition.aliases.contains { alias in
-                normalizedHomeWorldToken(alias) == normalized
-            } || normalizedHomeWorldToken(definition.displayName) == normalized
+                normalizedCatalogToken(alias) == normalized
+            } || normalizedCatalogToken(definition.displayName) == normalized
+        }
+    }
+
+    static func canonicalBackground(for rawValue: String) -> DHIIBackgroundDefinition? {
+        let normalized = normalizedCatalogToken(rawValue)
+        guard normalized != nil else {
+            return nil
+        }
+
+        return canonicalBackgrounds.first { definition in
+            definition.aliases.contains { alias in
+                normalizedCatalogToken(alias) == normalized
+            } || normalizedCatalogToken(definition.displayName) == normalized
         }
     }
 
@@ -236,6 +522,20 @@ enum DHIICharacterCreationEngine {
         return DHIIHomeWorldPreview(
             definition: definition,
             compatibility: compatibilityReport(for: definition)
+        )
+    }
+
+    static func previewBackgroundSelection(
+        rawValue: String,
+        homeWorldRawValue: String? = nil
+    ) -> DHIIBackgroundPreview? {
+        guard let definition = canonicalBackground(for: rawValue) else {
+            return nil
+        }
+
+        return DHIIBackgroundPreview(
+            definition: definition,
+            compatibility: compatibilityReport(for: definition, homeWorldRawValue: homeWorldRawValue)
         )
     }
 
@@ -258,9 +558,62 @@ enum DHIICharacterCreationEngine {
             warningMessages: warningMessages
         )
     }
+
+    static func compatibilityReport(
+        for definition: DHIIBackgroundDefinition,
+        homeWorldRawValue: String?
+    ) -> DHIICharacterModelCompatibilityReport {
+        let warningMessages = definition.unsupportedProjectionRuleKeys.map { ruleKey in
+            backgroundProjectionWarning(for: ruleKey, definition: definition)
+        }
+
+        var contextualMessages: [String] = []
+        if let homeWorldRawValue,
+           let homeWorld = canonicalHomeWorld(for: homeWorldRawValue) {
+            if homeWorld.recommendedBackgrounds.contains(definition.displayName) {
+                contextualMessages.append("Current home world preview recommends this background.")
+            } else {
+                contextualMessages.append("Current home world preview does not list this among its recommended backgrounds.")
+            }
+        }
+
+        return DHIICharacterModelCompatibilityReport(
+            unsupportedRuleKeys: definition.unsupportedProjectionRuleKeys,
+            warningMessages: warningMessages,
+            contextualMessages: contextualMessages
+        )
+    }
+
+    static func backgroundProjectionWarning(
+        for ruleKey: String,
+        definition: DHIIBackgroundDefinition
+    ) -> String {
+        switch ruleKey {
+        case "availability_modifier":
+            "\(definition.displayName) changes Availability during creation, but the current engine does not yet project requisition or item-availability modifiers."
+        case "skill_specific_reroll":
+            "\(definition.displayName) grants skill-specific re-roll behavior, but the current engine does not yet project per-skill re-roll hooks."
+        case "degrees_of_success_substitution":
+            "\(definition.displayName) can substitute Willpower bonus for degrees of success on certain tests, but the current engine does not yet project that rules hook."
+        case "psychic_phenomena_modifier":
+            "\(definition.displayName) modifies Psychic Phenomenon results within 10m, but the current engine does not yet project psychic-phenomena state."
+        case "conditional_creation_hook":
+            "\(definition.displayName) conditionally grants Sanctioned during character creation, but the current engine does not yet project that creation-time hook."
+        case "cybernetic_availability_modifier":
+            "\(definition.displayName) changes cybernetic Availability, but the current engine does not yet project cybernetic requisition modifiers."
+        case "fate_spend_modifier":
+            "\(definition.displayName) modifies Fate spending outcomes, but the current engine does not yet project that Fate-spend hook."
+        case "combat_state_dependent_damage_reroll":
+            "\(definition.displayName) depends on combat-state damage re-rolls, but the current engine does not yet project combat-state package hooks."
+        case "fatigue_threshold_modifier":
+            "\(definition.displayName) changes Fatigue determination, but the current engine does not yet project a rules-backed Fatigue threshold."
+        default:
+            "\(definition.displayName) includes a creation rule the current engine does not yet project safely."
+        }
+    }
 }
 
-private func normalizedHomeWorldToken(_ value: String) -> String? {
+private func normalizedCatalogToken(_ value: String) -> String? {
     let cleaned = value.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !cleaned.isEmpty else {
         return nil

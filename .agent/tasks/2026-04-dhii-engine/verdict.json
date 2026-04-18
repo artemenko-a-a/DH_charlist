@@ -1,29 +1,31 @@
 {
   "task_id": "2026-04-dhii-engine",
-  "title": "DHII Engine architecture freeze and Task 01 home-world foundation",
+  "title": "DHII Engine architecture freeze with Tasks 01-02 creation foundations",
   "status": "accepted_with_conditions",
-  "summary": "Task 01 accepted: the repo now has a frozen DHII Engine roadmap plus a typed, rulebook-backed home-world foundation with informational profile preview, explicit current-model compatibility diagnostics, and green local validation including make ci.",
+  "summary": "Tasks 01-02 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world and background foundations with informational profile previews, explicit current-model compatibility diagnostics, and green local validation including a rerun-clean make ci.",
   "accepted_scope": [
     "DHII Engine roadmap and task decomposition",
     "typed six-world home-world catalog with aliases and rulebook-backed previews",
+    "typed seven-background catalog with aliases, package summaries, and unsupported-mechanics diagnostics",
     "profile-flow informational preview integration",
-    "Task 01 regression hardening and validation proof bundle updates"
+    "Task 01-02 regression hardening and validation proof bundle updates"
   ],
   "rejected_scope": [
-    "automatic background package application",
     "automatic role package application",
+    "automatic background package application",
     "full DHII character creation pipeline",
     "real-device behavior claims"
   ],
   "blockers": [],
   "residual_risks": [
     "real device behavior not verified",
-    "full creation pipeline not yet implemented"
+    "full creation pipeline not yet implemented",
+    "web does not yet mirror the new background preview foundation"
   ],
   "required_followups": [
-    "Complete background package catalog task",
     "Complete role package catalog task",
-    "Expand typed creation state beyond home world"
+    "Compose aptitudes from home world, background, and role",
+    "Expand typed creation state beyond home world/background"
   ],
   "evidence_bundle": [
     ".agent/tasks/2026-04-dhii-engine/spec.md",
@@ -34,6 +36,8 @@
     "swift test",
     "web npm test",
     "web typecheck",
+    "web production build",
+    "targeted host UI smoke for create-flow entry points",
     "targeted host UI smoke for XP validation screen",
     "full make ci including host coverage run and coverage policy"
   ],
@@ -43,8 +47,8 @@
   ],
   "trust_assessment": {
     "logic_confidence": "high",
-    "runtime_confidence": "medium_high",
-    "ui_confidence": "medium",
+    "runtime_confidence": "high",
+    "ui_confidence": "medium_high",
     "real_device_confidence": "low"
   }
 }

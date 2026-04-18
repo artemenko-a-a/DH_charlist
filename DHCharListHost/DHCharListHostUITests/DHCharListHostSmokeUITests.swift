@@ -99,7 +99,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         let createButton = app.buttons["Create Character"]
         XCTAssertTrue(createButton.waitForExistence(timeout: 5))
         createButton.tap()
-        XCTAssertTrue(app.navigationBars["Create Character"].waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForCreateCharacterEntryPoint())
 
         let blankCharacterButton = app.buttons["quickstart.blank-character"]
         if blankCharacterButton.waitForExistence(timeout: 5) {
@@ -792,6 +792,20 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         }
         XCTAssertTrue(finalTarget.waitForExistence(timeout: 5))
         XCTAssertEqual(finalTarget.label, expectedValue)
+    }
+
+    private func waitForCreateCharacterEntryPoint() -> Bool {
+        if app.navigationBars["Create Character"].waitForExistence(timeout: 5) {
+            return true
+        }
+
+        let blankCharacterButton = app.buttons["quickstart.blank-character"]
+        if blankCharacterButton.waitForExistence(timeout: 5) {
+            return true
+        }
+
+        let blankCharacterRow = app.otherElements["quickstart.blank-character"]
+        return blankCharacterRow.waitForExistence(timeout: 5)
     }
 
     private func reveal(_ element: XCUIElement, maxSwipes: Int) {

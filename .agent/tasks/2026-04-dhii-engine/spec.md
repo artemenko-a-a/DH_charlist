@@ -4,13 +4,13 @@
 2026-04-dhii-engine
 
 ## Title
-DHII Engine architecture freeze and Task 01 home-world foundation
+DHII Engine architecture freeze with Tasks 01-02 creation foundations
 
 ## Goal
-Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и сразу реализовать первый безопасный вертикальный срез: typed home-world creation foundation с каноническим источником правил, compatibility diagnostics и read-only интеграцией в текущий профиль.
+Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и поэтапно реализовать первые два безопасных вертикальных среза: typed home-world foundation и typed background catalog foundation с каноническим источником правил, compatibility diagnostics и read-only интеграцией в текущий профиль.
 
 ## User value
-- Пользователь получает первый rulebook-backed creation surface вместо полностью свободного текстового поля без доменной опоры.
+- Пользователь получает первые rulebook-backed creation surfaces вместо полностью свободных текстовых полей без доменной опоры.
 - Команда получает согласованную архитектуру и последовательный roadmap, а не хаотичное наращивание UI.
 - Риск ложных или неполных стартовых правил снижается за счёт явного catalog/preview и честной индикации текущих доменных пробелов.
 
@@ -24,7 +24,8 @@ DHII Engine architecture freeze and Task 01 home-world foundation
 - Current-state assessment и target DHII Engine architecture в repo docs.
 - Подробный phased roadmap и task decomposition для дальнейшей реализации движка.
 - Task 01: канонический typed registry для всех шести DHII home worlds на основе core rulebook.
-- Explainable home-world preview и compatibility diagnostics для текущей snapshot-модели.
+- Task 02: канонический typed registry для всех семи DHII core backgrounds с package summaries и current-model diagnostics.
+- Explainable home-world/background previews и compatibility diagnostics для текущей snapshot-модели.
 - Read-only integration в `ProfileScreen` без изменения persistence shape.
 - Unit/regression tests на новый foundation slice.
 
@@ -32,7 +33,7 @@ DHII Engine architecture freeze and Task 01 home-world foundation
 - Полный character creation pipeline.
 - Автоматическое применение background/role packages.
 - Полная миграция persistence shape под rich engine state.
-- Web parity для нового creation foundation.
+- Web parity для background preview foundation.
 - Real-device validation.
 
 ## Constraints
@@ -56,8 +57,9 @@ DHII Engine architecture freeze and Task 01 home-world foundation
 - Affects persistence observability: no
 
 ## Trust-critical risks
-- Home-world facts can look authoritative while current app still lacks full creation pipeline.
+- Home-world and background facts can look authoritative while current app still lacks full creation pipeline.
 - Current saved character snapshot cannot yet represent `Influence` as a first-class DHII creation field.
+- Current saved character snapshot cannot yet project background package effects such as availability modifiers, combat-state hooks, or conditional creation grants.
 - UI could over-promise automation if the preview is not clearly marked informational.
 - Future phases could diverge if the roadmap is not frozen before additional implementation.
 
@@ -66,7 +68,9 @@ DHII Engine architecture freeze and Task 01 home-world foundation
 - AC2. The rules layer exposes a canonical typed home-world catalog for all six DHII core home worlds with rulebook-backed modifiers, fate threshold, aptitude, wounds, bonus, and recommended backgrounds.
 - AC3. The engine exposes a deterministic preview/compatibility API that can recognize canonical home worlds from current freeform profile text and explicitly flag unsupported current-model fields such as `Influence`.
 - AC4. The existing profile flow surfaces the recognized home-world preview in read-only form without changing saved data semantics.
-- AC5. Targeted tests and broader regression gates pass, and no previously supported flow regresses.
+- AC5. The rules layer exposes a canonical typed background catalog for all seven DHII core backgrounds with rulebook-backed aptitude options, starting package summaries, background bonuses, recommended roles, and explicit unsupported-mechanics diagnostics.
+- AC6. The existing profile flow surfaces the recognized background preview in read-only form without changing saved data semantics or implying automatic package application.
+- AC7. Targeted tests and broader regression gates pass, and no previously supported flow regresses.
 
 ## Required validation
 - `make fmt`
@@ -88,13 +92,14 @@ DHII Engine architecture freeze and Task 01 home-world foundation
 ## Evidence expectations
 The evidence bundle must include:
 - exact commands actually executed
-- focused rules/data evidence for the home-world foundation
+- focused rules/data evidence for the home-world and background foundations
 - explicit separation between tested behavior and future phases
 - confidence split across logic, runtime, UI, and real-device categories
 - final recommendation: accepted / accepted_with_conditions / rejected
 
 ## Notes for implementer
-- Keep Task 01 limited to home-world foundation plus documentation.
+- Keep Tasks 01-02 limited to home-world/background foundations plus documentation.
 - Prefer typed domain structures over raw strings in the new rules layer.
 - Treat the read-only preview as an integration seam, not as the full creation UI.
 - Be explicit that `Influence` remains a known model gap.
+- Do not silently project background package mechanics the current character model cannot yet support.

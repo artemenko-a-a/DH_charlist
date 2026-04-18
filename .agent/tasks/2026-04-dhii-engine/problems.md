@@ -17,3 +17,12 @@
 - **Root cause:** the smoke had drifted beyond the bounded guarantee required by Task 01. This roadmap slice only needed the XP validation entry point to remain reachable while the home-world foundation landed. The original smoke also depended on iOS number-pad dismissal and downstream navigation details that were not the right truth source for this task.
 - **Classification:** verification/test-scope issue with a small supporting UX gap.
 - **Resolution:** added explicit XP cost text-state synchronization plus an iOS keyboard `Done` action in `XPSpendScreen`, then narrowed the smoke to the stable UI guarantee actually required here: the bounded XP validation screen opens from Characteristics, exposes manual cost entry for characteristic advances, and starts blocked until user input.
+
+## 2026-04-18 — Create-character smoke readiness assertion was flaky under full CI load
+
+- **Where:** `DHCharListHost/DHCharListHostUITests/DHCharListHostSmokeUITests.swift`
+- **Observed during:** first `make ci` run after Task 02
+- **Symptom:** `testSmokeCoreFlowsAndEntryPoints` failed on `XCTAssertTrue(app.navigationBars["Create Character"].waitForExistence(timeout: 5))` even though a targeted rerun of the same test completed successfully end-to-end.
+- **Root cause:** the smoke used a brittle readiness signal for the modal create flow. Under heavy simulator load, the navigation-bar title could miss the 5-second window even though the quick-start entry point itself was already the meaningful screen contract.
+- **Classification:** verification/test-flake issue, not a DHII engine regression.
+- **Resolution:** replaced the navigation-bar-only assertion with a helper that accepts either the navigation title or the quick-start blank-character control as the readiness signal, then reran the targeted smoke and full `make ci` successfully.

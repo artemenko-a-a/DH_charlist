@@ -1,31 +1,38 @@
 {
   "task_id": "2026-04-dhii-engine",
-  "title": "DHII Engine architecture freeze with Tasks 01-02 creation foundations",
+  "title": "DHII Engine architecture freeze with Tasks 01-04 creation foundations",
   "status": "accepted_with_conditions",
-  "summary": "Tasks 01-02 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world and background foundations with informational profile previews, explicit current-model compatibility diagnostics, and green local validation including a rerun-clean make ci.",
+  "summary": "Tasks 01-04 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, and a typed in-memory creation draft aggregate that safely recomposes canonical selections without stale downstream choice state. Validation is green locally, including full make ci and coverage-policy checks after draft-specific regression hardening.",
   "accepted_scope": [
     "DHII Engine roadmap and task decomposition",
     "typed six-world home-world catalog with aliases and rulebook-backed previews",
     "typed seven-background catalog with aliases, package summaries, and unsupported-mechanics diagnostics",
+    "typed eight-role catalog with aliases, package summaries, and unsupported-mechanics diagnostics",
+    "explainable aptitude composition across home world, background, and role with explicit unresolved-choice handling",
+    "typed in-memory creation draft aggregate derived from the current profile snapshot",
+    "safe recomposition and pruning of stale background/role choice state",
     "profile-flow informational preview integration",
-    "Task 01-02 regression hardening and validation proof bundle updates"
+    "bounded progression consumption of engine-backed aptitudes without persistence mutation",
+    "Task 01-04 regression hardening and validation proof bundle updates"
   ],
   "rejected_scope": [
     "automatic role package application",
     "automatic background package application",
     "full DHII character creation pipeline",
+    "typed persistence for creation-time choice slots",
     "real-device behavior claims"
   ],
   "blockers": [],
   "residual_risks": [
     "real device behavior not verified",
-    "full creation pipeline not yet implemented",
-    "web does not yet mirror the new background preview foundation"
+    "characteristic generation modes and starting-package projection are not yet implemented",
+    "typed persistence for unresolved aptitude choices is not yet implemented",
+    "web does not yet mirror the new creation preview foundations"
   ],
   "required_followups": [
-    "Complete role package catalog task",
-    "Compose aptitudes from home world, background, and role",
-    "Expand typed creation state beyond home world/background"
+    "Implement characteristic generation modes over the typed creation draft",
+    "Project typed creation state into persistence safely",
+    "Persist and recompose creation-time aptitude choices safely"
   ],
   "evidence_bundle": [
     ".agent/tasks/2026-04-dhii-engine/spec.md",
@@ -34,6 +41,9 @@
   ],
   "tested_in_this_environment": [
     "swift test",
+    "targeted Swift tests for CharacterCreationEngine, XPProgression, and RulesRegistry",
+    "expanded CharacterCreationEngine draft-coverage tests",
+    "swift build",
     "web npm test",
     "web typecheck",
     "web production build",
@@ -43,12 +53,13 @@
   ],
   "not_verified_in_this_environment": [
     "real device behavior",
-    "full DHII character creation flow"
+    "full DHII character creation flow",
+    "persistence-backed creation-state migration"
   ],
   "trust_assessment": {
     "logic_confidence": "high",
     "runtime_confidence": "high",
-    "ui_confidence": "medium_high",
+    "ui_confidence": "high",
     "real_device_confidence": "low"
   }
 }

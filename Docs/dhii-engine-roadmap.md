@@ -190,26 +190,29 @@
 - Acceptance criteria:
   - all eight roles modeled
   - aptitude composition deterministic and explainable
-  - manual aptitudes no longer required for engine-backed selections
+  - fixed package aptitudes no longer require manual profile entry when canonical selections resolve cleanly
+  - unresolved rulebook choice-slots remain explicit instead of being silently guessed
 - Test requirements:
   - role catalog coverage
   - aptitude composition scenarios
   - regression suite
 - Manual validation: none
-- Status: pending
+- Status: completed
 
 ### T04 — Creation draft aggregate
-- Description: Introduce a typed creation aggregate with canonical selections and safe recomposition.
+- Description: Introduce an in-memory typed creation aggregate with canonical selections, explicit choice-slot state, safe recomposition, and a legacy adapter over the current `Profile` snapshot.
 - Dependencies: T03
 - Acceptance criteria:
-  - upstream choice changes invalidate/recompose downstream outputs safely
-  - no stale engine state survives choice changes
+  - the rules layer can derive a typed creation draft from the current freeform `Profile`
+  - upstream choice changes invalidate or prune no-longer-applicable downstream choice state safely
+  - no stale engine-derived aptitude state survives background/role changes
+  - current persistence shape remains unchanged
 - Test requirements:
   - aggregate mutation tests
   - recomposition scenarios
-  - persistence adapter regression tests
+  - legacy-adapter regression tests
 - Manual validation: lightweight create/edit smoke
-- Status: pending
+- Status: completed
 
 ### T05 — Characteristic generation modes
 - Description: Implement random-roll and point-allocation generation with explainable output.

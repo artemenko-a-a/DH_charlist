@@ -158,7 +158,8 @@ struct ProfileScreen: View {
             }
 
             if shouldShowAptitudeComposition {
-                let composition = DHIICharacterCreationEngine.composeAptitudes(for: draft)
+                let creationDraft = DHIICharacterCreationEngine.creationDraft(from: draft)
+                let composition = creationDraft.aptitudeComposition
 
                 Section {
                     if composition.resolvedAptitudes.isEmpty == false {
@@ -240,7 +241,7 @@ struct ProfileScreen: View {
             return false
         }
 
-        let composition = DHIICharacterCreationEngine.composeAptitudes(for: draft)
+        let composition = DHIICharacterCreationEngine.creationDraft(from: draft).aptitudeComposition
         return composition.resolvedAptitudes.isEmpty == false
             || composition.effectiveAptitudes.isEmpty == false
             || composition.unresolvedChoices.isEmpty == false

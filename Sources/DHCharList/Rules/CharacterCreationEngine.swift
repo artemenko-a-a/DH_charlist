@@ -243,6 +243,132 @@ struct DHIIAptitudeComposition: Equatable, Sendable {
     var isFullyResolved: Bool { unresolvedChoices.isEmpty }
 }
 
+struct DHIICreationDraft: Equatable, Sendable {
+    let homeWorldID: DHIIHomeWorldID?
+    let backgroundID: DHIIBackgroundID?
+    let roleID: DHIIRoleID?
+    let backgroundAptitudeChoice: String?
+    let roleAptitudeChoice: String?
+    let legacyFallbackAptitudes: [String]
+    let unrecognizedHomeWorldInput: String?
+    let unrecognizedBackgroundInput: String?
+    let unrecognizedRoleInput: String?
+
+    var homeWorldDefinition: DHIIHomeWorldDefinition? {
+        homeWorldID.flatMap { id in
+            DHIICharacterCreationEngine.canonicalHomeWorlds.first { $0.id == id }
+        }
+    }
+
+    var backgroundDefinition: DHIIBackgroundDefinition? {
+        backgroundID.flatMap { id in
+            DHIICharacterCreationEngine.canonicalBackgrounds.first { $0.id == id }
+        }
+    }
+
+    var roleDefinition: DHIIRoleDefinition? {
+        roleID.flatMap { id in
+            DHIICharacterCreationEngine.canonicalRoles.first { $0.id == id }
+        }
+    }
+
+    var aptitudeComposition: DHIIAptitudeComposition {
+        DHIICharacterCreationEngine.composeAptitudes(for: self)
+    }
+
+    func settingHomeWorld(_ id: DHIIHomeWorldID?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: id,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: nil,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput
+        )
+    }
+
+    func settingBackground(_ id: DHIIBackgroundID?) -> DHIICreationDraft {
+        let validOptions = id.flatMap { backgroundID in
+            DHIICharacterCreationEngine.canonicalBackgrounds.first { $0.id == backgroundID }?.aptitudeOptions
+        } ?? []
+
+        return DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: id,
+            roleID: roleID,
+            backgroundAptitudeChoice: validatedChoice(backgroundAptitudeChoice, options: validOptions),
+            roleAptitudeChoice: roleAptitudeChoice,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: nil,
+            unrecognizedRoleInput: unrecognizedRoleInput
+        )
+    }
+
+    func settingBackgroundAptitudeChoice(_ choice: String?) -> DHIICreationDraft {
+        let validOptions = backgroundDefinition?.aptitudeOptions ?? []
+
+        return DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: validatedChoice(choice, options: validOptions),
+            roleAptitudeChoice: roleAptitudeChoice,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput
+        )
+    }
+
+    func settingRole(_ id: DHIIRoleID?) -> DHIICreationDraft {
+        let validOptions = id.flatMap { roleID in
+            DHIICharacterCreationEngine.canonicalRoles.first { $0.id == roleID }?.aptitudeRules.compactMap { rule -> String? in
+                guard case .choice(let first, let second) = rule else {
+                    return nil
+                }
+                return [first, second].joined(separator: "||")
+            }.first?.components(separatedBy: "||")
+        } ?? []
+
+        return DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: id,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: validatedChoice(roleAptitudeChoice, options: validOptions),
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: nil
+        )
+    }
+
+    func settingRoleAptitudeChoice(_ choice: String?) -> DHIICreationDraft {
+        let validOptions = roleDefinition?.aptitudeRules.compactMap { rule -> String? in
+            guard case .choice(let first, let second) = rule else {
+                return nil
+            }
+            return [first, second].joined(separator: "||")
+        }.first?.components(separatedBy: "||") ?? []
+
+        return DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: validatedChoice(choice, options: validOptions),
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput
+        )
+    }
+}
+
 enum DHIICharacterCreationEngine {
     static let backgroundCreationNotes: [String] = [
         "Starting skills from a background are gained at Known (+0).",
@@ -785,61 +911,88 @@ enum DHIICharacterCreationEngine {
         )
     }
 
+    static func creationDraft(from profile: Profile) -> DHIICreationDraft {
+        let homeWorldDefinition = canonicalHomeWorld(for: profile.homeWorld)
+        let backgroundDefinition = canonicalBackground(for: profile.background)
+        let roleDefinition = canonicalRole(for: profile.role)
+
+        var remainingLegacyAptitudes = sanitizedLegacyAptitudes(from: profile.aptitudes)
+        let backgroundChoice = inferAndConsumeChoice(
+            options: backgroundDefinition?.aptitudeOptions ?? [],
+            from: &remainingLegacyAptitudes
+        )
+        let roleChoice = inferAndConsumeChoice(
+            options: roleDefinition?.aptitudeRules.compactMap { rule -> String? in
+                guard case .choice(let first, let second) = rule else {
+                    return nil
+                }
+                return [first, second].joined(separator: "||")
+            }.first?.components(separatedBy: "||") ?? [],
+            from: &remainingLegacyAptitudes
+        )
+
+        return DHIICreationDraft(
+            homeWorldID: homeWorldDefinition?.id,
+            backgroundID: backgroundDefinition?.id,
+            roleID: roleDefinition?.id,
+            backgroundAptitudeChoice: backgroundChoice,
+            roleAptitudeChoice: roleChoice,
+            legacyFallbackAptitudes: remainingLegacyAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedLegacyInput(profile.homeWorld, recognized: homeWorldDefinition != nil),
+            unrecognizedBackgroundInput: unrecognizedLegacyInput(profile.background, recognized: backgroundDefinition != nil),
+            unrecognizedRoleInput: unrecognizedLegacyInput(profile.role, recognized: roleDefinition != nil)
+        )
+    }
+
     static func composeAptitudes(for profile: Profile) -> DHIIAptitudeComposition {
-        let legacyAptitudes = sanitizedLegacyAptitudes(from: profile.aptitudes)
+        composeAptitudes(for: creationDraft(from: profile))
+    }
+
+    static func composeAptitudes(for draft: DHIICreationDraft) -> DHIIAptitudeComposition {
         var resolvedAptitudes: [String] = []
         var unresolvedChoices: [String] = []
         var unsupportedRuleKeys: [String] = []
         var contextualMessages: [String] = []
 
-        if let homeWorld = canonicalHomeWorld(for: profile.homeWorld) {
+        if let homeWorld = draft.homeWorldDefinition {
             appendAptitude(homeWorld.aptitude, into: &resolvedAptitudes)
-        } else if profile.homeWorld.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+        } else if draft.unrecognizedHomeWorldInput != nil {
             contextualMessages.append("Home world is not yet a canonical DHII selection, so its aptitude could not be composed.")
         }
 
-        if let background = canonicalBackground(for: profile.background) {
-            switch resolveChoice(
-                options: background.aptitudeOptions,
-                using: legacyAptitudes
-            ) {
-            case .resolved(let aptitude):
-                appendAptitude(aptitude, into: &resolvedAptitudes)
-            case .unresolved(let message):
-                unresolvedChoices.append("\(background.displayName): \(message)")
-                unsupportedRuleKeys.append("background_aptitude_choice")
-            case .notApplicable:
-                break
+        if let background = draft.backgroundDefinition {
+            if background.aptitudeOptions.isEmpty == false {
+                if let aptitude = validatedChoice(draft.backgroundAptitudeChoice, options: background.aptitudeOptions) {
+                    appendAptitude(aptitude, into: &resolvedAptitudes)
+                } else {
+                    unresolvedChoices.append("\(background.displayName): \(explicitChoiceRequiredMessage(for: background.aptitudeOptions))")
+                    unsupportedRuleKeys.append("background_aptitude_choice")
+                }
             }
-        } else if profile.background.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+        } else if draft.unrecognizedBackgroundInput != nil {
             contextualMessages.append("Background is not yet a canonical DHII selection, so its aptitude choice could not be composed.")
         }
 
-        if let role = canonicalRole(for: profile.role) {
+        if let role = draft.roleDefinition {
             for rule in role.aptitudeRules {
                 switch rule {
                 case .fixed(let aptitude):
                     appendAptitude(aptitude, into: &resolvedAptitudes)
                 case .choice(let first, let second):
-                    switch resolveChoice(options: [first, second], using: legacyAptitudes) {
-                    case .resolved(let aptitude):
+                    if let aptitude = validatedChoice(draft.roleAptitudeChoice, options: [first, second]) {
                         appendAptitude(aptitude, into: &resolvedAptitudes)
-                    case .unresolved(let message):
-                        unresolvedChoices.append("\(role.displayName): \(message)")
+                    } else {
+                        unresolvedChoices.append("\(role.displayName): \(explicitChoiceRequiredMessage(for: [first, second]))")
                         unsupportedRuleKeys.append("role_aptitude_choice")
-                    case .notApplicable:
-                        break
                     }
                 }
             }
-        } else if profile.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+        } else if draft.unrecognizedRoleInput != nil {
             contextualMessages.append("Role is not yet a canonical DHII selection, so its aptitudes could not be composed.")
         }
 
-        let effectiveAptitudes = stableUniqueAptitudes(resolvedAptitudes + legacyAptitudes)
-        let legacyFallbackAptitudes = effectiveAptitudes.filter { aptitude in
-            resolvedAptitudes.contains { normalizedCatalogToken($0) == normalizedCatalogToken(aptitude) } == false
-        }
+        let effectiveAptitudes = stableUniqueAptitudes(resolvedAptitudes + draft.legacyFallbackAptitudes)
+        let legacyFallbackAptitudes = draft.legacyFallbackAptitudes
 
         return DHIIAptitudeComposition(
             resolvedAptitudes: resolvedAptitudes,
@@ -1020,6 +1173,45 @@ private func resolveChoice(
     default:
         return .unresolved("requires an explicit aptitude choice (\(options.joined(separator: " or "))) that the current typed creation state does not yet store.")
     }
+}
+
+private func explicitChoiceRequiredMessage(for options: [String]) -> String {
+    "requires an explicit aptitude choice (\(options.joined(separator: " or "))) that the current typed creation state does not yet store."
+}
+
+private func inferAndConsumeChoice(
+    options: [String],
+    from legacyAptitudes: inout [String]
+) -> String? {
+    switch resolveChoice(options: options, using: legacyAptitudes) {
+    case .resolved(let aptitude):
+        if let index = legacyAptitudes.firstIndex(where: { normalizedCatalogToken($0) == normalizedCatalogToken(aptitude) }) {
+            legacyAptitudes.remove(at: index)
+        }
+        return aptitude
+    case .unresolved, .notApplicable:
+        return nil
+    }
+}
+
+private func validatedChoice(_ choice: String?, options: [String]) -> String? {
+    guard let choice,
+          let normalizedChoice = normalizedCatalogToken(choice) else {
+        return nil
+    }
+
+    return options.first { option in
+        normalizedCatalogToken(option) == normalizedChoice
+    }
+}
+
+private func unrecognizedLegacyInput(_ rawValue: String, recognized: Bool) -> String? {
+    guard recognized == false else {
+        return nil
+    }
+
+    let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmed.isEmpty ? nil : trimmed
 }
 
 private func appendAptitude(_ aptitude: String, into aptitudes: inout [String]) {

@@ -26,3 +26,12 @@
 - **Root cause:** the smoke used a brittle readiness signal for the modal create flow. Under heavy simulator load, the navigation-bar title could miss the 5-second window even though the quick-start entry point itself was already the meaningful screen contract.
 - **Classification:** verification/test-flake issue, not a DHII engine regression.
 - **Resolution:** replaced the navigation-bar-only assertion with a helper that accepts either the navigation title or the quick-start blank-character control as the readiness signal, then reran the targeted smoke and full `make ci` successfully.
+
+## 2026-04-18 — Rules coverage gate regressed after introducing the draft aggregate
+
+- **Where:** `Sources/DHCharList/Rules/CharacterCreationEngine.swift` and `Tests/DHCharListTests/CharacterCreationEngineTests.swift`
+- **Observed during:** first `make ci` after Task 04 implementation
+- **Symptom:** coverage policy failed because `Rules` dropped to `91.87%`, below the allowed minimum `93.55%`, even though runtime/tests were otherwise green.
+- **Root cause:** the new typed creation draft introduced untested branches for unknown freeform inputs, ambiguous legacy choice matches, and setter validation/pruning paths.
+- **Classification:** quality-gate regression in new Task 04 test coverage, not a runtime/domain defect.
+- **Resolution:** added focused draft tests for unknown-input handling, ambiguous legacy matches, setter validation, and recomposition pruning, then reran `make ci`; `Rules` coverage recovered to `94.71%` and the policy passed.

@@ -187,3 +187,155 @@ import Testing
     #expect(composition.unresolvedChoices.contains { $0.contains("Assassin") })
     #expect(composition.compatibility.warningMessages.count == 2)
 }
+
+@Test func creationDraftInfersCanonicalSelectionsAndSeparatesChoiceProvenanceFromLegacyFallback() {
+    let profile = Profile(
+        name: "Drafted",
+        homeWorld: "Hive World",
+        background: "Administratum",
+        role: "Assassin",
+        aptitudes: ["Social", "Weapon Skill", "Tech"],
+        description: "Legacy snapshot"
+    )
+
+    let draft = DHIICharacterCreationEngine.creationDraft(from: profile)
+
+    #expect(draft.homeWorldID == .hiveWorld)
+    #expect(draft.backgroundID == .adeptusAdministratum)
+    #expect(draft.roleID == .assassin)
+    #expect(draft.backgroundAptitudeChoice == "Social")
+    #expect(draft.roleAptitudeChoice == "Weapon Skill")
+    #expect(draft.legacyFallbackAptitudes == ["Tech"])
+    #expect(draft.aptitudeComposition.resolvedAptitudes == ["Perception", "Social", "Agility", "Weapon Skill", "Fieldcraft", "Finesse"])
+    #expect(draft.aptitudeComposition.effectiveAptitudes == ["Perception", "Social", "Agility", "Weapon Skill", "Fieldcraft", "Finesse", "Tech"])
+    #expect(draft.aptitudeComposition.isFullyResolved)
+}
+
+@Test func changingBackgroundPrunesNoLongerApplicableChoiceStateWithoutReconsumingLegacyFallback() {
+    let original = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Shifted",
+            homeWorld: "Hive World",
+            background: "Administratum",
+            role: "Assassin",
+            aptitudes: ["Social", "Weapon Skill", "Tech"]
+        )
+    )
+
+    let recomposed = original.settingBackground(.adeptusMechanicus)
+
+    #expect(recomposed.backgroundID == .adeptusMechanicus)
+    #expect(recomposed.backgroundAptitudeChoice == nil)
+    #expect(recomposed.roleID == .assassin)
+    #expect(recomposed.roleAptitudeChoice == "Weapon Skill")
+    #expect(recomposed.legacyFallbackAptitudes == ["Tech"])
+    #expect(recomposed.aptitudeComposition.resolvedAptitudes == ["Perception", "Agility", "Weapon Skill", "Fieldcraft", "Finesse"])
+    #expect(recomposed.aptitudeComposition.effectiveAptitudes == ["Perception", "Agility", "Weapon Skill", "Fieldcraft", "Finesse", "Tech"])
+    #expect(recomposed.aptitudeComposition.unresolvedChoices == [
+        "Adeptus Mechanicus: requires an explicit aptitude choice (Knowledge or Tech) that the current typed creation state does not yet store."
+    ])
+}
+
+@Test func changingRolePrunesStaleRoleChoiceAndKeepsOtherValidSelections() {
+    let original = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Shifted",
+            homeWorld: "Hive World",
+            background: "Administratum",
+            role: "Assassin",
+            aptitudes: ["Social", "Weapon Skill", "Tech"]
+        )
+    )
+
+    let recomposed = original.settingRole(.sage)
+
+    #expect(recomposed.backgroundID == .adeptusAdministratum)
+    #expect(recomposed.backgroundAptitudeChoice == "Social")
+    #expect(recomposed.roleID == .sage)
+    #expect(recomposed.roleAptitudeChoice == nil)
+    #expect(recomposed.legacyFallbackAptitudes == ["Tech"])
+    #expect(recomposed.aptitudeComposition.resolvedAptitudes == ["Perception", "Social", "Intelligence", "Knowledge", "Tech", "Willpower"])
+    #expect(recomposed.aptitudeComposition.effectiveAptitudes == ["Perception", "Social", "Intelligence", "Knowledge", "Tech", "Willpower"])
+    #expect(recomposed.aptitudeComposition.unresolvedChoices.isEmpty)
+}
+
+@Test func creationDraftKeepsUnknownFreeformSelectionsExplicitInsteadOfPretendingTheyAreCanonical() {
+    let draft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Unknown",
+            homeWorld: "Dust Bowl",
+            background: "Street Mystic",
+            role: "Sniper",
+            aptitudes: ["Warpcraft"]
+        )
+    )
+
+    #expect(draft.homeWorldID == nil)
+    #expect(draft.backgroundID == nil)
+    #expect(draft.roleID == nil)
+    #expect(draft.legacyFallbackAptitudes == ["Warpcraft"])
+    #expect(draft.aptitudeComposition.effectiveAptitudes == ["Warpcraft"])
+    #expect(draft.aptitudeComposition.compatibility.contextualMessages == [
+        "Home world is not yet a canonical DHII selection, so its aptitude could not be composed.",
+        "Background is not yet a canonical DHII selection, so its aptitude choice could not be composed.",
+        "Role is not yet a canonical DHII selection, so its aptitudes could not be composed."
+    ])
+}
+
+@Test func creationDraftLeavesAmbiguousLegacyChoiceMatchesUnresolved() {
+    let draft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Ambiguous",
+            homeWorld: "Hive World",
+            background: "Adeptus Administratum",
+            role: "Assassin",
+            aptitudes: ["Knowledge", "Social", "Weapon Skill", "Ballistic Skill"]
+        )
+    )
+
+    #expect(draft.backgroundAptitudeChoice == nil)
+    #expect(draft.roleAptitudeChoice == nil)
+    #expect(draft.legacyFallbackAptitudes == ["Knowledge", "Social", "Weapon Skill", "Ballistic Skill"])
+    #expect(draft.aptitudeComposition.unresolvedChoices == [
+        "Adeptus Administratum: requires an explicit aptitude choice (Knowledge or Social) that the current typed creation state does not yet store.",
+        "Assassin: requires an explicit aptitude choice (Ballistic Skill or Weapon Skill) that the current typed creation state does not yet store."
+    ])
+}
+
+@Test func creationDraftSelectionSettersValidateChoicesAndClearUnknownInputs() {
+    let unknownDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Unknown",
+            homeWorld: "Dust Bowl",
+            background: "Street Mystic",
+            role: "Sniper",
+            aptitudes: ["Warpcraft"]
+        )
+    )
+
+    let resolved = unknownDraft
+        .settingHomeWorld(.forgeWorld)
+        .settingBackground(.adeptusMechanicus)
+        .settingBackgroundAptitudeChoice("Tech")
+        .settingRole(.assassin)
+        .settingRoleAptitudeChoice("Weapon Skill")
+
+    #expect(resolved.homeWorldID == .forgeWorld)
+    #expect(resolved.backgroundID == .adeptusMechanicus)
+    #expect(resolved.backgroundAptitudeChoice == "Tech")
+    #expect(resolved.roleID == .assassin)
+    #expect(resolved.roleAptitudeChoice == "Weapon Skill")
+    #expect(resolved.aptitudeComposition.resolvedAptitudes == ["Intelligence", "Tech", "Agility", "Weapon Skill", "Fieldcraft", "Finesse", "Perception"])
+    #expect(resolved.aptitudeComposition.compatibility.contextualMessages.isEmpty)
+
+    let invalidated = resolved
+        .settingBackgroundAptitudeChoice("Social")
+        .settingRoleAptitudeChoice("Willpower")
+
+    #expect(invalidated.backgroundAptitudeChoice == nil)
+    #expect(invalidated.roleAptitudeChoice == nil)
+    #expect(invalidated.aptitudeComposition.unresolvedChoices == [
+        "Adeptus Mechanicus: requires an explicit aptitude choice (Knowledge or Tech) that the current typed creation state does not yet store.",
+        "Assassin: requires an explicit aptitude choice (Ballistic Skill or Weapon Skill) that the current typed creation state does not yet store."
+    ])
+}

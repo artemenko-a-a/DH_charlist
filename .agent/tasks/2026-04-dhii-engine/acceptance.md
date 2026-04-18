@@ -4,6 +4,10 @@
 - [x] Current-state assessment and target architecture are documented in-repo
 - [x] Home-world preview works as described in the spec
 - [x] Background preview works as described in the spec
+- [x] Role preview works as described in the spec
+- [x] Explainable aptitude composition works as described in the spec
+- [x] Typed creation draft can be derived from the current profile snapshot
+- [x] Draft recomposition safely prunes stale background/role choice state
 - [x] Existing accepted profile editing flow remains intact
 - [x] Out-of-scope creation automation was not silently introduced
 
@@ -12,6 +16,12 @@
 - [x] Typed catalog covers all six core home worlds
 - [x] Background facts are backed by the DH2 core rulebook
 - [x] Typed catalog covers all seven core backgrounds
+- [x] Role facts are backed by the DH2 core rulebook
+- [x] Typed catalog covers all eight core roles
+- [x] Composed aptitudes are deterministic where the current model has enough information
+- [x] Unresolved rulebook choice-slots remain explicit instead of being silently guessed
+- [x] Legacy profile aptitudes are separated into inferred choice provenance vs fallback leftovers when possible
+- [x] Unknown freeform selections remain explicit instead of being misrepresented as canonical
 - [x] Compatibility diagnostics explicitly flag unsupported current-model effects
 - [x] No new silent calculation path bypasses the accepted rules layer
 
@@ -21,6 +31,8 @@
 - [x] Import/export semantics remain unchanged
 - [x] Current freeform profile fields continue to round-trip
 - [x] No persisted background identifier or dual source of truth was introduced
+- [x] No persisted role identifier or typed aptitude-choice state was introduced prematurely
+- [x] No draft-only state is silently persisted into the current storage shape
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
@@ -33,6 +45,8 @@
 - [x] No obvious unreadable state introduced in profile flow
 - [x] Compatibility warnings are explicit where the engine cannot yet project full DHII state
 - [x] No obvious compact-screen blocker introduced
+- [x] Composed aptitudes do not falsely imply that unresolved choices were auto-resolved
+- [x] Profile flow now reads composed aptitudes through the typed draft seam
 
 ## Automation / quality gates
 - [x] `make fmt` passed
@@ -55,6 +69,6 @@
 - [ ] Rejected
 
 ## Remaining conditions / follow-up
-- Role package catalog
-- Full creation aggregate and migration path
+- Typed persistence and migration path for creation state
 - Background package application
+- Starting-package projection beyond previews and aptitude composition

@@ -2,6 +2,12 @@
 
 ## 2026-04-18
 
+### DHII Engine Task 05 — Characteristic generation modes
+- **status:** accepted_with_conditions
+- **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift build`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `swift test`, `make ci`
+- **results:** completed Task 05 with a typed characteristic-generation foundation over the creation draft. The rules layer now models all ten DHII creation characteristics, including transient `Influence`, and supports the standard character-generation paths from the core rulebook: random generation with `2d10 + 20`, home-world roll modifiers, and one allowed re-roll, plus standard point allocation with `25` base values, `60` discretionary points, and a `40` per-characteristic cap. The draft can now carry explainable generation state without mutating the persisted `Character` snapshot, project supported values into the existing nine persisted characteristics, surface explicit validation failures for overspend/cap violations, and honestly invalidate stale random-roll state after a home-world change instead of silently preserving wrong semantics. Added focused tests for deterministic random generation, point-allocation validation, projection, and recomposition/invalidation behavior. Full regression and CI/coverage gates are green after the T05 additions.
+- **blockers:** no blocker remains for Task 05. Residual scope limits stay intentional: no starting-package projection yet, no typed persistence for characteristic-generation provenance, no persistence migration path, and no real-device verification.
+
 ### DHII Engine Task 04 — Creation draft aggregate
 - **status:** accepted_with_conditions
 - **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift build`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `swift test`, `make ci`, second `make ci` after coverage hardening

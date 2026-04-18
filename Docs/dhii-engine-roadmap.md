@@ -216,17 +216,19 @@
 
 ### T05 — Characteristic generation modes
 - Description: Implement random-roll and point-allocation generation with explainable output.
+- Scope note: this slice covers only the standard DHII characteristic-generation rules (`2d10 + 20` random generation with one allowed re-roll, and `25` base / `60` points / `40` cap point allocation). The optional higher-power `+25` variant remains explicitly out of scope for now.
 - Dependencies: T04
 - Acceptance criteria:
   - supported generation modes follow rulebook-backed formulas
   - home-world modifiers apply correctly
+  - transient `Influence` remains explicit even though it is not yet part of the persisted `Character` snapshot
   - explainable breakdowns are available
 - Test requirements:
   - deterministic random-source tests
   - point-buy scenarios
   - edge-case bounds tests
 - Manual validation: lightweight creation smoke
-- Status: pending
+- Status: completed
 
 ### T06 — Starting package projection
 - Description: Project creation aggregate into starting resources, influence, wounds, fate, aptitudes, and other supported packages.
@@ -272,17 +274,17 @@
 ## 5. Execution Log
 
 ### Current task in work
-- T01 — Home-world engine foundation
+- T06 — Starting package projection
 
 ### What is done so far
 - Current repository architecture and local process rules audited.
 - Existing rules roadmap and decision log aligned with the new DHII Engine direction.
-- Rulebook-backed facts for all six home worlds extracted for the first catalog slice.
-- Task 01 implementation started with a typed home-world catalog and read-only profile preview seam.
+- Tasks 01-05 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, and typed standard characteristic-generation foundation are now in place.
+- Standard DHII random-roll and point-allocation characteristic generation now exist as transient creation-draft state with explicit `Influence`, explainable breakdowns, and honest invalidation on home-world changes.
 
 ### Gate status
-- Acceptance gate for T01: pending validation.
-- Next task remains blocked until T01 passes.
+- Acceptance gate for T05: passed locally.
+- Next task is T06: starting-package projection over the typed creation draft.
 
 ## 6. Final Delivery Summary
 

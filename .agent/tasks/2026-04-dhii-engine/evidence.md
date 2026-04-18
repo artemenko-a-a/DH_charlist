@@ -2,7 +2,7 @@
 
 ## Task
 - ID: 2026-04-dhii-engine
-- Title: DHII Engine architecture freeze with Tasks 01-04 creation foundations
+- Title: DHII Engine architecture freeze with Tasks 01-05 creation foundations
 
 ## What was implemented
 - Frozen DHII Engine roadmap with explicit phase/task decomposition for the full engine rollout.
@@ -30,6 +30,12 @@
   - separates inferred background/role aptitude choices from legacy fallback aptitudes where possible
   - preserves unknown freeform inputs as explicit non-canonical state
   - safely prunes stale background/role choice state when upstream selections change
+- Added typed characteristic-generation foundation in [`Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift) and [`Sources/DHCharList/Rules/CharacterCreationEngine.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationEngine.swift) that:
+  - models all ten DHII creation characteristics, including transient `Influence`
+  - supports standard random generation (`2d10 + 20`) with home-world roll modifiers and one allowed re-roll
+  - supports standard point allocation (`25` base, `60` discretionary points, `40` cap) with home-world starting-score modifiers
+  - keeps random-roll provenance and point-allocation state transient inside the creation draft instead of flattening it into the persisted snapshot
+  - exposes explainable per-characteristic breakdowns, validation errors, and honest invalidation when a home-world change makes prior random results no longer valid
 - Integrated informational home-world preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape or silently automating creation packages.
 - Integrated informational background preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape, replacing the existing free-text field, or implying automatic package application.
 - Integrated informational role preview and composed-aptitude preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape or implying that typed creation choices already exist.
@@ -47,6 +53,7 @@
 - `Docs/dhii-engine-roadmap.md`
 - `Docs/progress-log.md`
 - `Sources/DHCharList/Rules/CharacterCreationEngine.swift`
+- `Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift`
 - `Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`
 - `Sources/DHCharList/Presentation/Features/Progression/XPSpendScreen.swift`
 - `Tests/DHCharListTests/CharacterCreationEngineTests.swift`
@@ -72,6 +79,13 @@ List only commands actually executed:
 - `npm test -- --runInBand` (failed immediately due unsupported Vitest flag; no code change resulted from this command)
 - `make ci`
 - `make ci` (rerun after draft coverage hardening)
+- `swift test --filter CharacterCreationEngineTests` (after T05 characteristic-generation additions)
+- `swift build` (after T05 characteristic-generation additions)
+- `cd web && npm test` (after T05 characteristic-generation additions)
+- `cd web && npm run typecheck` (after T05 characteristic-generation additions)
+- `cd web && npm run build` (after T05 characteristic-generation additions)
+- `swift test` (after T05 characteristic-generation additions)
+- `make ci` (after T05 characteristic-generation additions)
 
 ## Results
 - `swift test`: passed (`165` tests)
@@ -92,7 +106,14 @@ List only commands actually executed:
 - `swift test`: passed after T04 changes (`179` tests)
 - first `make ci` after T04 changes: failed only on `Rules` coverage regression (`91.87% < 93.55%`)
 - second `make ci` after draft coverage hardening: passed
-- coverage policy: passed with `Rules` at `94.71%`
+- `swift test --filter CharacterCreationEngineTests`: passed after T05 additions (`24` tests)
+- `swift build`: passed after T05 additions
+- `cd web && npm test`: passed after T05 additions (`17` tests)
+- `cd web && npm run typecheck`: passed after T05 additions
+- `cd web && npm run build`: passed after T05 additions
+- `swift test`: passed after T05 additions (`187` tests)
+- `make ci`: passed after T05 additions
+- coverage policy: passed with `Rules` at `94.78%`
 - no persistence-shape migration was introduced in this task
 
 ## Runtime / host UI evidence
@@ -101,6 +122,7 @@ List only commands actually executed:
 - Role preview remains informational inside the existing profile edit flow.
 - Composed aptitude preview remains informational and explicitly warns when rulebook choice-slots are unresolved.
 - Profile composed-aptitude preview now reads through the typed draft seam rather than recomputing directly from the overloaded raw profile fields.
+- T05 runtime verification stayed green while characteristic-generation state remained transient and non-destructive.
 - Existing accepted profile flow stayed intact through the full `make ci` host UI coverage run.
 - XP validation screen remains reachable from Characteristics and exposes manual cost entry deterministically for the bounded characteristic path.
 - XP prerequisites and registry-backed skill-cost defaults now consume engine-backed composed aptitudes when canonical fixed selections resolve.
@@ -121,6 +143,11 @@ List only commands actually executed:
   - inferred choice provenance consumed from legacy `profile.aptitudes`
   - leftover fallback aptitudes that must not be silently reinterpreted after upstream choice changes
 - Draft recomposition now drops no-longer-applicable background/role choices instead of letting stale engine-derived aptitude state survive a selection change.
+- Characteristic generation now distinguishes:
+  - standard random-roll generation with explicit dice provenance and one reroll seam
+  - standard point allocation with explicit overspend/cap validation
+  - transient `Influence`, which remains part of creation truth but not the current persisted `Character` snapshot
+- Home-world changes now recompute or invalidate characteristic-generation state honestly instead of silently preserving stale semantics.
 - No automatic package application was introduced, so the app still does not imply full DHII creation support before the engine is built.
 
 ## Data safety evidence
@@ -128,6 +155,7 @@ List only commands actually executed:
 - Replace-all confirmation confirmed? n/a
 - Existing saved entities preserved? yes
 - Persistence backend observability unchanged? yes
+- Characteristic-generation provenance silently persisted? no
 
 ## UI / visual evidence
 - Screenshot pass executed? yes, via `make ci` coverage host run
@@ -137,7 +165,7 @@ List only commands actually executed:
 ## Coverage / CI evidence
 - `make ci` passed? yes
 - truthful coverage gate passed? yes
-- package surface coverage moved from `19.59%` to `21.84%`
+- package surface coverage moved from `19.59%` to `23.39%`
 - per-area non-regression gate passed for App/Application/Domain/Infrastructure/Presentation/Rules
 
 ## Real-device evidence
@@ -153,12 +181,14 @@ List only commands actually executed:
 
 ## Residual issues
 - Current character snapshot still lacks first-class `Influence`.
+- Starting package projection is not implemented yet.
 - Background and role package automation are still not implemented.
 - Typed persistence for background/role aptitude choices is not implemented yet.
+- Typed persistence for characteristic-generation state is not implemented yet.
 - Web does not yet mirror the new creation preview foundations.
 
 ## Recommended verdict
 - accepted_with_conditions
 
 ## Recommended next step
-- Continue to the next roadmap slice: characteristic generation modes over the typed creation draft, followed by persistence-safe creation-state projection and migration work.
+- Continue to the next roadmap slice: starting-package projection over the typed creation draft, followed by persistence-safe creation-state projection and migration work.

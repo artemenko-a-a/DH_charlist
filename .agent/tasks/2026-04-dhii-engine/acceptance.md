@@ -10,6 +10,9 @@
 - [x] Draft recomposition safely prunes stale background/role choice state
 - [x] Existing accepted profile editing flow remains intact
 - [x] Out-of-scope creation automation was not silently introduced
+- [x] Typed characteristic generation works as described in the spec
+- [x] Random-roll generation includes the standard DHII reroll rule
+- [x] Point-allocation generation works as described in the spec
 
 ## Rules / logic correctness
 - [x] Home-world facts are backed by the DH2 core rulebook
@@ -24,6 +27,11 @@
 - [x] Unknown freeform selections remain explicit instead of being misrepresented as canonical
 - [x] Compatibility diagnostics explicitly flag unsupported current-model effects
 - [x] No new silent calculation path bypasses the accepted rules layer
+- [x] Generation logic uses a typed 10-character creation model, including transient Influence
+- [x] Random-roll generation follows the standard DHII formula and home-world roll modifiers
+- [x] Point allocation follows the standard DHII formula, pool, and cap
+- [x] Unsupported Influence projection remains explicit instead of being silently dropped
+- [x] Home-world changes recompose or invalidate generation state honestly
 
 ## Data safety
 - [x] Existing saved characters are not silently mutated
@@ -33,12 +41,14 @@
 - [x] No persisted background identifier or dual source of truth was introduced
 - [x] No persisted role identifier or typed aptitude-choice state was introduced prematurely
 - [x] No draft-only state is silently persisted into the current storage shape
+- [x] No transient generation provenance is silently persisted into the current storage shape
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
 - [x] Relevant smoke path remains green
 - [x] No newly observed blocker in profile flow
 - [x] Web regression set remains green
+- [x] New generation-specific regression set is green
 
 ## UI / UX
 - [x] Preview is clearly informational and does not imply full automation
@@ -47,6 +57,7 @@
 - [x] No obvious compact-screen blocker introduced
 - [x] Composed aptitudes do not falsely imply that unresolved choices were auto-resolved
 - [x] Profile flow now reads composed aptitudes through the typed draft seam
+- [x] Any surfaced generation output stays explicitly informational until a later engine-backed creation flow lands
 
 ## Automation / quality gates
 - [x] `make fmt` passed
@@ -56,6 +67,7 @@
 - [x] `make ci` passed
 - [x] targeted DHII Engine tests passed
 - [x] worktree clean enough for intentional follow-up
+- [x] T05 targeted DHII Engine tests passed
 
 ## Documentation / truthfulness
 - [x] DHII Engine roadmap doc added or updated
@@ -69,6 +81,7 @@
 - [ ] Rejected
 
 ## Remaining conditions / follow-up
+- Typed persistence and migration path for characteristic-generation state
 - Typed persistence and migration path for creation state
 - Background package application
 - Starting-package projection beyond previews and aptitude composition

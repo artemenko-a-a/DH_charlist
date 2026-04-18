@@ -253,6 +253,7 @@ struct DHIICreationDraft: Equatable, Sendable {
     let unrecognizedHomeWorldInput: String?
     let unrecognizedBackgroundInput: String?
     let unrecognizedRoleInput: String?
+    let characteristicGenerationState: DHIICharacteristicGenerationState?
 
     var homeWorldDefinition: DHIIHomeWorldDefinition? {
         homeWorldID.flatMap { id in
@@ -276,6 +277,10 @@ struct DHIICreationDraft: Equatable, Sendable {
         DHIICharacterCreationEngine.composeAptitudes(for: self)
     }
 
+    var characteristicGeneration: DHIICharacteristicGenerationPreview? {
+        DHIICharacterCreationEngine.previewCharacteristicGeneration(for: self)
+    }
+
     func settingHomeWorld(_ id: DHIIHomeWorldID?) -> DHIICreationDraft {
         DHIICreationDraft(
             homeWorldID: id,
@@ -286,7 +291,8 @@ struct DHIICreationDraft: Equatable, Sendable {
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: nil,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
-            unrecognizedRoleInput: unrecognizedRoleInput
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
         )
     }
 
@@ -304,7 +310,8 @@ struct DHIICreationDraft: Equatable, Sendable {
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: nil,
-            unrecognizedRoleInput: unrecognizedRoleInput
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
         )
     }
 
@@ -320,7 +327,8 @@ struct DHIICreationDraft: Equatable, Sendable {
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
-            unrecognizedRoleInput: unrecognizedRoleInput
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
         )
     }
 
@@ -343,7 +351,8 @@ struct DHIICreationDraft: Equatable, Sendable {
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
-            unrecognizedRoleInput: nil
+            unrecognizedRoleInput: nil,
+            characteristicGenerationState: characteristicGenerationState
         )
     }
 
@@ -364,7 +373,8 @@ struct DHIICreationDraft: Equatable, Sendable {
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
-            unrecognizedRoleInput: unrecognizedRoleInput
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
         )
     }
 }
@@ -940,7 +950,8 @@ enum DHIICharacterCreationEngine {
             legacyFallbackAptitudes: remainingLegacyAptitudes,
             unrecognizedHomeWorldInput: unrecognizedLegacyInput(profile.homeWorld, recognized: homeWorldDefinition != nil),
             unrecognizedBackgroundInput: unrecognizedLegacyInput(profile.background, recognized: backgroundDefinition != nil),
-            unrecognizedRoleInput: unrecognizedLegacyInput(profile.role, recognized: roleDefinition != nil)
+            unrecognizedRoleInput: unrecognizedLegacyInput(profile.role, recognized: roleDefinition != nil),
+            characteristicGenerationState: nil
         )
     }
 

@@ -1,8 +1,8 @@
 {
   "task_id": "2026-04-dhii-engine",
-  "title": "DHII Engine architecture freeze with Tasks 01-04 creation foundations",
+  "title": "DHII Engine architecture freeze with Tasks 01-05 creation foundations",
   "status": "accepted_with_conditions",
-  "summary": "Tasks 01-04 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, and a typed in-memory creation draft aggregate that safely recomposes canonical selections without stale downstream choice state. Validation is green locally, including full make ci and coverage-policy checks after draft-specific regression hardening.",
+  "summary": "Tasks 01-05 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, a typed in-memory creation draft aggregate, and a typed characteristic-generation foundation for standard DHII random-roll and point-allocation modes. Validation is green locally, including full make ci and coverage-policy checks after adding characteristic-generation coverage.",
   "accepted_scope": [
     "DHII Engine roadmap and task decomposition",
     "typed six-world home-world catalog with aliases and rulebook-backed previews",
@@ -13,24 +13,27 @@
     "safe recomposition and pruning of stale background/role choice state",
     "profile-flow informational preview integration",
     "bounded progression consumption of engine-backed aptitudes without persistence mutation",
-    "Task 01-04 regression hardening and validation proof bundle updates"
+    "typed characteristic-generation foundation with transient Influence and explainable breakdowns",
+    "Task 01-05 regression hardening and validation proof bundle updates"
   ],
   "rejected_scope": [
     "automatic role package application",
     "automatic background package application",
     "full DHII character creation pipeline",
     "typed persistence for creation-time choice slots",
+    "typed persistence for characteristic-generation provenance",
     "real-device behavior claims"
   ],
   "blockers": [],
   "residual_risks": [
     "real device behavior not verified",
-    "characteristic generation modes and starting-package projection are not yet implemented",
+    "starting-package projection is not yet implemented",
     "typed persistence for unresolved aptitude choices is not yet implemented",
+    "typed persistence for characteristic-generation state is not yet implemented",
     "web does not yet mirror the new creation preview foundations"
   ],
   "required_followups": [
-    "Implement characteristic generation modes over the typed creation draft",
+    "Implement starting-package projection over the typed creation draft",
     "Project typed creation state into persistence safely",
     "Persist and recompose creation-time aptitude choices safely"
   ],
@@ -43,6 +46,7 @@
     "swift test",
     "targeted Swift tests for CharacterCreationEngine, XPProgression, and RulesRegistry",
     "expanded CharacterCreationEngine draft-coverage tests",
+    "expanded CharacterCreationEngine characteristic-generation tests",
     "swift build",
     "web npm test",
     "web typecheck",

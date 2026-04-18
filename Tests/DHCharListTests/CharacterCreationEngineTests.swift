@@ -339,3 +339,224 @@ import Testing
         "Assassin: requires an explicit aptitude choice (Ballistic Skill or Weapon Skill) that the current typed creation state does not yet store."
     ])
 }
+
+@Test func randomCharacteristicGenerationSupportsHomeWorldModifiersSingleRerollAndTransientInfluence() throws {
+    let draft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Rolled",
+            homeWorld: "Hive World",
+            background: "Adeptus Administratum",
+            role: "Seeker"
+        )
+    )
+
+    let generated = try DHIICharacterCreationEngine.generateRandomCharacteristics(
+        for: draft,
+        rolls: [
+            4, 7,
+            5, 6,
+            2, 9,
+            1, 8,
+            3, 4, 6,
+            5, 7,
+            2, 2, 9,
+            8, 8, 8,
+            4, 4,
+            6, 6,
+            10, 1, 1
+        ],
+        rerolling: .willpower
+    )
+
+    let preview = try #require(generated.characteristicGeneration)
+
+    #expect(preview.mode == .randomRoll)
+    #expect(preview.isValid)
+    #expect(preview.rerolledCharacteristic == .willpower)
+    #expect(preview.values?.weaponSkill == 31)
+    #expect(preview.values?.ballisticSkill == 31)
+    #expect(preview.values?.strength == 31)
+    #expect(preview.values?.toughness == 29)
+    #expect(preview.values?.agility == 30)
+    #expect(preview.values?.intelligence == 32)
+    #expect(preview.values?.perception == 31)
+    #expect(preview.values?.willpower == 22)
+    #expect(preview.values?.fellowship == 28)
+    #expect(preview.values?.influence == 32)
+    #expect(preview.projectedCharacteristics == CharacteristicSet(
+        weaponSkill: 31,
+        ballisticSkill: 31,
+        strength: 31,
+        toughness: 29,
+        agility: 30,
+        intelligence: 32,
+        perception: 31,
+        willpower: 22,
+        fellowship: 28
+    ))
+    #expect(preview.compatibility.unsupportedTargets == [.influence])
+
+    let agility = try #require(preview.breakdown(for: .agility))
+    #expect(agility.rolledDice == [3, 4, 6])
+    #expect(agility.keptDice == [6, 4])
+    #expect(agility.finalValue == 30)
+
+    let willpower = try #require(preview.breakdown(for: .willpower))
+    #expect(willpower.rolledDice == [10, 1, 1])
+    #expect(willpower.keptDice == [1, 1])
+    #expect(willpower.finalValue == 22)
+}
+
+@Test func pointAllocationGenerationTracksRemainingPointsAndProjectsSupportedCharacteristics() throws {
+    let draft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Allocated",
+            homeWorld: "Shrine World",
+            background: "Adeptus Administratum",
+            role: "Hierophant"
+        )
+    )
+
+    let allocated = try draft.settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 5,
+            ballisticSkill: 5,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 10,
+            fellowship: 10,
+            influence: 5
+        )
+    )
+
+    let preview = try #require(allocated.characteristicGeneration)
+
+    #expect(preview.mode == .pointAllocation)
+    #expect(preview.isValid)
+    #expect(preview.spentPoints == 60)
+    #expect(preview.remainingPoints == 0)
+    #expect(preview.values?.perception == 25)
+    #expect(preview.values?.willpower == 40)
+    #expect(preview.values?.fellowship == 40)
+    #expect(preview.values?.influence == 30)
+    #expect(preview.projectedCharacteristics == CharacteristicSet(
+        weaponSkill: 30,
+        ballisticSkill: 30,
+        strength: 30,
+        toughness: 30,
+        agility: 30,
+        intelligence: 30,
+        perception: 25,
+        willpower: 40,
+        fellowship: 40
+    ))
+    #expect(preview.compatibility.unsupportedTargets == [.influence])
+
+    let fellowship = try #require(preview.breakdown(for: .fellowship))
+    #expect(fellowship.finalValue == 40)
+    #expect(fellowship.contributions.map(\.label) == ["Base Value", "Home World Modifier", "Allocated Points"])
+    #expect(fellowship.contributions.map(\.value) == [25, 5, 10])
+}
+
+@Test func pointAllocationRejectsOverspendAndCapViolations() {
+    let neutralDraft = DHIICharacterCreationEngine.creationDraft(from: Profile(name: "Overspend"))
+    let shrineDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(name: "Cap", homeWorld: "Shrine World")
+    )
+
+    #expect(throws: DHIICharacteristicGenerationValidationError.self) {
+        _ = try neutralDraft.settingPointAllocation(
+            DHIICreationCharacteristicValues(
+                weaponSkill: 6,
+                ballisticSkill: 6,
+                strength: 6,
+                toughness: 6,
+                agility: 6,
+                intelligence: 6,
+                perception: 6,
+                willpower: 6,
+                fellowship: 6,
+                influence: 7
+            )
+        )
+    }
+
+    #expect(throws: DHIICharacteristicGenerationValidationError.self) {
+        _ = try shrineDraft.settingPointAllocation(
+            DHIICreationCharacteristicValues(
+                weaponSkill: 5,
+                ballisticSkill: 5,
+                strength: 5,
+                toughness: 5,
+                agility: 5,
+                intelligence: 5,
+                perception: 5,
+                willpower: 11,
+                fellowship: 9,
+                influence: 5
+            )
+        )
+    }
+}
+
+@Test func pointAllocationRecomposesAcrossHomeWorldChangesAndCanBecomeInvalid() throws {
+    let neutralDraft = DHIICharacterCreationEngine.creationDraft(from: Profile(name: "Recompose"))
+    let allocated = try neutralDraft.settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 5,
+            ballisticSkill: 5,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 15,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+
+    let hiveShifted = allocated.settingHomeWorld(.hiveWorld)
+    let preview = try #require(hiveShifted.characteristicGeneration)
+
+    #expect(preview.mode == .pointAllocation)
+    #expect(preview.isValid == false)
+    #expect(preview.values?.perception == 45)
+    #expect(preview.validationMessages.contains {
+        $0.contains("Perception") && $0.contains("40")
+    })
+}
+
+@Test func randomCharacteristicGenerationBecomesInvalidWhenHomeWorldChangesAfterRolling() throws {
+    let hiveDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(name: "Shifted", homeWorld: "Hive World")
+    )
+    let generated = try DHIICharacterCreationEngine.generateRandomCharacteristics(
+        for: hiveDraft,
+        rolls: [
+            4, 7,
+            5, 6,
+            2, 9,
+            1, 8,
+            3, 4, 6,
+            5, 7,
+            2, 2, 9,
+            8, 8, 8,
+            4, 4,
+            6, 6
+        ]
+    )
+
+    let shifted = generated.settingHomeWorld(.forgeWorld)
+    let preview = try #require(shifted.characteristicGeneration)
+
+    #expect(preview.mode == .randomRoll)
+    #expect(preview.isValid == false)
+    #expect(preview.projectedCharacteristics == nil)
+    #expect(preview.validationMessages.contains {
+        $0.contains("Hive World") && $0.contains("Forge World")
+    })
+}

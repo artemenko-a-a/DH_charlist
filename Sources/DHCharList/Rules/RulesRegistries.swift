@@ -50,6 +50,7 @@ struct SkillMetadata: Identifiable, Equatable, Sendable {
     let displayName: String
     let linkedCharacteristic: SkillCharacteristic
     let category: SkillCategory?
+    let advancementAptitudes: [String]?
     let isCanonical: Bool
 
     static func adHoc(name: String, characteristic: SkillCharacteristic) -> SkillMetadata {
@@ -58,6 +59,7 @@ struct SkillMetadata: Identifiable, Equatable, Sendable {
             displayName: trimmedOrPlaceholder(name, placeholder: "Unnamed Skill"),
             linkedCharacteristic: characteristic,
             category: nil,
+            advancementAptitudes: nil,
             isCanonical: false
         )
     }
@@ -69,16 +71,16 @@ struct SkillMetadata: Identifiable, Equatable, Sendable {
 
 enum SkillMetadataRegistry {
     static let canonical: [SkillMetadata] = [
-        SkillMetadata(id: "awareness", displayName: "Awareness", linkedCharacteristic: .perception, category: .fieldcraft, isCanonical: true),
-        SkillMetadata(id: "tech-use", displayName: "Tech-Use", linkedCharacteristic: .intelligence, category: .tech, isCanonical: true),
-        SkillMetadata(id: "dodge", displayName: "Dodge", linkedCharacteristic: .agility, category: .combat, isCanonical: true),
-        SkillMetadata(id: "parry", displayName: "Parry", linkedCharacteristic: .weaponSkill, category: .combat, isCanonical: true),
-        SkillMetadata(id: "scrutiny", displayName: "Scrutiny", linkedCharacteristic: .perception, category: .investigation, isCanonical: true),
-        SkillMetadata(id: "inquiry", displayName: "Inquiry", linkedCharacteristic: .fellowship, category: .interaction, isCanonical: true),
-        SkillMetadata(id: "stealth", displayName: "Stealth", linkedCharacteristic: .agility, category: .fieldcraft, isCanonical: true),
-        SkillMetadata(id: "medicae", displayName: "Medicae", linkedCharacteristic: .intelligence, category: .tech, isCanonical: true),
-        SkillMetadata(id: "athletics", displayName: "Athletics", linkedCharacteristic: .strength, category: .fieldcraft, isCanonical: true),
-        SkillMetadata(id: "psyniscience", displayName: "Psyniscience", linkedCharacteristic: .perception, category: .knowledge, isCanonical: true)
+        SkillMetadata(id: "awareness", displayName: "Awareness", linkedCharacteristic: .perception, category: .fieldcraft, advancementAptitudes: ["Perception", "Fieldcraft"], isCanonical: true),
+        SkillMetadata(id: "tech-use", displayName: "Tech-Use", linkedCharacteristic: .intelligence, category: .tech, advancementAptitudes: ["Intelligence", "Tech"], isCanonical: true),
+        SkillMetadata(id: "dodge", displayName: "Dodge", linkedCharacteristic: .agility, category: .combat, advancementAptitudes: ["Agility", "Defence"], isCanonical: true),
+        SkillMetadata(id: "parry", displayName: "Parry", linkedCharacteristic: .weaponSkill, category: .combat, advancementAptitudes: ["Weapon Skill", "Defence"], isCanonical: true),
+        SkillMetadata(id: "scrutiny", displayName: "Scrutiny", linkedCharacteristic: .perception, category: .investigation, advancementAptitudes: ["Perception", "General"], isCanonical: true),
+        SkillMetadata(id: "inquiry", displayName: "Inquiry", linkedCharacteristic: .fellowship, category: .interaction, advancementAptitudes: ["Fellowship", "Social"], isCanonical: true),
+        SkillMetadata(id: "stealth", displayName: "Stealth", linkedCharacteristic: .agility, category: .fieldcraft, advancementAptitudes: ["Agility", "Fieldcraft"], isCanonical: true),
+        SkillMetadata(id: "medicae", displayName: "Medicae", linkedCharacteristic: .intelligence, category: .tech, advancementAptitudes: ["Intelligence", "Fieldcraft"], isCanonical: true),
+        SkillMetadata(id: "athletics", displayName: "Athletics", linkedCharacteristic: .strength, category: .fieldcraft, advancementAptitudes: ["Strength", "General"], isCanonical: true),
+        SkillMetadata(id: "psyniscience", displayName: "Psyniscience", linkedCharacteristic: .perception, category: .knowledge, advancementAptitudes: ["Perception", "Psyker"], isCanonical: true)
     ]
 
     static func lookup(name: String, characteristic: SkillCharacteristic) -> SkillMetadata? {

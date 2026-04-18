@@ -203,6 +203,46 @@ import Testing
     #expect(result.finalTarget == 40)
 }
 
+@Test func quickCheckModifiersClampToDh2PlusSixtyMinusSixtyLimits() {
+    let characteristics = CharacteristicSet(
+        weaponSkill: 40,
+        ballisticSkill: 40,
+        strength: 40,
+        toughness: 40,
+        agility: 40,
+        intelligence: 40,
+        perception: 40,
+        willpower: 40,
+        fellowship: 40
+    )
+
+    let positive = MechanicsCheckResolver.resolve(
+        .characteristic(
+            .agility,
+            characteristics: characteristics,
+            modifiers: [
+                .manual(value: 50),
+                .preset(value: 30)
+            ]
+        )
+    )
+    let negative = MechanicsCheckResolver.resolve(
+        .skill(
+            Skill(name: "Awareness", characteristic: .perception, training: .known),
+            characteristics: characteristics,
+            modifiers: [
+                .manual(value: -50),
+                .manual(value: -30)
+            ]
+        )
+    )
+
+    #expect(positive.breakdown.appliedModifier == 60)
+    #expect(positive.finalTarget == 100)
+    #expect(negative.breakdown.appliedModifier == -60)
+    #expect(negative.finalTarget == -20)
+}
+
 @Test func unifiedExplainableCheckEngineKeepsStableContributionOrdering() {
     let characteristics = CharacteristicSet(
         weaponSkill: 39,

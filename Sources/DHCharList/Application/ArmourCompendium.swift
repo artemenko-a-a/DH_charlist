@@ -36,7 +36,7 @@ public struct ArmourCompendiumCatalog: Identifiable, Codable, Equatable, Sendabl
                 name: "Flak Coat",
                 category: "Body Armour",
                 coverage: ["Body", "Arms"],
-                armourPoints: 4,
+                armourPoints: 3,
                 weight: "8kg",
                 availability: "Scarce",
                 traits: ["Flak"]
@@ -47,7 +47,7 @@ public struct ArmourCompendiumCatalog: Identifiable, Codable, Equatable, Sendabl
                 name: "Guard Helm",
                 category: "Head Armour",
                 coverage: ["Head"],
-                armourPoints: 3,
+                armourPoints: 2,
                 weight: "2kg",
                 availability: "Common",
                 traits: ["Enclosed"]
@@ -58,7 +58,7 @@ public struct ArmourCompendiumCatalog: Identifiable, Codable, Equatable, Sendabl
                 name: "Mesh Vest",
                 category: "Body Armour",
                 coverage: ["Body"],
-                armourPoints: 5,
+                armourPoints: 4,
                 weight: "5kg",
                 availability: "Rare",
                 traits: ["Flexible"]

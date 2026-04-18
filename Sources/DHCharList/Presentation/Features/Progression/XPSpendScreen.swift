@@ -34,7 +34,7 @@ struct XPSpendScreen: View {
     @State private var xpCost: Int = CharacteristicAdvanceCatalogRegistry
         .entry(for: .weaponSkill)
         .costModel
-        .defaultCost
+        .defaultCost ?? 0
     @State private var requiredAptitudesText = ""
     @State private var requiredTalent = ""
     @State private var requiredTrait = ""
@@ -85,11 +85,8 @@ struct XPSpendScreen: View {
                         }
                         .accessibilityIdentifier("xp-spend.characteristic")
 
-                        Picker("Increase", selection: $characteristicDelta) {
-                            Text("+5").tag(5)
-                            Text("+10").tag(10)
-                        }
-                        .accessibilityIdentifier("xp-spend.characteristic-delta")
+                        LabeledContent("Increase", value: "+5")
+                            .accessibilityIdentifier("xp-spend.characteristic-delta")
 
                     case .skill:
                         if sortedSkills.isEmpty {
@@ -112,6 +109,11 @@ struct XPSpendScreen: View {
                                 }
                             }
                             .accessibilityIdentifier("xp-spend.skill.target")
+
+                            if allowedTargetTraining == [selectedSkill?.training].compactMap({ $0 }) {
+                                Text("This skill is already at the highest supported training rank.")
+                                    .cogitatorSupportingText()
+                            }
                         }
                     }
 
@@ -129,6 +131,9 @@ struct XPSpendScreen: View {
                     .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Upgrade", subtitle: "Choose a bounded spend target")
+                } footer: {
+                    Text(upgradeGuidanceText)
+                        .cogitatorSupportingText()
                 }
 
                 Section {
@@ -268,6 +273,14 @@ struct XPSpendScreen: View {
                 }
             }
         }
+        .onAppear(perform: syncProgressionDefaults)
+        .onChange(of: upgradeKind) { _, _ in syncProgressionDefaults() }
+        .onChange(of: selectedCharacteristic) { _, _ in syncProgressionDefaults() }
+        .onChange(of: selectedSkillID) { _, _ in syncProgressionDefaults() }
+        .onChange(of: targetTraining) { _, _ in
+            guard upgradeKind == .skill else { return }
+            syncProgressionDefaults()
+        }
     }
 
     private var sortedSkills: [Skill] {
@@ -288,7 +301,7 @@ struct XPSpendScreen: View {
                     .entry(for: selectedCharacteristic)
                     .makeAdvance(
                         deltaOverride: characteristicDelta,
-                        costOverride: max(0, xpCost),
+                        costOverride: xpCost,
                         extraPrerequisites: manualPrerequisites
                     )
             )
@@ -302,7 +315,7 @@ struct XPSpendScreen: View {
                     .entry(for: selectedSkill, targetTraining: targetTraining)
                     .makeAdvance(
                         skill: selectedSkill,
-                        costOverride: max(0, xpCost),
+                        costOverride: xpCost,
                         extraPrerequisites: manualPrerequisites
                     )
             )
@@ -345,17 +358,54 @@ struct XPSpendScreen: View {
 
     private var allowedTargetTraining: [SkillTrainingLevel] {
         guard let selectedSkill else {
-            return SkillTrainingLevel.allCases
+            return [.known]
         }
 
-        let higherLevels = SkillTrainingLevel.allCases.filter {
-            $0.progressionRank > selectedSkill.training.progressionRank
+        guard let nextLevel = nextTrainingLevel(after: selectedSkill.training) else {
+            return [selectedSkill.training]
         }
-        return higherLevels.isEmpty ? [selectedSkill.training] : higherLevels
+        return [nextLevel]
     }
 
     private var validationResult: XPSpendResult {
         XPProgressionResolver.validate(currentRequest)
+    }
+
+    private var upgradeGuidanceText: String {
+        switch upgradeKind {
+        case .characteristic:
+            "DH2 characteristic advances are purchased in single +5 steps. This bounded flow requires manual XP entry because the app does not yet track characteristic advance tiers."
+        case .skill:
+            "DH2 skill advances are purchased one rank at a time. When the selected skill has a verified aptitude pair, the XP field is prefilled from the next-rank rulebook cost; otherwise it remains manual."
+        }
+    }
+
+    private func syncProgressionDefaults() {
+        switch upgradeKind {
+        case .characteristic:
+            characteristicDelta = 5
+            xpCost = 0
+
+        case .skill:
+            guard let selectedSkill else {
+                targetTraining = .known
+                xpCost = 0
+                return
+            }
+
+            let nextLevel = nextTrainingLevel(after: selectedSkill.training) ?? selectedSkill.training
+            if targetTraining != nextLevel {
+                targetTraining = nextLevel
+                return
+            }
+
+            let entry = SkillAdvanceCatalogRegistry.entry(for: selectedSkill, targetTraining: targetTraining)
+            xpCost = entry.defaultCost(for: character.profile.aptitudes) ?? 0
+        }
+    }
+
+    private func nextTrainingLevel(after currentTraining: SkillTrainingLevel) -> SkillTrainingLevel? {
+        SkillTrainingLevel.allCases.first { $0.progressionRank == currentTraining.progressionRank + 1 }
     }
 }
 #endif

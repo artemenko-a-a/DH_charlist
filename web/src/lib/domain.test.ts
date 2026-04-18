@@ -4,12 +4,15 @@ import {
   coerceCharacter,
   composeDossier,
   createDefaultCharacter,
+  demoArmourCatalog,
+  demoWeaponCatalog,
   parseArmourCompendiumImport,
   parseWeaponCompendiumImport,
   resolveAttackFlow,
   resolveDamage,
   resolveReactionFlow,
   resolveSkillCheck,
+  suggestedSkillAdvanceCost,
   trainingModifiers,
   validateOrApplyXPSpend
 } from './domain'
@@ -154,6 +157,48 @@ describe('rules and safety helpers', () => {
     expect(resolveSkillCheck(veteranSkill, characteristics).finalTarget).toBe(70)
   })
 
+  it('caps summed check modifiers at the DH2 +60 / -60 bounds', () => {
+    const characteristics = {
+      weaponSkill: 40,
+      ballisticSkill: 40,
+      strength: 40,
+      toughness: 40,
+      agility: 40,
+      intelligence: 40,
+      perception: 40,
+      willpower: 40,
+      fellowship: 40
+    }
+
+    expect(resolveSkillCheck({
+      id: 'cap-positive',
+      name: 'Awareness',
+      characteristic: 'perception',
+      training: 'known',
+      specialisations: []
+    }, characteristics, 50, [{ label: 'Full Aim', value: 30 }]).appliedModifier).toBe(60)
+
+    expect(resolveSkillCheck({
+      id: 'cap-negative',
+      name: 'Awareness',
+      characteristic: 'perception',
+      training: 'known',
+      specialisations: []
+    }, characteristics, -50, [{ label: 'Smoke', value: -30 }]).appliedModifier).toBe(-60)
+  })
+
+  it('ships corrected bounded demo equipment values for core-backed entries', () => {
+    const combatShotgun = demoWeaponCatalog.definitions.find((item) => item.id === 'local-demo.combat-shotgun')
+    const flakCoat = demoArmourCatalog.definitions.find((item) => item.id === 'local-demo.flak-coat')
+    const guardHelm = demoArmourCatalog.definitions.find((item) => item.id === 'local-demo.guard-helm')
+    const meshVest = demoArmourCatalog.definitions.find((item) => item.id === 'local-demo.mesh-vest')
+
+    expect(combatShotgun).toMatchObject({ clip: '18', reload: 'Full' })
+    expect(flakCoat?.armourPoints).toBe(3)
+    expect(guardHelm?.armourPoints).toBe(2)
+    expect(meshVest?.armourPoints).toBe(4)
+  })
+
   it('rejects malformed compendium imports and accepts valid replace-all payloads', () => {
     expect(parseWeaponCompendiumImport('{').ok).toBe(false)
     expect(parseArmourCompendiumImport('{"schemaVersion":2}').ok).toBe(false)
@@ -243,6 +288,65 @@ describe('rules and safety helpers', () => {
     expect(applied.appliedCharacter?.characteristics.strength).toBe(35)
     expect(applied.appliedCharacter?.resources.experienceSpent).toBe(150)
     expect(applied.appliedCharacter?.history[0]?.title).toContain('Advancement')
+  })
+
+  it('rejects characteristic skips and skill-rank jumps that DH2 requires to be sequential', () => {
+    const character = createDefaultCharacter('Sequential XP')
+    character.characteristics.weaponSkill = 35
+    character.skills = [
+      {
+        id: 'awareness-seq',
+        name: 'Awareness',
+        characteristic: 'perception',
+        training: 'trained',
+        specialisations: []
+      }
+    ]
+
+    const characteristicSkip = validateOrApplyXPSpend(character, {
+      kind: 'characteristicAdvance',
+      characteristic: 'weaponSkill',
+      delta: 10,
+      cost: 250,
+      prerequisites: []
+    }, false)
+    const skillSkip = validateOrApplyXPSpend(character, {
+      kind: 'skillAdvance',
+      skillID: 'awareness-seq',
+      skillName: 'Awareness',
+      targetTraining: 'veteran',
+      cost: 800,
+      prerequisites: []
+    }, false)
+
+    expect(characteristicSkip.isValid).toBe(false)
+    expect(characteristicSkip.validationErrors).toContain('Characteristic advances in DH2 must be purchased as single +5 steps.')
+    expect(skillSkip.isValid).toBe(false)
+    expect(skillSkip.validationErrors).toContain('Skill advances in DH2 must be purchased one rank at a time.')
+  })
+
+  it('only suggests skill XP costs when the exact DH2 aptitude match is known', () => {
+    const character = createDefaultCharacter('Cost Suggestions')
+    character.profile.aptitudes = ['Perception']
+
+    const awareness = {
+      id: 'awareness-cost',
+      name: 'Awareness',
+      characteristic: 'perception' as const,
+      training: 'trained' as const,
+      specialisations: []
+    }
+    const adHocSkill = {
+      id: 'ad-hoc-cost',
+      name: 'Forbidden Litany',
+      characteristic: 'willpower' as const,
+      training: 'known' as const,
+      specialisations: []
+    }
+
+    expect(suggestedSkillAdvanceCost(character, awareness, 'experienced')).toBe(600)
+    expect(suggestedSkillAdvanceCost({ ...character, profile: { ...character.profile, aptitudes: ['Perception', 'Fieldcraft'] } }, awareness, 'experienced')).toBe(300)
+    expect(suggestedSkillAdvanceCost(character, adHocSkill, 'trained')).toBeNull()
   })
 
   it('composes dossier output and bounded damage breakdowns', () => {

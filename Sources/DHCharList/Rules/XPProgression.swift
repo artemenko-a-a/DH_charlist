@@ -268,26 +268,29 @@ enum XPProgressionResolver {
             guard advance.delta > 0 else {
                 return [.invalidUpgrade("Characteristic advances must increase the selected characteristic.")]
             }
-            guard advance.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard advance.delta == 5 else {
+                return [.invalidUpgrade("Characteristic advances in DH2 must be purchased as single +5 steps.")]
+            }
+            guard advance.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             return []
 
         case .skillAdvance(let advance):
-            guard advance.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard advance.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             guard let currentSkill = request.character.skills.first(where: { $0.id == advance.skillID }) else {
                 return [.missingUpgradeTarget("The selected skill no longer exists on this character.")]
             }
-            guard currentSkill.training.progressionRank < advance.targetTraining.progressionRank else {
-                return [.invalidUpgrade("Skill advances must move to a higher training level than the character already has.")]
+            guard advance.targetTraining.progressionRank == currentSkill.training.progressionRank + 1 else {
+                return [.invalidUpgrade("Skill advances in DH2 must be purchased one rank at a time.")]
             }
             return []
 
         case .talentUnlock(let unlock):
-            guard unlock.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard unlock.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             let talentName = unlock.talentName.trimmedOrPlaceholder("Unnamed Talent")
             guard talentName != "Unnamed Talent" else {

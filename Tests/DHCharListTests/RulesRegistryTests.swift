@@ -65,15 +65,18 @@ import Testing
 
     #expect(characteristicEntry.id == "characteristic.weaponSkill.tier1")
     #expect(characteristicEntry.delta == 5)
-    #expect(characteristicEntry.costModel.defaultCost == 100)
+    #expect(characteristicEntry.costModel.defaultCost == nil)
     #expect(characteristicEntry.aptitudeLinks == ["Weapon Skill"])
     #expect(characteristicEntry.source == "Bounded Advance Registry")
 
     #expect(skillEntry.id == "skill.awareness.veteran")
     #expect(skillEntry.skillMetadata.id == "awareness")
     #expect(skillEntry.targetTraining == .veteran)
-    #expect(skillEntry.costModel.defaultCost == 100)
-    #expect(skillEntry.aptitudeLinks == ["Perception"])
+    #expect(skillEntry.costModel.defaultCost == nil)
+    #expect(skillEntry.defaultCost(for: ["Perception"]) == 800)
+    #expect(skillEntry.defaultCost(for: ["Fieldcraft"]) == 800)
+    #expect(skillEntry.defaultCost(for: ["Perception", "Fieldcraft"]) == 400)
+    #expect(skillEntry.aptitudeLinks == ["Perception", "Fieldcraft"])
     #expect(skillEntry.source == "Bounded Advance Registry")
 }
 

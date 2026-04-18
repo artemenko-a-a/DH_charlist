@@ -2,11 +2,14 @@ import Foundation
 
 enum ProgressionCostModel: Equatable, Sendable {
     case fixed(Int)
+    case manual
 
-    var defaultCost: Int {
+    var defaultCost: Int? {
         switch self {
         case .fixed(let value):
             max(0, value)
+        case .manual:
+            nil
         }
     }
 }
@@ -37,7 +40,7 @@ struct TalentCatalogEntry: Identifiable, Equatable, Sendable {
         TalentUnlock(
             talentID: id,
             talentName: displayName,
-            cost: costOverride ?? costModel.defaultCost,
+            cost: costOverride ?? costModel.defaultCost ?? 0,
             prerequisites: prerequisites + extraPrerequisites
         )
     }
@@ -51,7 +54,7 @@ enum TalentCatalogRegistry {
             category: .combat,
             costModel: .fixed(100),
             prerequisites: [],
-            aptitudeLinks: ["Agility"],
+            aptitudeLinks: ["Agility", "Fieldcraft"],
             tags: ["combat", "ranged"],
             source: "Bounded Talent Registry",
             isCanonical: true
@@ -64,8 +67,8 @@ enum TalentCatalogRegistry {
             prerequisites: [.minimumCharacteristic(.ballisticSkill, 35)],
             aptitudeLinks: ["Ballistic Skill"],
             tags: ["combat", "ranged"],
-            source: "Bounded Talent Registry",
-            isCanonical: true
+            source: "Bounded Talent Registry (unverified in local core PDF extraction)",
+            isCanonical: false
         ),
         TalentCatalogEntry(
             id: "meditation",
@@ -75,16 +78,19 @@ enum TalentCatalogRegistry {
             prerequisites: [],
             aptitudeLinks: ["Willpower"],
             tags: ["mental"],
-            source: "Bounded Talent Registry",
-            isCanonical: true
+            source: "Bounded Talent Registry (unverified in local core PDF extraction)",
+            isCanonical: false
         ),
         TalentCatalogEntry(
             id: "weapon-tech",
             displayName: "Weapon-Tech",
             category: .tech,
             costModel: .fixed(200),
-            prerequisites: [.requiredSkill(name: "Tech-Use", minimumTraining: .known)],
-            aptitudeLinks: ["Intelligence"],
+            prerequisites: [
+                .minimumCharacteristic(.intelligence, 40),
+                .requiredSkill(name: "Tech-Use", minimumTraining: .trained)
+            ],
+            aptitudeLinks: ["Intelligence", "Tech"],
             tags: ["tech", "equipment"],
             source: "Bounded Talent Registry",
             isCanonical: true
@@ -133,7 +139,7 @@ struct CharacteristicAdvanceCatalogEntry: Identifiable, Equatable, Sendable {
         CharacteristicAdvance(
             characteristic: characteristic,
             delta: deltaOverride ?? delta,
-            cost: costOverride ?? costModel.defaultCost,
+            cost: costOverride ?? costModel.defaultCost ?? 0,
             prerequisites: prerequisites + extraPrerequisites
         )
     }
@@ -146,7 +152,7 @@ enum CharacteristicAdvanceCatalogRegistry {
             characteristic: characteristic,
             tier: 1,
             delta: 5,
-            costModel: .fixed(100),
+            costModel: .manual,
             prerequisites: [],
             aptitudeLinks: [characteristic.label],
             source: "Bounded Advance Registry",
@@ -161,7 +167,7 @@ enum CharacteristicAdvanceCatalogRegistry {
                 characteristic: characteristic,
                 tier: 1,
                 delta: 5,
-                costModel: .fixed(100),
+                costModel: .manual,
                 prerequisites: [],
                 aptitudeLinks: [],
                 source: "Bounded Advance Registry",
@@ -180,6 +186,34 @@ struct SkillAdvanceCatalogEntry: Identifiable, Equatable, Sendable {
     let source: String
     let isCanonical: Bool
 
+    func defaultCost(for profileAptitudes: [String]) -> Int? {
+        guard aptitudeLinks.count == 2 else {
+            return nil
+        }
+
+        let normalizedProfileAptitudes = Set(profileAptitudes.map(normalizedProgressionRegistryToken))
+        let matchingAptitudes = Set(aptitudeLinks.map(normalizedProgressionRegistryToken))
+            .intersection(normalizedProfileAptitudes)
+            .count
+
+        switch (matchingAptitudes, targetTraining) {
+        case (2, .known): return 100
+        case (2, .trained): return 200
+        case (2, .experienced): return 300
+        case (2, .veteran): return 400
+        case (1, .known): return 200
+        case (1, .trained): return 400
+        case (1, .experienced): return 600
+        case (1, .veteran): return 800
+        case (0, .known): return 300
+        case (0, .trained): return 600
+        case (0, .experienced): return 900
+        case (0, .veteran): return 1200
+        case (_, .untrained): return nil
+        default: return nil
+        }
+    }
+
     func makeAdvance(
         skill: Skill,
         costOverride: Int? = nil,
@@ -189,7 +223,7 @@ struct SkillAdvanceCatalogEntry: Identifiable, Equatable, Sendable {
             skillID: skill.id,
             skillName: skill.displayName,
             targetTraining: targetTraining,
-            cost: costOverride ?? costModel.defaultCost,
+            cost: costOverride ?? costModel.defaultCost ?? 0,
             prerequisites: prerequisites + extraPrerequisites
         )
     }
@@ -202,11 +236,11 @@ enum SkillAdvanceCatalogRegistry {
             id: "skill.\(metadata.id).\(targetTraining.rawValue)",
             skillMetadata: metadata,
             targetTraining: targetTraining,
-            costModel: .fixed(100),
+            costModel: .manual,
             prerequisites: [],
-            aptitudeLinks: [metadata.linkedCharacteristic.label],
+            aptitudeLinks: metadata.advancementAptitudes ?? [metadata.linkedCharacteristic.label],
             source: "Bounded Advance Registry",
-            isCanonical: metadata.isCanonical
+            isCanonical: metadata.advancementAptitudes != nil && metadata.isCanonical
         )
     }
 }

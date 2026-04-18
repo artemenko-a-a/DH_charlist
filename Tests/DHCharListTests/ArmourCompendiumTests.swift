@@ -39,7 +39,7 @@ import Testing
 
     #expect(first?.id != second?.id)
     #expect(first?.location == "Flak Coat (Body, Arms)")
-    #expect(first?.armourPoints == 4)
+    #expect(first?.armourPoints == 3)
 }
 
 @Test func armourCompendiumDefinitionFormatsPreviewSupportingAndPlaceholderFields() {
@@ -314,7 +314,7 @@ import Testing
 
     #expect(definition.name == "Flak Coat")
     #expect(definition.coverageText == "Body, Arms")
-    #expect(definition.armourPoints == 4)
+    #expect(definition.armourPoints == 3)
 }
 
 @MainActor
@@ -378,7 +378,7 @@ import Testing
     #expect(updated.equipment.armour == [copiedArmour])
     #expect(persisted?.equipment.armour == [copiedArmour])
     #expect(definition.name == "Flak Coat")
-    #expect(definition.armourPoints == 4)
+    #expect(definition.armourPoints == 3)
 }
 
 @Test func replacingCompendiumDoesNotMutateExistingCharacterOwnedArmour() async throws {

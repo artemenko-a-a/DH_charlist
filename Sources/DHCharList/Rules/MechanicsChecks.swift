@@ -330,6 +330,7 @@ struct RuleBreakdown: Equatable, Sendable {
     var appliedModifier: Int {
         contributions(of: .modifier)
             .reduce(0) { $0 + $1.value }
+            .clamped(to: -60...60)
     }
 
     var appliedModifierContributions: [RuleContribution] {
@@ -439,10 +440,12 @@ enum MechanicsCheckResolver {
         let resolvedDefinition = request.definition.resolve(using: request.characteristics)
         let modifierContributions = orderedModifierContributions(for: request)
         let contributions = resolvedDefinition.defaultContributions + modifierContributions
-        let finalTarget = resolvedDefinition.baseValue
-            + contributions
-            .filter(\.appliesToFinalTarget)
+        let nonModifierContribution = contributions
+            .filter { $0.appliesToFinalTarget && $0.kind != .modifier }
             .reduce(0) { $0 + $1.value }
+        let finalTarget = resolvedDefinition.baseValue
+            + nonModifierContribution
+            + cappedModifierTotal(for: contributions)
 
         return CheckResult(
             definition: request.definition,
@@ -470,6 +473,19 @@ enum MechanicsCheckResolver {
                     modifier: modifier
                 )
             }
+    }
+
+    private static func cappedModifierTotal(for contributions: [RuleContribution]) -> Int {
+        contributions
+            .filter { $0.appliesToFinalTarget && $0.kind == .modifier }
+            .reduce(0) { $0 + $1.value }
+            .clamped(to: -60...60)
+    }
+}
+
+private extension Comparable {
+    func clamped(to limits: ClosedRange<Self>) -> Self {
+        min(max(self, limits.lowerBound), limits.upperBound)
     }
 }
 

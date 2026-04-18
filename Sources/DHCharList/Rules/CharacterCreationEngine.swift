@@ -249,11 +249,56 @@ struct DHIICreationDraft: Equatable, Sendable {
     let roleID: DHIIRoleID?
     let backgroundAptitudeChoice: String?
     let roleAptitudeChoice: String?
+    let homeWorldTalentChoice: String?
+    let backgroundSkillChoices: [String]
+    let backgroundTalentChoice: String?
+    let backgroundEquipmentChoices: [String]
+    let roleTalentChoice: String?
+    let startingWoundsRoll: Int?
+    let startingFateRoll: Int?
     let legacyFallbackAptitudes: [String]
     let unrecognizedHomeWorldInput: String?
     let unrecognizedBackgroundInput: String?
     let unrecognizedRoleInput: String?
     let characteristicGenerationState: DHIICharacteristicGenerationState?
+
+    init(
+        homeWorldID: DHIIHomeWorldID?,
+        backgroundID: DHIIBackgroundID?,
+        roleID: DHIIRoleID?,
+        backgroundAptitudeChoice: String?,
+        roleAptitudeChoice: String?,
+        homeWorldTalentChoice: String? = nil,
+        backgroundSkillChoices: [String] = [],
+        backgroundTalentChoice: String? = nil,
+        backgroundEquipmentChoices: [String] = [],
+        roleTalentChoice: String? = nil,
+        startingWoundsRoll: Int? = nil,
+        startingFateRoll: Int? = nil,
+        legacyFallbackAptitudes: [String],
+        unrecognizedHomeWorldInput: String?,
+        unrecognizedBackgroundInput: String?,
+        unrecognizedRoleInput: String?,
+        characteristicGenerationState: DHIICharacteristicGenerationState?
+    ) {
+        self.homeWorldID = homeWorldID
+        self.backgroundID = backgroundID
+        self.roleID = roleID
+        self.backgroundAptitudeChoice = backgroundAptitudeChoice
+        self.roleAptitudeChoice = roleAptitudeChoice
+        self.homeWorldTalentChoice = homeWorldTalentChoice
+        self.backgroundSkillChoices = backgroundSkillChoices
+        self.backgroundTalentChoice = backgroundTalentChoice
+        self.backgroundEquipmentChoices = backgroundEquipmentChoices
+        self.roleTalentChoice = roleTalentChoice
+        self.startingWoundsRoll = startingWoundsRoll
+        self.startingFateRoll = startingFateRoll
+        self.legacyFallbackAptitudes = legacyFallbackAptitudes
+        self.unrecognizedHomeWorldInput = unrecognizedHomeWorldInput
+        self.unrecognizedBackgroundInput = unrecognizedBackgroundInput
+        self.unrecognizedRoleInput = unrecognizedRoleInput
+        self.characteristicGenerationState = characteristicGenerationState
+    }
 
     var homeWorldDefinition: DHIIHomeWorldDefinition? {
         homeWorldID.flatMap { id in
@@ -281,6 +326,26 @@ struct DHIICreationDraft: Equatable, Sendable {
         DHIICharacterCreationEngine.previewCharacteristicGeneration(for: self)
     }
 
+    var homeWorldTalentOptions: [String] {
+        DHIICharacterCreationEngine.homeWorldTalentOptions(for: homeWorldID)
+    }
+
+    var backgroundSkillOptionGroups: [[String]] {
+        DHIICharacterCreationEngine.backgroundSkillOptionGroups(for: backgroundID)
+    }
+
+    var backgroundTalentOptions: [String] {
+        DHIICharacterCreationEngine.backgroundTalentOptions(for: backgroundID)
+    }
+
+    var backgroundEquipmentOptionGroups: [[String]] {
+        DHIICharacterCreationEngine.backgroundEquipmentOptionGroups(for: backgroundID)
+    }
+
+    var roleTalentOptions: [String] {
+        roleDefinition?.roleTalentChoices ?? []
+    }
+
     func settingHomeWorld(_ id: DHIIHomeWorldID?) -> DHIICreationDraft {
         DHIICreationDraft(
             homeWorldID: id,
@@ -288,6 +353,13 @@ struct DHIICreationDraft: Equatable, Sendable {
             roleID: roleID,
             backgroundAptitudeChoice: backgroundAptitudeChoice,
             roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: validatedChoice(homeWorldTalentChoice, options: DHIICharacterCreationEngine.homeWorldTalentOptions(for: id)),
+            backgroundSkillChoices: validatedIndexedChoices(backgroundSkillChoices, optionGroups: backgroundSkillOptionGroups),
+            backgroundTalentChoice: validatedChoice(backgroundTalentChoice, options: backgroundTalentOptions),
+            backgroundEquipmentChoices: validatedIndexedChoices(backgroundEquipmentChoices, optionGroups: backgroundEquipmentOptionGroups),
+            roleTalentChoice: validatedChoice(roleTalentChoice, options: roleTalentOptions),
+            startingWoundsRoll: validatedStartingRoll(startingWoundsRoll, allowedRange: 1 ... 5),
+            startingFateRoll: validatedStartingRoll(startingFateRoll, allowedRange: 1 ... 10),
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: nil,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
@@ -307,6 +379,22 @@ struct DHIICreationDraft: Equatable, Sendable {
             roleID: roleID,
             backgroundAptitudeChoice: validatedChoice(backgroundAptitudeChoice, options: validOptions),
             roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: validatedIndexedChoices(
+                backgroundSkillChoices,
+                optionGroups: DHIICharacterCreationEngine.backgroundSkillOptionGroups(for: id)
+            ),
+            backgroundTalentChoice: validatedChoice(
+                backgroundTalentChoice,
+                options: DHIICharacterCreationEngine.backgroundTalentOptions(for: id)
+            ),
+            backgroundEquipmentChoices: validatedIndexedChoices(
+                backgroundEquipmentChoices,
+                optionGroups: DHIICharacterCreationEngine.backgroundEquipmentOptionGroups(for: id)
+            ),
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: nil,
@@ -324,6 +412,13 @@ struct DHIICreationDraft: Equatable, Sendable {
             roleID: roleID,
             backgroundAptitudeChoice: validatedChoice(choice, options: validOptions),
             roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
@@ -348,6 +443,18 @@ struct DHIICreationDraft: Equatable, Sendable {
             roleID: id,
             backgroundAptitudeChoice: backgroundAptitudeChoice,
             roleAptitudeChoice: validatedChoice(roleAptitudeChoice, options: validOptions),
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: validatedChoice(
+                roleTalentChoice,
+                options: id.flatMap { roleID in
+                    DHIICharacterCreationEngine.canonicalRoles.first { $0.id == roleID }?.roleTalentChoices
+                } ?? []
+            ),
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
@@ -370,6 +477,177 @@ struct DHIICreationDraft: Equatable, Sendable {
             roleID: roleID,
             backgroundAptitudeChoice: backgroundAptitudeChoice,
             roleAptitudeChoice: validatedChoice(choice, options: validOptions),
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingHomeWorldTalentChoice(_ choice: String?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: validatedChoice(choice, options: homeWorldTalentOptions),
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingBackgroundSkillChoice(_ choice: String?, at index: Int) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: replacingIndexedChoice(
+                backgroundSkillChoices,
+                with: choice,
+                at: index,
+                optionGroups: backgroundSkillOptionGroups
+            ),
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingBackgroundTalentChoice(_ choice: String?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: validatedChoice(choice, options: backgroundTalentOptions),
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingBackgroundEquipmentChoice(_ choice: String?, at index: Int) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: replacingIndexedChoice(
+                backgroundEquipmentChoices,
+                with: choice,
+                at: index,
+                optionGroups: backgroundEquipmentOptionGroups
+            ),
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingRoleTalentChoice(_ choice: String?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: validatedChoice(choice, options: roleTalentOptions),
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingStartingWoundsRoll(_ roll: Int?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: validatedStartingRoll(roll, allowedRange: 1 ... 5),
+            startingFateRoll: startingFateRoll,
+            legacyFallbackAptitudes: legacyFallbackAptitudes,
+            unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
+            unrecognizedBackgroundInput: unrecognizedBackgroundInput,
+            unrecognizedRoleInput: unrecognizedRoleInput,
+            characteristicGenerationState: characteristicGenerationState
+        )
+    }
+
+    func settingStartingFateRoll(_ roll: Int?) -> DHIICreationDraft {
+        DHIICreationDraft(
+            homeWorldID: homeWorldID,
+            backgroundID: backgroundID,
+            roleID: roleID,
+            backgroundAptitudeChoice: backgroundAptitudeChoice,
+            roleAptitudeChoice: roleAptitudeChoice,
+            homeWorldTalentChoice: homeWorldTalentChoice,
+            backgroundSkillChoices: backgroundSkillChoices,
+            backgroundTalentChoice: backgroundTalentChoice,
+            backgroundEquipmentChoices: backgroundEquipmentChoices,
+            roleTalentChoice: roleTalentChoice,
+            startingWoundsRoll: startingWoundsRoll,
+            startingFateRoll: validatedStartingRoll(roll, allowedRange: 1 ... 10),
             legacyFallbackAptitudes: legacyFallbackAptitudes,
             unrecognizedHomeWorldInput: unrecognizedHomeWorldInput,
             unrecognizedBackgroundInput: unrecognizedBackgroundInput,
@@ -1205,7 +1483,7 @@ private func inferAndConsumeChoice(
     }
 }
 
-private func validatedChoice(_ choice: String?, options: [String]) -> String? {
+func validatedChoice(_ choice: String?, options: [String]) -> String? {
     guard let choice,
           let normalizedChoice = normalizedCatalogToken(choice) else {
         return nil

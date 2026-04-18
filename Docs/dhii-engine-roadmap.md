@@ -241,7 +241,7 @@
   - end-to-end creation projection tests
   - migration safety tests
 - Manual validation: save/reload smoke
-- Status: pending
+- Status: completed
 
 ### T07 — Persistence and migration path
 - Description: Introduce storage-safe engine state and legacy adapters.
@@ -274,17 +274,18 @@
 ## 5. Execution Log
 
 ### Current task in work
-- T06 — Starting package projection
+- T07 — Persistence and migration path
 
 ### What is done so far
 - Current repository architecture and local process rules audited.
 - Existing rules roadmap and decision log aligned with the new DHII Engine direction.
-- Tasks 01-05 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, and typed standard characteristic-generation foundation are now in place.
+- Tasks 01-06 are accepted locally: canonical home-world/background/role catalogs, explainable aptitude composition, typed creation draft recomposition, typed standard characteristic-generation foundation, and bounded starting-package projection are now in place.
 - Standard DHII random-roll and point-allocation characteristic generation now exist as transient creation-draft state with explicit `Influence`, explainable breakdowns, and honest invalidation on home-world changes.
+- Starting-package projection now derives a bounded engine-backed starting character package from resolved canonical selections, explicit choice slots, generated characteristics, and starting wounds/fate rolls while keeping unsupported rule areas honest.
 
 ### Gate status
-- Acceptance gate for T05: passed locally.
-- Next task is T06: starting-package projection over the typed creation draft.
+- Acceptance gate for T06: passed locally.
+- Next task is T07: storage-safe engine state and legacy-compatible migration path.
 
 ## 6. Final Delivery Summary
 

@@ -4,16 +4,17 @@
 2026-04-dhii-engine
 
 ## Title
-DHII Engine architecture freeze with Tasks 01-05 creation foundations
+DHII Engine architecture freeze with Tasks 01-06 creation foundations
 
 ## Goal
-Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и поэтапно реализовать первые пять безопасных вертикальных срезов: typed home-world foundation, typed background catalog foundation, typed role/aptitude-composition foundation, typed in-memory creation draft aggregate и typed characteristic-generation foundation с каноническим источником правил, compatibility diagnostics и безопасной интеграцией в текущий bounded domain.
+Зафиксировать целевую архитектуру полноценного DHII Engine для `DH_charlist` и поэтапно реализовать первые шесть безопасных вертикальных срезов: typed home-world foundation, typed background catalog foundation, typed role/aptitude-composition foundation, typed in-memory creation draft aggregate, typed characteristic-generation foundation и starting-package projection с каноническим источником правил, compatibility diagnostics и безопасной интеграцией в текущий bounded domain.
 
 ## User value
 - Пользователь получает первые rulebook-backed creation surfaces вместо полностью свободных текстовых полей без доменной опоры.
 - Пользователь получает engine-backed aptitude composition там, где rulebook package slots фиксированы, без необходимости вручную дублировать эти aptitudes в профиле.
 - Команда получает typed creation draft seam, через который можно безопасно менять ранние creation choices без скрытого протаскивания устаревших downstream aptitude choices.
 - Пользователь получает typed, explainable characteristic-generation engine для стандартного DHII random-roll и standard point-allocation flows, без выдуманных стартовых значений и без потери rulebook-critical `Influence` внутри transient creation state.
+- Пользователь получает engine-backed стартовый пакет персонажа в пределах поддерживаемого scope: стартовые aptitudes, ресурсы, навыки, таланты, traits, special abilities, оружие и инвентарь теперь собираются из typed creation truth вместо ручных догадок.
 - Команда получает согласованную архитектуру и последовательный roadmap, а не хаотичное наращивание UI.
 - Риск ложных или неполных стартовых правил снижается за счёт явного catalog/preview и честной индикации текущих доменных пробелов.
 
@@ -31,11 +32,13 @@ DHII Engine architecture freeze with Tasks 01-05 creation foundations
 - Task 03: канонический typed registry для всех восьми DHII core roles, explainable aptitude composition across home world/background/role, and safe bounded integration into progression checks.
 - Task 04: typed in-memory creation draft aggregate over canonical home world/background/role selections plus explicit background/role aptitude choice state with safe recomposition and a legacy adapter from `Profile`.
 - Task 05: typed characteristic-generation model over the creation draft for the standard DHII random-roll and standard point-allocation modes, including a single random-generation reroll, explicit transient `Influence`, explainable breakdowns, and safe handling of home-world recomposition or invalidation.
+- Task 06: starting-package projection over the typed creation draft for supported DHII creation outputs, including explicit choice-slot resolution for package skills/talents/equipment, starting wounds/fate rolls, bounded `Character` projection, and explicit compatibility diagnostics for unsupported rule effects.
 - Explainable home-world/background previews и compatibility diagnostics для текущей snapshot-модели.
 - Explainable role preview and composed-aptitude preview for the current snapshot model.
 - Typed in-memory creation draft derived from the current snapshot model, including explicit unresolved choice-slot handling and pruning of stale downstream choice state when selections change.
 - Narrow, non-persistent creation-engine integration that does not change the current persistence shape.
 - Safe use of composed aptitudes in bounded XP prerequisite and skill-cost helpers without rewriting persisted `profile.aptitudes`.
+- Bounded starting-package projection that derives a safe legacy `Character` snapshot plus transient `Influence` from a fully resolved creation draft.
 - Unit/regression tests на новый foundation slice.
 
 ## Out of scope
@@ -43,6 +46,7 @@ DHII Engine architecture freeze with Tasks 01-05 creation foundations
 - Автоматическое применение background/role packages.
 - Typed persistence for creation-time aptitude choices.
 - Typed persistence for characteristic-generation provenance.
+- Typed persistence for starting-package choice state or projected engine state.
 - Полная миграция persistence shape под rich engine state.
 - Experienced Acolyte / high-power characteristic-generation variant (`+25` random base, adjusted point-allocation floor/cap).
 - Web parity для creation preview foundations.
@@ -77,6 +81,7 @@ DHII Engine architecture freeze with Tasks 01-05 creation foundations
 - Current saved character snapshot cannot yet persist typed background/role aptitude choices or role talent choices.
 - Current saved character snapshot still cannot persist typed background/role aptitude choices; Task 04 may only derive them in memory from legacy profile fields and must not introduce silent destructive writes.
 - Current saved character snapshot still cannot persist characteristic-generation mode, dice provenance, point-allocation state, or transient `Influence`; Task 05 must keep these transient and must not silently flatten them into invented persisted defaults.
+- Current saved character snapshot still cannot persist typed starting-package choice provenance or engine-backed creation state, so Task 06 must project safely into the legacy snapshot without introducing a shadow persisted truth.
 - UI could over-promise automation if the preview is not clearly marked informational.
 - Future phases could diverge if the roadmap is not frozen before additional implementation.
 
@@ -98,6 +103,9 @@ DHII Engine architecture freeze with Tasks 01-05 creation foundations
 - AC15. The engine supports standard DHII point allocation (`25` base, `60` discretionary points, `40` per-characteristic cap) with home-world starting-score modifiers and explicit validation errors for overspend and cap violations.
 - AC16. The engine can project supported generated results into the persisted nine-characteristic snapshot while explicitly retaining unsupported `Influence` only in transient creation state.
 - AC17. Home-world changes do not silently preserve stale generation semantics: point-allocation results recompose safely, and any random-generation state that is no longer rule-valid becomes explicit or is invalidated instead of being misrepresented.
+- AC18. The rules layer exposes a starting-package projection API that requires canonical selections, resolved supported choice slots, characteristic generation, and starting wounds/fate rolls before yielding a projected package.
+- AC19. The engine can derive a bounded starting `Character` snapshot end-to-end from a fully resolved creation draft, including supported aptitudes, starting resources, skills, talents, traits, special abilities, weapons, and inventory, while surfacing transient `Influence` separately.
+- AC20. Unsupported or unresolved starting-package rules remain explicit through validation or compatibility diagnostics instead of being silently guessed or flattened into incorrect saved state.
 
 ## Required validation
 - `make fmt`
@@ -120,8 +128,10 @@ DHII Engine architecture freeze with Tasks 01-05 creation foundations
 The evidence bundle must include:
 - exact commands actually executed
 - focused rules/data evidence for the creation foundations, including the typed draft recomposition contract
+- focused rules/data evidence for starting-package projection, including choice-slot resolution requirements and bounded `Character` projection
 - explicit separation between tested behavior and future phases
 - explicit separation between transient engine-only characteristic generation state and persisted snapshot projection
+- explicit separation between projected legacy snapshot data and still-unpersisted engine state
 - confidence split across logic, runtime, UI, and real-device categories
 - final recommendation: accepted / accepted_with_conditions / rejected
 
@@ -129,6 +139,7 @@ The evidence bundle must include:
 - Keep Tasks 01-03 limited to catalog/preview/composition foundations and bounded progression integration.
 - Task 03 may consume composed aptitudes in bounded progression flows, but must not introduce typed persistence or silent choice inference.
 - Task 05 must stay on the standard DHII characteristic-generation path only; do not silently include the optional higher-power variant.
+- Task 06 must project only supported package effects into the legacy snapshot and must keep unresolved choice slots plus unsupported rule effects explicit.
 - Prefer typed domain structures over raw strings in the new rules layer.
 - Treat the read-only preview as an integration seam, not as the full creation UI.
 - Be explicit that `Influence` remains a known model gap.

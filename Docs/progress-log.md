@@ -2,6 +2,12 @@
 
 ## 2026-04-18
 
+### DHII Engine Task 06 — Starting package projection
+- **status:** accepted_with_conditions
+- **checks run:** `swift build`, `swift test --filter CharacterCreationEngineTests`, `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `make ci`
+- **results:** completed Task 06 with a typed starting-package projection seam over the creation draft. The rules layer now carries the supported home-world/background/role choice slots and starting wounds/fate rolls needed to build a bounded DHII starting package without changing the persisted `Character` shape. Added `CharacterCreationProjection.swift` to validate canonical selections, choice-slot resolution, characteristic-generation readiness, and roll gates before projection; the engine can now derive a safe legacy `Character` snapshot end-to-end with supported aptitudes, resources, skills, talents, traits, special abilities, weapons, inventory, and movement, while keeping transient `Influence` explicit outside persistence. Added focused tests for fully resolved end-to-end projection, explicit rejection of unresolved slots, stale-choice pruning across recomposition, codable round-trip safety, and branch coverage across all seven backgrounds. First `make ci` found a real quality-gate issue: the new projection branches dropped `Rules` coverage below policy. Added targeted projection tests, reran the full gate, and recovered `Rules` coverage to `95.19%` while keeping broader regression and host/UI coverage green.
+- **blockers:** no blocker remains for Task 06. Residual scope limits stay intentional: no typed persistence for creation/projection state yet, no engine-backed create/edit flow yet, no full unsupported package-effect automation, and no real-device verification.
+
 ### DHII Engine Task 05 — Characteristic generation modes
 - **status:** accepted_with_conditions
 - **checks run:** `swift test --filter CharacterCreationEngineTests`, `swift build`, `cd web && npm test`, `cd web && npm run typecheck`, `cd web && npm run build`, `swift test`, `make ci`

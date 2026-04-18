@@ -1,8 +1,8 @@
 {
   "task_id": "2026-04-dhii-engine",
-  "title": "DHII Engine architecture freeze with Tasks 01-05 creation foundations",
+  "title": "DHII Engine architecture freeze with Tasks 01-06 creation foundations",
   "status": "accepted_with_conditions",
-  "summary": "Tasks 01-05 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, a typed in-memory creation draft aggregate, and a typed characteristic-generation foundation for standard DHII random-roll and point-allocation modes. Validation is green locally, including full make ci and coverage-policy checks after adding characteristic-generation coverage.",
+  "summary": "Tasks 01-06 accepted: the repo now has a frozen DHII Engine roadmap plus typed, rulebook-backed home-world, background, and role foundations, explainable aptitude composition, a typed in-memory creation draft aggregate, a typed characteristic-generation foundation for standard DHII random-roll and point-allocation modes, and bounded starting-package projection into the legacy Character snapshot. Validation is green locally, including full make ci and coverage-policy checks after adding starting-package coverage.",
   "accepted_scope": [
     "DHII Engine roadmap and task decomposition",
     "typed six-world home-world catalog with aliases and rulebook-backed previews",
@@ -14,7 +14,8 @@
     "profile-flow informational preview integration",
     "bounded progression consumption of engine-backed aptitudes without persistence mutation",
     "typed characteristic-generation foundation with transient Influence and explainable breakdowns",
-    "Task 01-05 regression hardening and validation proof bundle updates"
+    "bounded starting-package projection into a safe legacy Character snapshot with transient Influence kept separate",
+    "Task 01-06 regression hardening and validation proof bundle updates"
   ],
   "rejected_scope": [
     "automatic role package application",
@@ -27,15 +28,15 @@
   "blockers": [],
   "residual_risks": [
     "real device behavior not verified",
-    "starting-package projection is not yet implemented",
     "typed persistence for unresolved aptitude choices is not yet implemented",
     "typed persistence for characteristic-generation state is not yet implemented",
+    "typed persistence for starting-package choice provenance is not yet implemented",
     "web does not yet mirror the new creation preview foundations"
   ],
   "required_followups": [
-    "Implement starting-package projection over the typed creation draft",
     "Project typed creation state into persistence safely",
-    "Persist and recompose creation-time aptitude choices safely"
+    "Persist and recompose creation-time aptitude choices safely",
+    "Replace manual creation illusions with an engine-backed creation flow"
   ],
   "evidence_bundle": [
     ".agent/tasks/2026-04-dhii-engine/spec.md",
@@ -47,7 +48,12 @@
     "targeted Swift tests for CharacterCreationEngine, XPProgression, and RulesRegistry",
     "expanded CharacterCreationEngine draft-coverage tests",
     "expanded CharacterCreationEngine characteristic-generation tests",
+    "expanded CharacterCreationEngine starting-package projection tests",
     "swift build",
+    "make fmt",
+    "make lint",
+    "make typecheck",
+    "make test",
     "web npm test",
     "web typecheck",
     "web production build",
@@ -57,7 +63,7 @@
   ],
   "not_verified_in_this_environment": [
     "real device behavior",
-    "full DHII character creation flow",
+    "full DHII engine-backed character creation flow",
     "persistence-backed creation-state migration"
   ],
   "trust_assessment": {

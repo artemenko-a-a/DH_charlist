@@ -560,3 +560,506 @@ import Testing
         $0.contains("Hive World") && $0.contains("Forge World")
     })
 }
+
+@Test func startingPackageProjectionBuildsResolvedImperialGuardWarriorPackage() throws {
+    let baseDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Guardsman",
+            homeWorld: "Hive World",
+            background: "Imperial Guard",
+            role: "Warrior"
+        )
+    )
+
+    let generated = try baseDraft.settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+
+    let resolved = generated
+        .settingBackgroundAptitudeChoice("Fieldcraft")
+        .settingBackgroundSkillChoice("Operate (Surface)", at: 0)
+        .settingBackgroundEquipmentChoice("Lasgun", at: 0)
+        .settingRoleTalentChoice("Rapid Reload")
+        .settingStartingWoundsRoll(2)
+        .settingStartingFateRoll(7)
+
+    let preview = DHIICharacterCreationEngine.previewStartingPackage(for: resolved)
+    let projected = try #require(preview.projectedCharacter)
+
+    #expect(preview.isValid)
+    #expect(preview.validationMessages.isEmpty)
+    #expect(preview.projectedInfluence == 30)
+    #expect(projected.profile.homeWorld == "Hive World")
+    #expect(projected.profile.background == "Imperial Guard")
+    #expect(projected.profile.role == "Warrior")
+    #expect(projected.profile.aptitudes == [
+        "Perception", "Fieldcraft", "Ballistic Skill", "Defence", "Offence", "Strength", "Weapon Skill"
+    ])
+    #expect(projected.resources == ResourceState(
+        currentWounds: 10,
+        maxWounds: 10,
+        fatigue: 0,
+        corruption: 0,
+        insanity: 0,
+        currentFate: 3,
+        maxFate: 3,
+        experienceSpent: 0,
+        experienceTotal: 1_000
+    ))
+    #expect(projected.skills.contains {
+        $0.name == "Athletics" && $0.characteristic == .strength && $0.training == .known
+    })
+    #expect(projected.skills.contains {
+        $0.name == "Operate (Surface)" && $0.characteristic == .agility && $0.training == .known && $0.specialisations == ["Surface"]
+    })
+    #expect(projected.notes.talents.contains("Rapid Reload"))
+    #expect(projected.notes.talents.contains("Weapon Training (Las, Low-Tech)"))
+    #expect(projected.notes.specialAbilities.contains("Hammer of the Emperor: Damage dice showing 1 or 2 can be re-rolled against a target an ally attacked since the end of the character's last turn."))
+    #expect(projected.notes.specialAbilities.contains("Expert at Violence: After a successful attack and before hits are determined, the character can spend a Fate point to replace attack-roll degrees of success with Weapon Skill bonus or Ballistic Skill bonus."))
+    #expect(projected.equipment.weapons.map(\.name) == ["Lasgun"])
+    #expect(projected.equipment.inventory.contains {
+        $0.name == "Standard Ammunition for Lasgun" && $0.quantity == 2
+    })
+    #expect(projected.equipment.inventory.contains { $0.name == "Imperial Guard Flak Armour" })
+    #expect(projected.equipment.movement == MovementProfile(halfMove: 3, fullMove: 6, charge: 9, run: 18))
+}
+
+@Test func startingPackageProjectionDoesNotGuessMissingChoicesOrRolls() throws {
+    let draft = try DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Incomplete",
+            homeWorld: "Forge World",
+            background: "Adeptus Mechanicus",
+            role: "Assassin"
+        )
+    ).settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 5,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 10,
+            intelligence: 10,
+            perception: 5,
+            willpower: 5,
+            fellowship: 0,
+            influence: 5
+        )
+    )
+
+    let preview = DHIICharacterCreationEngine.previewStartingPackage(for: draft)
+
+    #expect(preview.projectedCharacter == nil)
+    #expect(preview.isValid == false)
+    #expect(preview.validationMessages.contains { $0.contains("Adeptus Mechanicus") && $0.contains("aptitude choice") })
+    #expect(preview.validationMessages.contains { $0.contains("Assassin") && $0.contains("aptitude choice") })
+    #expect(preview.validationMessages.contains { $0.contains("Forge World") && $0.contains("home world talent choice") })
+    #expect(preview.validationMessages.contains { $0.contains("starting equipment choice 1") })
+    #expect(preview.validationMessages.contains { $0.contains("starting equipment choice 2") })
+    #expect(preview.validationMessages.contains("Starting wounds require a 1d5 roll before projection."))
+    #expect(preview.validationMessages.contains("Starting fate requires a 1d10 roll before projection."))
+}
+
+@Test func changingBackgroundPrunesStaleStartingPackageChoiceState() {
+    let draft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Reselect",
+            homeWorld: "Forge World",
+            background: "Adeptus Mechanicus",
+            role: "Warrior"
+        )
+    )
+    .settingHomeWorldTalentChoice("Weapon-Tech")
+    .settingBackgroundAptitudeChoice("Tech")
+    .settingBackgroundSkillChoice("Operate (Pick One)", at: 0)
+    .settingBackgroundEquipmentChoice("Hand Cannon", at: 0)
+    .settingBackgroundEquipmentChoice("Optical Mechadendrite", at: 1)
+    .settingRoleTalentChoice("Rapid Reload")
+    .settingStartingWoundsRoll(4)
+    .settingStartingFateRoll(9)
+
+    let recomposed = draft.settingBackground(.adeptusAdministratum)
+
+    #expect(recomposed.homeWorldTalentChoice == "Weapon-Tech")
+    #expect(recomposed.backgroundAptitudeChoice == nil)
+    #expect(recomposed.backgroundSkillChoices.isEmpty)
+    #expect(recomposed.backgroundEquipmentChoices.isEmpty)
+    #expect(recomposed.roleTalentChoice == "Rapid Reload")
+    #expect(recomposed.startingWoundsRoll == 4)
+    #expect(recomposed.startingFateRoll == 9)
+}
+
+@Test func startingPackageProjectionRoundTripsThroughLegacyCharacterCodableShape() throws {
+    let draft = try DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Roundtrip",
+            homeWorld: "Hive World",
+            background: "Imperial Guard",
+            role: "Warrior"
+        )
+    )
+    .settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+    .settingBackgroundAptitudeChoice("Fieldcraft")
+    .settingBackgroundSkillChoice("Operate (Surface)", at: 0)
+    .settingBackgroundEquipmentChoice("Lasgun", at: 0)
+    .settingRoleTalentChoice("Rapid Reload")
+    .settingStartingWoundsRoll(2)
+    .settingStartingFateRoll(7)
+
+    let preview = DHIICharacterCreationEngine.previewStartingPackage(for: draft)
+    let projected = try #require(preview.projectedCharacter)
+
+    let encoded = try JSONEncoder().encode(projected)
+    let decoded = try JSONDecoder().decode(Character.self, from: encoded)
+
+    #expect(decoded == projected)
+}
+
+@Test func startingPackageProjectionSupportsEveryBackgroundBranchWithResolvedSelections() throws {
+    struct Scenario {
+        let homeWorld: String
+        let background: String
+        let role: String
+        let homeWorldTalentChoice: String?
+        let backgroundAptitudeChoice: String?
+        let roleAptitudeChoice: String?
+        let backgroundSkillChoices: [String]
+        let backgroundTalentChoice: String?
+        let backgroundEquipmentChoices: [String]
+        let roleTalentChoice: String?
+        let startingWoundsRoll: Int
+        let startingFateRoll: Int
+        let expectedWeapons: [String]
+        let expectedInventoryItems: [String]
+        let expectedTalents: [String]
+        let expectedTraits: [String]
+        let expectedSkillNames: [String]
+        let expectedSpecialAbilityNames: [String]
+    }
+
+    let scenarios: [Scenario] = [
+        Scenario(
+            homeWorld: "Hive World",
+            background: "Adeptus Administratum",
+            role: "Seeker",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Social",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Medicae"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Stub Automatic"],
+            roleTalentChoice: "Disarm",
+            startingWoundsRoll: 2,
+            startingFateRoll: 5,
+            expectedWeapons: ["Stub Automatic"],
+            expectedInventoryItems: ["Imperial Robes", "Medi-kit", "Standard Ammunition for Stub Automatic"],
+            expectedTalents: ["Weapon Training (Las or Solid Projectile)", "Disarm"],
+            expectedTraits: [],
+            expectedSkillNames: ["Medicae", "Common Lore", "Linguistics", "Logic", "Scholastic Lore"],
+            expectedSpecialAbilityNames: ["Master of Paperwork", "Nothing Escapes My Sight", "Teeming Masses in Metal Mountains"]
+        ),
+        Scenario(
+            homeWorld: "Feral World",
+            background: "Adeptus Arbites",
+            role: "Warrior",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Defence",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Interrogation"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Shock Maul", "Carapace Chestplate"],
+            roleTalentChoice: "Iron Jaw",
+            startingWoundsRoll: 5,
+            startingFateRoll: 2,
+            expectedWeapons: ["Shock Maul"],
+            expectedInventoryItems: ["Carapace Chestplate", "3 Doses of Stimm"],
+            expectedTalents: ["Weapon Training (Shock or Solid Projectile)", "Iron Jaw"],
+            expectedTraits: [],
+            expectedSkillNames: ["Awareness", "Common Lore", "Interrogation", "Intimidate", "Scrutiny"],
+            expectedSpecialAbilityNames: ["The Face of the Law", "Expert at Violence", "The Old Ways"]
+        ),
+        Scenario(
+            homeWorld: "Voidborn",
+            background: "Adeptus Astra Telepathica",
+            role: "Mystic",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Psyker",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Interrogation", "Scrutiny"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Whip", "Flak Vest"],
+            roleTalentChoice: "Warp Sense",
+            startingWoundsRoll: 1,
+            startingFateRoll: 9,
+            expectedWeapons: ["Laspistol", "Whip"],
+            expectedInventoryItems: ["Flak Vest", "Micro-bead", "Standard Ammunition for Laspistol"],
+            expectedTalents: ["Weapon Training (Las, Low-Tech)", "Warp Sense", "Strong Minded"],
+            expectedTraits: [],
+            expectedSkillNames: ["Awareness", "Common Lore", "Interrogation", "Forbidden Lore", "Scrutiny"],
+            expectedSpecialAbilityNames: ["The Constant Threat / Tested on Terra", "Stare into the Warp", "Child of the Dark"]
+        ),
+        Scenario(
+            homeWorld: "Forge World",
+            background: "Adeptus Mechanicus",
+            role: "Sage",
+            homeWorldTalentChoice: "Weapon-Tech",
+            backgroundAptitudeChoice: "Tech",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Operate (Pick One)"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Hand Cannon", "Optical Mechadendrite"],
+            roleTalentChoice: "Clues from the Crowds",
+            startingWoundsRoll: 3,
+            startingFateRoll: 10,
+            expectedWeapons: ["Hand Cannon"],
+            expectedInventoryItems: ["Optical Mechadendrite", "2 Vials of Sacred Unguents", "Standard Ammunition for Hand Cannon"],
+            expectedTalents: ["Mechadendrite Use (Utility)", "Weapon Training (Solid Projectile)", "Weapon-Tech", "Clues from the Crowds"],
+            expectedTraits: ["Mechanicus Implants"],
+            expectedSkillNames: ["Operate (Pick One)", "Common Lore", "Logic", "Security", "Tech-Use"],
+            expectedSpecialAbilityNames: ["Replace the Weak Flesh", "Quest for Knowledge", "Omnissiah's Chosen"]
+        ),
+        Scenario(
+            homeWorld: "Shrine World",
+            background: "Adeptus Ministorum",
+            role: "Hierophant",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Leadership",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Scrutiny"],
+            backgroundTalentChoice: "Weapon Training (Low-Tech, Solid Projectile)",
+            backgroundEquipmentChoices: ["Warhammer and Stub Revolver", "Flak Vest"],
+            roleTalentChoice: "Hatred (Pick One)",
+            startingWoundsRoll: 4,
+            startingFateRoll: 2,
+            expectedWeapons: ["Warhammer", "Stub Revolver"],
+            expectedInventoryItems: ["Flak Vest", "Monotask Servo-Skull (Laud Hailer)", "Standard Ammunition for Stub Revolver"],
+            expectedTalents: ["Weapon Training (Low-Tech, Solid Projectile)", "Hatred (Pick One)"],
+            expectedTraits: [],
+            expectedSkillNames: ["Charm", "Command", "Common Lore", "Scrutiny", "Linguistics"],
+            expectedSpecialAbilityNames: ["Faith is All", "Sway the Masses", "Faith in the Creed"]
+        ),
+        Scenario(
+            homeWorld: "Hive World",
+            background: "Imperial Guard",
+            role: "Assassin",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Leadership",
+            roleAptitudeChoice: "Weapon Skill",
+            backgroundSkillChoices: ["Medicae"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Laspistol and Sword"],
+            roleTalentChoice: "Leap Up",
+            startingWoundsRoll: 2,
+            startingFateRoll: 4,
+            expectedWeapons: ["Laspistol", "Sword"],
+            expectedInventoryItems: ["Imperial Guard Flak Armour", "Standard Ammunition for Laspistol"],
+            expectedTalents: ["Weapon Training (Las, Low-Tech)", "Leap Up"],
+            expectedTraits: [],
+            expectedSkillNames: ["Athletics", "Command", "Common Lore", "Medicae", "Navigate"],
+            expectedSpecialAbilityNames: ["Hammer of the Emperor", "Sure Kill", "Teeming Masses in Metal Mountains"]
+        ),
+        Scenario(
+            homeWorld: "Highborn",
+            background: "Outcast",
+            role: "Desperado",
+            homeWorldTalentChoice: nil,
+            backgroundAptitudeChoice: "Social",
+            roleAptitudeChoice: nil,
+            backgroundSkillChoices: ["Sleight of Hand"],
+            backgroundTalentChoice: nil,
+            backgroundEquipmentChoices: ["Laspistol", "Flak Vest", "Slaught"],
+            roleTalentChoice: "Quick Draw",
+            startingWoundsRoll: 3,
+            startingFateRoll: 9,
+            expectedWeapons: ["Laspistol", "Chainsword"],
+            expectedInventoryItems: ["Flak Vest", "2 Doses of Slaught", "Standard Ammunition for Laspistol"],
+            expectedTalents: ["Weapon Training (Chain, and Las or Solid Projectile)", "Quick Draw"],
+            expectedTraits: [],
+            expectedSkillNames: ["Sleight of Hand", "Common Lore", "Deceive", "Dodge", "Stealth"],
+            expectedSpecialAbilityNames: ["Never Quit", "Move and Shoot", "Breeding Counts"]
+        )
+    ]
+
+    for scenario in scenarios {
+        let draft = try fullyResolvedStartingPackageDraft(
+            name: scenario.background,
+            homeWorld: scenario.homeWorld,
+            background: scenario.background,
+            role: scenario.role,
+            homeWorldTalentChoice: scenario.homeWorldTalentChoice,
+            backgroundAptitudeChoice: scenario.backgroundAptitudeChoice,
+            roleAptitudeChoice: scenario.roleAptitudeChoice,
+            backgroundSkillChoices: scenario.backgroundSkillChoices,
+            backgroundTalentChoice: scenario.backgroundTalentChoice,
+            backgroundEquipmentChoices: scenario.backgroundEquipmentChoices,
+            roleTalentChoice: scenario.roleTalentChoice,
+            startingWoundsRoll: scenario.startingWoundsRoll,
+            startingFateRoll: scenario.startingFateRoll
+        )
+
+        let preview = DHIICharacterCreationEngine.previewStartingPackage(for: draft)
+        let projected = try #require(preview.projectedCharacter)
+
+        #expect(preview.isValid)
+        #expect(projected.equipment.weapons.map(\.name) == scenario.expectedWeapons)
+        for item in scenario.expectedInventoryItems {
+            if projected.equipment.inventory.contains(where: { $0.name == item }) == false {
+                Issue.record("Missing inventory item \(item) for \(scenario.background)")
+            }
+        }
+        for talent in scenario.expectedTalents {
+            if projected.notes.talents.contains(talent) == false {
+                Issue.record("Missing talent \(talent) for \(scenario.background)")
+            }
+        }
+        #expect(projected.notes.traits == scenario.expectedTraits)
+        for skillName in scenario.expectedSkillNames {
+            if projected.skills.contains(where: { $0.name == skillName }) == false {
+                Issue.record("Missing skill \(skillName) for \(scenario.background)")
+            }
+        }
+        for fragment in scenario.expectedSpecialAbilityNames {
+            if projected.notes.specialAbilities.contains(where: { $0.contains(fragment) }) == false {
+                Issue.record("Missing special ability fragment \(fragment) for \(scenario.background): \(projected.notes.specialAbilities)")
+            }
+        }
+    }
+}
+
+@Test func startingPackageProjectionRequiresCanonicalSelectionsAndSanitizesChoiceHelpers() {
+    let blank = DHIICharacterCreationEngine.previewStartingPackage(
+        for: DHIICharacterCreationEngine.creationDraft(from: Profile(name: "Blank"))
+    )
+
+    #expect(blank.projectedCharacter == nil)
+    #expect(blank.validationMessages.contains("A canonical home world is required before projecting a starting package."))
+    #expect(blank.validationMessages.contains("A canonical background is required before projecting a starting package."))
+    #expect(blank.validationMessages.contains("A canonical role is required before projecting a starting package."))
+    #expect(blank.validationMessages.contains("Characteristic generation must be resolved before projecting a starting package."))
+    #expect(blank.validationMessages.contains("Starting wounds require a 1d5 roll before projection."))
+    #expect(blank.validationMessages.contains("Starting fate requires a 1d10 roll before projection."))
+
+    let groups = [["Inquiry", "Interrogation"], ["Psyniscience", "Scrutiny"]]
+    #expect(validatedIndexedChoices(["Interrogation", "Bogus"], optionGroups: groups) == ["Interrogation"])
+    #expect(
+        replacingIndexedChoice(["Interrogation"], with: "Scrutiny", at: 1, optionGroups: groups)
+            == ["Interrogation", "Scrutiny"]
+    )
+    #expect(
+        replacingIndexedChoice(["Interrogation", "Scrutiny"], with: "Bogus", at: 0, optionGroups: groups)
+            == ["Scrutiny"]
+    )
+    #expect(
+        replacingIndexedChoice(["Interrogation"], with: "Bogus", at: 9, optionGroups: groups)
+            == ["Interrogation"]
+    )
+    #expect(validatedStartingRoll(3, allowedRange: 1 ... 5) == 3)
+    #expect(validatedStartingRoll(0, allowedRange: 1 ... 5) == nil)
+}
+
+private func fullyResolvedStartingPackageDraft(
+    name: String,
+    homeWorld: String,
+    background: String,
+    role: String,
+    homeWorldTalentChoice: String? = nil,
+    backgroundAptitudeChoice: String? = nil,
+    roleAptitudeChoice: String? = nil,
+    backgroundSkillChoices: [String] = [],
+    backgroundTalentChoice: String? = nil,
+    backgroundEquipmentChoices: [String] = [],
+    roleTalentChoice: String? = nil,
+    startingWoundsRoll: Int = 3,
+    startingFateRoll: Int = 5
+) throws -> DHIICreationDraft {
+    let baseDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: name,
+            homeWorld: homeWorld,
+            background: background,
+            role: role
+        )
+    )
+
+    var resolved = try baseDraft.settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+
+    if resolved.homeWorldTalentOptions.isEmpty == false {
+        resolved = resolved.settingHomeWorldTalentChoice(homeWorldTalentChoice ?? resolved.homeWorldTalentOptions.first)
+    }
+
+    if let firstBackgroundChoice = resolved.backgroundDefinition?.aptitudeOptions.first {
+        resolved = resolved.settingBackgroundAptitudeChoice(backgroundAptitudeChoice ?? firstBackgroundChoice)
+    }
+
+    if let firstRoleChoice = resolved.roleDefinition?.aptitudeRules.compactMap({ rule -> String? in
+        if case .choice(let first, _) = rule {
+            return first
+        }
+        return nil
+    }).first {
+        resolved = resolved.settingRoleAptitudeChoice(roleAptitudeChoice ?? firstRoleChoice)
+    }
+
+    for (index, options) in resolved.backgroundSkillOptionGroups.enumerated() {
+        resolved = resolved.settingBackgroundSkillChoice(backgroundSkillChoices[safe: index] ?? options.first, at: index)
+    }
+
+    if resolved.backgroundTalentOptions.isEmpty == false {
+        resolved = resolved.settingBackgroundTalentChoice(backgroundTalentChoice ?? resolved.backgroundTalentOptions.first)
+    }
+
+    for (index, options) in resolved.backgroundEquipmentOptionGroups.enumerated() {
+        resolved = resolved.settingBackgroundEquipmentChoice(backgroundEquipmentChoices[safe: index] ?? options.first, at: index)
+    }
+
+    if resolved.roleTalentOptions.isEmpty == false {
+        resolved = resolved.settingRoleTalentChoice(roleTalentChoice ?? resolved.roleTalentOptions.first)
+    }
+
+    return resolved
+        .settingStartingWoundsRoll(startingWoundsRoll)
+        .settingStartingFateRoll(startingFateRoll)
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}

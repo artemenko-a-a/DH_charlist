@@ -35,3 +35,12 @@
 - **Root cause:** the new typed creation draft introduced untested branches for unknown freeform inputs, ambiguous legacy choice matches, and setter validation/pruning paths.
 - **Classification:** quality-gate regression in new Task 04 test coverage, not a runtime/domain defect.
 - **Resolution:** added focused draft tests for unknown-input handling, ambiguous legacy matches, setter validation, and recomposition pruning, then reran `make ci`; `Rules` coverage recovered to `94.71%` and the policy passed.
+
+## 2026-04-18 — Rules coverage gate regressed after introducing starting-package projection
+
+- **Where:** `Sources/DHCharList/Rules/CharacterCreationProjection.swift` and `Tests/DHCharListTests/CharacterCreationEngineTests.swift`
+- **Observed during:** first `make ci` after Task 06 implementation
+- **Symptom:** coverage policy failed because `Rules` dropped to `90.97%`, below the allowed minimum `93.55%`, even though the new projection tests and runtime flows were otherwise green.
+- **Root cause:** the new starting-package projection seam introduced many untested branches for alternate background package branches, explicit choice-slot validation paths, and helper sanitization logic.
+- **Classification:** quality-gate regression in new Task 06 test coverage, not a runtime/domain defect.
+- **Resolution:** added focused projection coverage for all seven background branches, explicit unresolved-choice validation paths, helper sanitization, and legacy codable round-trip behavior, then reran `make ci`; `Rules` coverage recovered to `95.19%` and the policy passed.

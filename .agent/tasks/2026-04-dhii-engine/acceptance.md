@@ -13,6 +13,8 @@
 - [x] Typed characteristic generation works as described in the spec
 - [x] Random-roll generation includes the standard DHII reroll rule
 - [x] Point-allocation generation works as described in the spec
+- [x] Starting-package projection derives a bounded engine-backed character package end-to-end
+- [x] Starting-package projection refuses unresolved or unsupported selections instead of guessing
 
 ## Rules / logic correctness
 - [x] Home-world facts are backed by the DH2 core rulebook
@@ -32,6 +34,8 @@
 - [x] Point allocation follows the standard DHII formula, pool, and cap
 - [x] Unsupported Influence projection remains explicit instead of being silently dropped
 - [x] Home-world changes recompose or invalidate generation state honestly
+- [x] Starting-package projection requires explicit resolution of supported choice slots and roll gates
+- [x] Starting-package projection keeps unsupported rule effects explicit through compatibility diagnostics
 
 ## Data safety
 - [x] Existing saved characters are not silently mutated
@@ -42,6 +46,8 @@
 - [x] No persisted role identifier or typed aptitude-choice state was introduced prematurely
 - [x] No draft-only state is silently persisted into the current storage shape
 - [x] No transient generation provenance is silently persisted into the current storage shape
+- [x] No typed starting-package engine state is silently persisted into the current storage shape
+- [x] Projected legacy `Character` remains codable and safe to round-trip
 
 ## Runtime confidence
 - [x] Focused host/runtime sanity passed
@@ -49,6 +55,7 @@
 - [x] No newly observed blocker in profile flow
 - [x] Web regression set remains green
 - [x] New generation-specific regression set is green
+- [x] New starting-package projection regression set is green
 
 ## UI / UX
 - [x] Preview is clearly informational and does not imply full automation
@@ -58,6 +65,7 @@
 - [x] Composed aptitudes do not falsely imply that unresolved choices were auto-resolved
 - [x] Profile flow now reads composed aptitudes through the typed draft seam
 - [x] Any surfaced generation output stays explicitly informational until a later engine-backed creation flow lands
+- [x] No UI surface falsely implies that unsupported starting-package mechanics are fully automated
 
 ## Automation / quality gates
 - [x] `make fmt` passed
@@ -68,6 +76,7 @@
 - [x] targeted DHII Engine tests passed
 - [x] worktree clean enough for intentional follow-up
 - [x] T05 targeted DHII Engine tests passed
+- [x] T06 targeted DHII Engine tests passed
 
 ## Documentation / truthfulness
 - [x] DHII Engine roadmap doc added or updated
@@ -84,4 +93,4 @@
 - Typed persistence and migration path for characteristic-generation state
 - Typed persistence and migration path for creation state
 - Background package application
-- Starting-package projection beyond previews and aptitude composition
+- Storage-safe persistence and migration path for engine-backed creation state

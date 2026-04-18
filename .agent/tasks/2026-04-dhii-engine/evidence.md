@@ -2,7 +2,7 @@
 
 ## Task
 - ID: 2026-04-dhii-engine
-- Title: DHII Engine architecture freeze with Tasks 01-05 creation foundations
+- Title: DHII Engine architecture freeze with Tasks 01-06 creation foundations
 
 ## What was implemented
 - Frozen DHII Engine roadmap with explicit phase/task decomposition for the full engine rollout.
@@ -36,6 +36,12 @@
   - supports standard point allocation (`25` base, `60` discretionary points, `40` cap) with home-world starting-score modifiers
   - keeps random-roll provenance and point-allocation state transient inside the creation draft instead of flattening it into the persisted snapshot
   - exposes explainable per-characteristic breakdowns, validation errors, and honest invalidation when a home-world change makes prior random results no longer valid
+- Added starting-package projection in [`Sources/DHCharList/Rules/CharacterCreationProjection.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationProjection.swift) plus supporting draft state in [`Sources/DHCharList/Rules/CharacterCreationEngine.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationEngine.swift) and [`Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift) that:
+  - models explicit home-world/background/role choice slots and starting wounds/fate rolls on the typed creation draft
+  - validates that canonical selections, supported choice slots, characteristic generation, and roll gates are resolved before projection
+  - projects bounded supported DHII creation outputs into the legacy `Character` snapshot: aptitudes, starting resources, skills, talents, traits, special abilities, weapons, inventory, and movement
+  - keeps transient `Influence` explicit alongside the projected legacy snapshot instead of inventing persistence fields prematurely
+  - preserves unsupported rule effects as compatibility diagnostics instead of flattening them into misleading saved state
 - Integrated informational home-world preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape or silently automating creation packages.
 - Integrated informational background preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape, replacing the existing free-text field, or implying automatic package application.
 - Integrated informational role preview and composed-aptitude preview into [`Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`](/Users/andrey_artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift) without changing persistence shape or implying that typed creation choices already exist.
@@ -54,6 +60,7 @@
 - `Docs/progress-log.md`
 - `Sources/DHCharList/Rules/CharacterCreationEngine.swift`
 - `Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift`
+- `Sources/DHCharList/Rules/CharacterCreationProjection.swift`
 - `Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift`
 - `Sources/DHCharList/Presentation/Features/Progression/XPSpendScreen.swift`
 - `Tests/DHCharListTests/CharacterCreationEngineTests.swift`
@@ -86,6 +93,17 @@ List only commands actually executed:
 - `cd web && npm run build` (after T05 characteristic-generation additions)
 - `swift test` (after T05 characteristic-generation additions)
 - `make ci` (after T05 characteristic-generation additions)
+- `swift build` (after T06 starting-package projection additions)
+- `swift test --filter CharacterCreationEngineTests` (after T06 starting-package projection additions)
+- `swift test` (after T06 starting-package projection additions)
+- `cd web && npm test` (after T06 starting-package projection additions)
+- `cd web && npm run typecheck` (after T06 starting-package projection additions)
+- `cd web && npm run build` (after T06 starting-package projection additions)
+- `make ci` (after T06 starting-package projection additions)
+- `make fmt`
+- `make lint`
+- `make typecheck`
+- `make test`
 
 ## Results
 - `swift test`: passed (`165` tests)
@@ -113,7 +131,18 @@ List only commands actually executed:
 - `cd web && npm run build`: passed after T05 additions
 - `swift test`: passed after T05 additions (`187` tests)
 - `make ci`: passed after T05 additions
-- coverage policy: passed with `Rules` at `94.78%`
+- `swift build`: passed after T06 additions
+- `swift test --filter CharacterCreationEngineTests`: passed after T06 additions (`30` tests)
+- `swift test`: passed after T06 additions (`193` tests)
+- `cd web && npm test`: passed after T06 additions (`17` tests)
+- `cd web && npm run typecheck`: passed after T06 additions
+- `cd web && npm run build`: passed after T06 additions
+- `make ci`: passed after T06 additions
+- `make fmt`: passed (`no-op fallback; no repository formatter configured`)
+- `make lint`: passed (`no-op fallback; no repository linter configured`)
+- `make typecheck`: passed
+- `make test`: passed (`193` tests)
+- coverage policy: passed with `Rules` at `95.19%`
 - no persistence-shape migration was introduced in this task
 
 ## Runtime / host UI evidence
@@ -127,6 +156,7 @@ List only commands actually executed:
 - XP validation screen remains reachable from Characteristics and exposes manual cost entry deterministically for the bounded characteristic path.
 - XP prerequisites and registry-backed skill-cost defaults now consume engine-backed composed aptitudes when canonical fixed selections resolve.
 - Host UI smoke regression was repaired without widening supported behavior claims.
+- Starting-package projection remained rules-layer only and did not introduce a premature engine-backed create/edit UI flow.
 
 ## Rules / logic evidence
 - Rulebook-backed catalog covers `Feral World`, `Forge World`, `Highborn`, `Hive World`, `Shrine World`, `Voidborn`.
@@ -148,6 +178,10 @@ List only commands actually executed:
   - standard point allocation with explicit overspend/cap validation
   - transient `Influence`, which remains part of creation truth but not the current persisted `Character` snapshot
 - Home-world changes now recompute or invalidate characteristic-generation state honestly instead of silently preserving stale semantics.
+- Starting-package projection now distinguishes:
+  - supported package effects that can be safely represented in the existing `Character` snapshot
+  - unresolved supported choices that must be provided explicitly before projection
+  - unsupported effects that remain compatibility diagnostics rather than silent guesses
 - No automatic package application was introduced, so the app still does not imply full DHII creation support before the engine is built.
 
 ## Data safety evidence
@@ -156,6 +190,7 @@ List only commands actually executed:
 - Existing saved entities preserved? yes
 - Persistence backend observability unchanged? yes
 - Characteristic-generation provenance silently persisted? no
+- Starting-package engine state silently persisted? no
 
 ## UI / visual evidence
 - Screenshot pass executed? yes, via `make ci` coverage host run
@@ -181,14 +216,14 @@ List only commands actually executed:
 
 ## Residual issues
 - Current character snapshot still lacks first-class `Influence`.
-- Starting package projection is not implemented yet.
 - Background and role package automation are still not implemented.
 - Typed persistence for background/role aptitude choices is not implemented yet.
 - Typed persistence for characteristic-generation state is not implemented yet.
+- Typed persistence for starting-package choice provenance is not implemented yet.
 - Web does not yet mirror the new creation preview foundations.
 
 ## Recommended verdict
 - accepted_with_conditions
 
 ## Recommended next step
-- Continue to the next roadmap slice: starting-package projection over the typed creation draft, followed by persistence-safe creation-state projection and migration work.
+- Continue to the next roadmap slice: persistence-safe creation-state projection and migration work, followed by the engine-backed creation UI flow.

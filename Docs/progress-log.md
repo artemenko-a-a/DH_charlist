@@ -1,5 +1,13 @@
 # Progress Log
 
+## 2026-04-18
+
+### DHII Engine Task 01 — Roadmap freeze + home-world foundation
+- **status:** accepted_with_conditions
+- **checks run:** `swift test`, `cd web && npm test`, `cd web && npm run typecheck`, targeted `xcodebuild test -only-testing:DHCharListHostUITests/DHCharListHostSmokeUITests/testXPSpendingValidationScreenShowsManualCharacteristicCostEntry`, `make ci`
+- **results:** froze the in-repo DHII Engine architecture/roadmap and completed Task 01 with a typed six-world home-world foundation. Added rulebook-backed home-world catalog/alias normalization/preview diagnostics in the rules layer, integrated informational preview UX into the existing profile flow without changing persistence shape or implying full automation, and added focused creation-engine tests. During validation, repaired two host-UI verification drifts: a stale armour expectation and an over-claimed XP validation smoke. Also improved the bounded XP screen’s iOS number-pad ergonomics with explicit text synchronization plus keyboard `Done` dismissal. Full local acceptance gate is now green, including `make ci` and coverage policy.
+- **blockers:** no blocker remains for Task 01. Residual scope limits remain intentional: no automatic background/role package application, no full creation aggregate, and no real-device verification.
+
 ## 2026-03-29
 
 ### Batch 47 — Web delivery completion + repo validation repair

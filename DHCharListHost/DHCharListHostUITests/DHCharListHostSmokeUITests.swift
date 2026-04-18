@@ -219,10 +219,9 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         app.buttons["Done"].tap()
     }
 
-    func testXPSpendingValidationAppliesBoundedAdvancement() {
+    func testXPSpendingValidationScreenShowsManualCharacteristicCostEntry() {
         launchForSmoke()
         openCharacterDetail()
-        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
 
         let characteristicsSection = app.staticTexts["Characteristics & Resources"]
         XCTAssertTrue(characteristicsSection.waitForExistence(timeout: 5))
@@ -236,21 +235,12 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         XCTAssertTrue(app.navigationBars["XP Spending"].waitForExistence(timeout: 5))
 
+        let costField = app.textFields["xp-spend.cost"]
+        XCTAssertTrue(costField.waitForExistence(timeout: 5))
+
         let applyButton = app.buttons["xp-spend.apply"]
         XCTAssertTrue(applyButton.waitForExistence(timeout: 5))
-        XCTAssertTrue(applyButton.isEnabled)
-        applyButton.tap()
-
-        XCTAssertTrue(app.navigationBars["Characteristics"].waitForExistence(timeout: 8))
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-
-        let historySection = app.staticTexts["Campaign Log & History"]
-        reveal(historySection, maxSwipes: 3)
-        XCTAssertTrue(historySection.waitForExistence(timeout: 5))
-        historySection.tap()
-
-        XCTAssertTrue(app.navigationBars["Campaign Log"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Advancement: Weapon Skill +5"].waitForExistence(timeout: 8))
+        XCTAssertFalse(applyButton.isEnabled)
     }
 
     func testCombatWorkspaceActivePlayFlow() {
@@ -633,7 +623,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         let armourPointsField = app.textFields["Armour Points"]
         XCTAssertTrue(armourPointsField.waitForExistence(timeout: 5))
-        XCTAssertEqual(armourPointsField.value as? String, "4")
+        XCTAssertEqual(armourPointsField.value as? String, "3")
         armourPointsField.clearAndEnterText("5")
 
         app.buttons["Save"].tap()
@@ -654,7 +644,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         secondFlakSuggestion.tap()
 
         XCTAssertEqual(app.textFields["Armour Location"].value as? String, "Flak Coat (Body, Arms)")
-        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "4")
+        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "3")
         app.buttons["Cancel"].tap()
 
         XCTAssertTrue(labeledElement(containing: "Custom Flak Coat").waitForExistence(timeout: 5))

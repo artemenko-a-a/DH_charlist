@@ -1,0 +1,50 @@
+{
+  "task_id": "2026-04-dhii-engine",
+  "title": "DHII Engine architecture freeze and Task 01 home-world foundation",
+  "status": "accepted_with_conditions",
+  "summary": "Task 01 accepted: the repo now has a frozen DHII Engine roadmap plus a typed, rulebook-backed home-world foundation with informational profile preview, explicit current-model compatibility diagnostics, and green local validation including make ci.",
+  "accepted_scope": [
+    "DHII Engine roadmap and task decomposition",
+    "typed six-world home-world catalog with aliases and rulebook-backed previews",
+    "profile-flow informational preview integration",
+    "Task 01 regression hardening and validation proof bundle updates"
+  ],
+  "rejected_scope": [
+    "automatic background package application",
+    "automatic role package application",
+    "full DHII character creation pipeline",
+    "real-device behavior claims"
+  ],
+  "blockers": [],
+  "residual_risks": [
+    "real device behavior not verified",
+    "full creation pipeline not yet implemented"
+  ],
+  "required_followups": [
+    "Complete background package catalog task",
+    "Complete role package catalog task",
+    "Expand typed creation state beyond home world"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-dhii-engine/spec.md",
+    ".agent/tasks/2026-04-dhii-engine/acceptance.md",
+    ".agent/tasks/2026-04-dhii-engine/evidence.md"
+  ],
+  "tested_in_this_environment": [
+    "swift test",
+    "web npm test",
+    "web typecheck",
+    "targeted host UI smoke for XP validation screen",
+    "full make ci including host coverage run and coverage policy"
+  ],
+  "not_verified_in_this_environment": [
+    "real device behavior",
+    "full DHII character creation flow"
+  ],
+  "trust_assessment": {
+    "logic_confidence": "high",
+    "runtime_confidence": "medium_high",
+    "ui_confidence": "medium",
+    "real_device_confidence": "low"
+  }
+}

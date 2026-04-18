@@ -35,6 +35,43 @@ struct ProfileScreen: View {
                 CogitatorSectionHeader("Identity", subtitle: "Primary Dossier Fields")
             }
 
+            if let homeWorldPreview = DHIICharacterCreationEngine.previewHomeWorldSelection(rawValue: draft.homeWorld) {
+                Section {
+                    LabeledContent("Canonical home world", value: homeWorldPreview.definition.displayName)
+                        .cogitatorPanelRow()
+                    LabeledContent("Characteristic modifiers", value: homeWorldPreview.definition.characteristicModifierSummary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Fate Threshold", value: homeWorldPreview.definition.fateThreshold.summary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Home World Aptitude", value: homeWorldPreview.definition.aptitude)
+                        .cogitatorPanelRow()
+                    LabeledContent("Wounds", value: homeWorldPreview.definition.wounds.summary)
+                        .cogitatorPanelRow()
+                    LabeledContent("Home World Bonus", value: homeWorldPreview.definition.homeWorldBonus.name)
+                        .cogitatorPanelRow()
+
+                    Text(homeWorldPreview.definition.homeWorldBonus.summary)
+                        .cogitatorSupportingText()
+                        .cogitatorPanelRow()
+
+                    LabeledContent("Recommended backgrounds", value: homeWorldPreview.definition.recommendedBackgroundSummary)
+                        .cogitatorPanelRow()
+
+                    if !homeWorldPreview.compatibility.warningMessages.isEmpty {
+                        ForEach(homeWorldPreview.compatibility.warningMessages, id: \.self) { warning in
+                            Text(warning)
+                                .cogitatorSupportingText()
+                                .cogitatorPanelRow()
+                        }
+                    }
+                } header: {
+                    CogitatorSectionHeader("DHII Home World", subtitle: "Rulebook-backed Preview")
+                } footer: {
+                    Text("This preview is informational only. Background, role, aptitude composition, and starting package automation land in later DHII Engine phases.")
+                        .cogitatorSupportingText()
+                }
+            }
+
             Section {
                 TextField("Description", text: $draft.description, axis: .vertical)
                     .lineLimit(3...6)

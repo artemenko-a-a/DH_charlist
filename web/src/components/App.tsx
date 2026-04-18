@@ -18,7 +18,9 @@ import {
   resolveSkillCheck,
   signedValue,
   skillTarget,
+  suggestedSkillAdvanceCost,
   trainingLabels,
+  nextTrainingLevel,
   validateOrApplyXPSpend,
   weaponAutocomplete,
   xpUpgradeSummary
@@ -1110,7 +1112,7 @@ function ProgressionPanel({ character, onApply }: { character: Character; onAppl
   const [kind, setKind] = useState<'characteristicAdvance' | 'skillAdvance' | 'talentUnlock'>('characteristicAdvance')
   const [characteristic, setCharacteristic] = useState<CharacteristicKey>('strength')
   const [delta, setDelta] = useState(5)
-  const [cost, setCost] = useState(100)
+  const [cost, setCost] = useState(0)
   const [skillID, setSkillID] = useState(character.skills[0]?.id ?? '')
   const [targetTraining, setTargetTraining] = useState<SkillTrainingLevel>('known')
   const [talentName, setTalentName] = useState('')
@@ -1132,6 +1134,38 @@ function ProgressionPanel({ character, onApply }: { character: Character; onAppl
   ]
 
   const skill = character.skills.find((entry) => entry.id === skillID) ?? character.skills[0]
+  const allowedTargetTraining = skill ? [nextTrainingLevel(skill.training) ?? skill.training] : ['known' as const]
+  const suggestedSkillCost = kind === 'skillAdvance' && skill
+    ? suggestedSkillAdvanceCost(character, skill, targetTraining)
+    : null
+
+  useEffect(() => {
+    if (kind === 'characteristicAdvance') {
+      setDelta(5)
+      setCost(0)
+      return
+    }
+
+    if (kind !== 'skillAdvance') {
+      return
+    }
+
+    const allowed = allowedTargetTraining[0]
+    if (allowed && targetTraining !== allowed) {
+      setTargetTraining(allowed)
+      return
+    }
+
+    setCost(suggestedSkillCost ?? 0)
+  }, [
+    kind,
+    skill?.id,
+    skill?.training,
+    targetTraining,
+    allowedTargetTraining,
+    suggestedSkillCost
+  ])
+
   const upgrade =
     kind === 'characteristicAdvance'
       ? { kind, characteristic, delta, cost, prerequisites }
@@ -1158,6 +1192,13 @@ function ProgressionPanel({ character, onApply }: { character: Character; onAppl
             <input type="number" value={cost} onChange={(event) => setCost(numberInput(event))} />
           </label>
         </div>
+        <p className="meta-line">
+          {kind === 'characteristicAdvance'
+            ? 'DH2 characteristic advances are one +5 step at a time. XP stays manual here because characteristic advance tiers are not yet tracked.'
+            : kind === 'skillAdvance'
+              ? 'DH2 skill advances are one rank at a time. The XP field is auto-suggested only for verified canonical aptitude pairs.'
+              : 'Talent XP remains a bounded manual entry with explicit prerequisite validation.'}
+        </p>
 
         {kind === 'characteristicAdvance' ? (
           <div className="inline-grid">
@@ -1169,7 +1210,7 @@ function ProgressionPanel({ character, onApply }: { character: Character; onAppl
             </label>
             <label>
               Increase
-              <input type="number" value={delta} onChange={(event) => setDelta(numberInput(event))} />
+              <input type="number" value={delta} readOnly />
             </label>
           </div>
         ) : null}
@@ -1185,7 +1226,7 @@ function ProgressionPanel({ character, onApply }: { character: Character; onAppl
             <label>
               Target Training
               <select value={targetTraining} onChange={(event) => setTargetTraining(event.target.value as SkillTrainingLevel)}>
-                {trainingOrder.map((training) => <option key={training} value={training}>{trainingLabels[training]}</option>)}
+                {allowedTargetTraining.map((training) => <option key={training} value={training}>{trainingLabels[training]}</option>)}
               </select>
             </label>
           </div>

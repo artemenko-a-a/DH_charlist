@@ -63,8 +63,8 @@ public struct WeaponCompendiumCatalog: Identifiable, Codable, Equatable, Sendabl
                 range: "30m",
                 damage: "1d10+4 I",
                 penetration: "0",
-                clip: "8",
-                reload: "2 Full",
+                clip: "18",
+                reload: "Full",
                 traits: ["Scatter"]
             ),
             WeaponCompendiumDefinition(

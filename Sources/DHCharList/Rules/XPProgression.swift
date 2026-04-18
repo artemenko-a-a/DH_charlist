@@ -268,26 +268,29 @@ enum XPProgressionResolver {
             guard advance.delta > 0 else {
                 return [.invalidUpgrade("Characteristic advances must increase the selected characteristic.")]
             }
-            guard advance.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard advance.delta == 5 else {
+                return [.invalidUpgrade("Characteristic advances in DH2 must be purchased as single +5 steps.")]
+            }
+            guard advance.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             return []
 
         case .skillAdvance(let advance):
-            guard advance.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard advance.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             guard let currentSkill = request.character.skills.first(where: { $0.id == advance.skillID }) else {
                 return [.missingUpgradeTarget("The selected skill no longer exists on this character.")]
             }
-            guard currentSkill.training.progressionRank < advance.targetTraining.progressionRank else {
-                return [.invalidUpgrade("Skill advances must move to a higher training level than the character already has.")]
+            guard advance.targetTraining.progressionRank == currentSkill.training.progressionRank + 1 else {
+                return [.invalidUpgrade("Skill advances in DH2 must be purchased one rank at a time.")]
             }
             return []
 
         case .talentUnlock(let unlock):
-            guard unlock.cost >= 0 else {
-                return [.invalidUpgrade("XP cost cannot be negative.")]
+            guard unlock.cost > 0 else {
+                return [.invalidUpgrade("XP cost must be greater than 0.")]
             }
             let talentName = unlock.talentName.trimmedOrPlaceholder("Unnamed Talent")
             guard talentName != "Unnamed Talent" else {
@@ -334,13 +337,25 @@ enum XPProgressionResolver {
 
         case .requiredAptitude(let aptitude):
             let required = aptitude.trimmedOrPlaceholder("Unnamed Aptitude")
-            let hasAptitude = character.profile.aptitudes.contains {
+            let composition = DHIICharacterCreationEngine.composeAptitudes(for: character.profile)
+            let hasEngineAptitude = composition.resolvedAptitudes.contains {
+                normalizedProgressionToken($0) == normalizedProgressionToken(required)
+            }
+            let hasAptitude = composition.effectiveAptitudes.contains {
                 normalizedProgressionToken($0) == normalizedProgressionToken(required)
             }
             return XPPrerequisiteEvaluation(
                 prerequisite: prerequisite,
                 isSatisfied: hasAptitude,
-                detail: hasAptitude ? "Character already has \(required)." : "\(required) is not listed on the profile."
+                detail: {
+                    if hasEngineAptitude {
+                        return "Character already has \(required) via DHII creation composition."
+                    }
+                    if hasAptitude {
+                        return "Character already has \(required)."
+                    }
+                    return "\(required) is not present in DHII creation composition or listed on the profile."
+                }()
             )
 
         case .requiredTalent(let talent):
@@ -434,8 +449,10 @@ extension SkillTrainingLevel {
             1
         case .trained:
             2
-        case .veteran:
+        case .experienced:
             3
+        case .veteran:
+            4
         }
     }
 }

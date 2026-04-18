@@ -103,6 +103,79 @@ import SwiftData
     #expect(missingHistoryDecoded.history.isEmpty)
 }
 
+@Test func characterCodableRoundtripPreservesDhiiEngineStateAndDefaultsMissingIt() throws {
+    let persistedState = try persistedDHIIEngineState(
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior"
+    )
+
+    let source = Character(
+        id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+        profile: Profile(name: "Engine Backed"),
+        dhiiEngineState: persistedState,
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_200)
+    )
+
+    let encoded = try JSONEncoder.iso8601.encode(source)
+    let decoded = try JSONDecoder.iso8601.decode(Character.self, from: encoded)
+    #expect(decoded == source)
+
+    var missingStateObject = try #require(
+        JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+    )
+    missingStateObject.removeValue(forKey: "dhiiEngineState")
+    let missingStateData = try JSONSerialization.data(withJSONObject: missingStateObject, options: [.sortedKeys])
+    let missingStateDecoded = try JSONDecoder.iso8601.decode(Character.self, from: missingStateData)
+    #expect(missingStateDecoded.dhiiEngineState == nil)
+}
+
+@Test func importExportRoundtripPreservesDhiiEngineStateAndExportsMigratedSchema() throws {
+    let service = CharacterJSONImportExportService()
+    let persistedState = try persistedDHIIEngineState(
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior"
+    )
+    let source = Character(profile: Profile(name: "Roundtrip Engine"), dhiiEngineState: persistedState)
+
+    let data = try service.exportCharacters([source])
+    let envelope = try JSONDecoder.iso8601.decode(CharacterExportEnvelope.self, from: data)
+    let decoded = try service.import(data)
+
+    #expect(envelope.schemaVersion == 2)
+    #expect(decoded.count == 1)
+    #expect(decoded.first?.dhiiEngineState == persistedState)
+}
+
+@Test func importSupportsLegacySchemaOneWithoutDhiiEngineState() throws {
+    let legacyCharacter = Character(
+        id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+        profile: Profile(name: "Legacy Import"),
+        updatedAt: Date(timeIntervalSince1970: 1_700_000_300)
+    )
+    let encodedCharacter = try JSONEncoder.iso8601.encode(CharacterDTO(character: legacyCharacter))
+    var characterObject = try #require(
+        JSONSerialization.jsonObject(with: encodedCharacter) as? [String: Any]
+    )
+    characterObject.removeValue(forKey: "dhiiEngineState")
+
+    let payload = try JSONSerialization.data(
+        withJSONObject: [
+            "schemaVersion": 1,
+            "exportedAt": ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: 1_700_000_300)),
+            "characters": [characterObject]
+        ],
+        options: [.sortedKeys]
+    )
+
+    let decoded = try CharacterJSONImportExportService().import(payload)
+
+    #expect(decoded.count == 1)
+    #expect(decoded.first?.profile.name == "Legacy Import")
+    #expect(decoded.first?.dhiiEngineState == nil)
+}
+
 @Test func importRejectsUnsupportedSchema() throws {
     let envelope = CharacterExportEnvelope(schemaVersion: 999, exportedAt: .now, characters: [])
     let encoder = JSONEncoder()
@@ -349,6 +422,107 @@ import SwiftData
 
     #expect(viewModel.errorMessage == nil)
     #expect(viewModel.characters.isEmpty)
+}
+
+@Test @MainActor func viewModelCreateDHIICharacterPersistsProjectedCharacterAndRefreshesList() async throws {
+    let fileURL = uniqueTestFileURL("t08-guided-create")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
+    let draft = try makeResolvedEngineDraft(
+        name: "Guided",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload",
+        startingWoundsRoll: 2,
+        startingFateRoll: 7
+    )
+
+    await viewModel.load()
+    let createdID = await viewModel.createDHIICharacter(
+        name: "Guided Acolyte",
+        description: "Engine-backed create flow",
+        draft: draft
+    )
+
+    let created = try #require(createdID.flatMap { viewModel.character(by: $0) })
+    let persisted = try #require(try await repository.fetch(id: created.id))
+
+    #expect(created.profile.name == "Guided Acolyte")
+    #expect(created.profile.description == "Engine-backed create flow")
+    #expect(created.profile.homeWorld == "Hive World")
+    #expect(created.profile.background == "Imperial Guard")
+    #expect(created.profile.role == "Warrior")
+    #expect(created.dhiiEngineState == DHIICharacterCreationEngine.persistedEngineState(for: draft))
+    #expect(persisted == created)
+    #expect(viewModel.errorMessage == nil)
+}
+
+@Test @MainActor func viewModelUpdateDHIICharacterReprojectsEngineBackedCharacterAndKeepsIdentity() async throws {
+    let fileURL = uniqueTestFileURL("t08-guided-update")
+    let repository = JSONFileCharacterRepository(fileURL: fileURL)
+    let useCases = CharacterUseCases(repository: repository)
+    let service = CharacterJSONImportExportService()
+    let viewModel = makeCharacterListViewModel(useCases: useCases, importExportService: service)
+
+    let originalDraft = try makeResolvedEngineDraft(
+        name: "Original",
+        homeWorld: "Hive World",
+        background: "Imperial Guard",
+        role: "Warrior",
+        backgroundAptitudeChoice: "Fieldcraft",
+        backgroundSkillChoices: ["Operate (Surface)"],
+        backgroundEquipmentChoices: ["Lasgun"],
+        roleTalentChoice: "Rapid Reload",
+        startingWoundsRoll: 2,
+        startingFateRoll: 7
+    )
+    let created = try #require(
+        DHIICharacterCreationEngine.previewStartingPackage(
+            for: originalDraft,
+            baseCharacter: Character(profile: Profile(name: "Original Acolyte"))
+        ).projectedCharacter
+    )
+    try await useCases.upsertCharacter(created)
+
+    let updatedDraft = try makeResolvedEngineDraft(
+        name: "Updated",
+        homeWorld: "Hive World",
+        background: "Adeptus Arbites",
+        role: "Assassin",
+        backgroundAptitudeChoice: "Offence",
+        roleAptitudeChoice: "Ballistic Skill",
+        backgroundSkillChoices: ["Inquiry"],
+        backgroundEquipmentChoices: ["Shotgun", "Enforcer Light Carapace Armour"],
+        roleTalentChoice: "Jaded",
+        startingWoundsRoll: 4,
+        startingFateRoll: 6
+    )
+
+    await viewModel.load()
+    let updated = try #require(
+        await viewModel.updateDHIICharacter(
+            characterID: created.id,
+            name: "Updated Acolyte",
+            description: "Reprojected safely",
+            draft: updatedDraft
+        )
+    )
+    let persisted = try #require(try await repository.fetch(id: created.id))
+
+    #expect(updated.id == created.id)
+    #expect(updated.profile.name == "Updated Acolyte")
+    #expect(updated.profile.description == "Reprojected safely")
+    #expect(updated.profile.background == "Adeptus Arbites")
+    #expect(updated.profile.role == "Assassin")
+    #expect(updated.dhiiEngineState == DHIICharacterCreationEngine.persistedEngineState(for: updatedDraft))
+    #expect(persisted == updated)
+    #expect(viewModel.errorMessage == nil)
 }
 
 @Test func characterListSearchMatchesVisibleProfileFields() {
@@ -646,7 +820,7 @@ import SwiftData
     let editedTarget = DerivedValueCalculator.skillTarget(for: editedCharacter.skills[0], characteristics: editedCharacter.characteristics)
 
     #expect(baselineTarget == 15)
-    #expect(editedTarget == 62)
+    #expect(editedTarget == 72)
 }
 
 @Test func skillSpecialisationsPersistCorrectly() async throws {
@@ -1794,6 +1968,43 @@ private func uniqueTestFileURL(_ suffix: String) -> URL {
         .appending(path: "dh_charlist_tests_\(suffix)_\(UUID().uuidString).json")
 }
 
+private func persistedDHIIEngineState(
+    homeWorld: String,
+    background: String,
+    role: String
+) throws -> DHIICharacterEngineState {
+    let draft = try DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: "Persisted",
+            homeWorld: homeWorld,
+            background: background,
+            role: role
+        )
+    )
+    .settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+    .settingBackgroundAptitudeChoice("Fieldcraft")
+    .settingBackgroundSkillChoice("Operate (Surface)", at: 0)
+    .settingBackgroundEquipmentChoice("Lasgun", at: 0)
+    .settingRoleTalentChoice("Rapid Reload")
+    .settingStartingWoundsRoll(2)
+    .settingStartingFateRoll(7)
+
+    return DHIICharacterCreationEngine.persistedEngineState(for: draft)
+}
+
 #if canImport(SwiftData) && (canImport(SwiftDataMacros) || Xcode)
 @available(iOS 17, macOS 14, *)
 private func makeSwiftDataRepository(testName: String) throws -> SwiftDataCharacterRepository {
@@ -1814,6 +2025,7 @@ private func makeSwiftDataTemplateRepository(testName: String) throws -> SwiftDa
 }
 #endif
 
+#if canImport(SwiftUI)
 @MainActor
 private func makeCharacterListViewModel(
     useCases: CharacterUseCases,
@@ -1836,6 +2048,7 @@ private func makeCharacterListViewModel(
         weaponCompendiumImportService: WeaponCompendiumJSONImportService()
     )
 }
+#endif
 
 private func sampleCharacter(name: String) -> Character {
     let weapon = Weapon(
@@ -1915,4 +2128,82 @@ private func sampleCharacter(name: String) -> Character {
         ),
         updatedAt: Date(timeIntervalSince1970: 1_700_000_000)
     )
+}
+
+private func makeResolvedEngineDraft(
+    name: String,
+    homeWorld: String,
+    background: String,
+    role: String,
+    backgroundAptitudeChoice: String? = nil,
+    roleAptitudeChoice: String? = nil,
+    backgroundSkillChoices: [String] = [],
+    backgroundTalentChoice: String? = nil,
+    backgroundEquipmentChoices: [String] = [],
+    roleTalentChoice: String? = nil,
+    startingWoundsRoll: Int = 3,
+    startingFateRoll: Int = 5
+) throws -> DHIICreationDraft {
+    let baseDraft = DHIICharacterCreationEngine.creationDraft(
+        from: Profile(
+            name: name,
+            homeWorld: homeWorld,
+            background: background,
+            role: role
+        )
+    )
+
+    var resolved = try baseDraft.settingPointAllocation(
+        DHIICreationCharacteristicValues(
+            weaponSkill: 10,
+            ballisticSkill: 10,
+            strength: 5,
+            toughness: 5,
+            agility: 5,
+            intelligence: 5,
+            perception: 5,
+            willpower: 5,
+            fellowship: 5,
+            influence: 5
+        )
+    )
+
+    if let firstBackgroundChoice = resolved.backgroundDefinition?.aptitudeOptions.first {
+        resolved = resolved.settingBackgroundAptitudeChoice(backgroundAptitudeChoice ?? firstBackgroundChoice)
+    }
+
+    if let firstRoleChoice = resolved.roleDefinition?.aptitudeRules.compactMap({ rule -> String? in
+        if case .choice(let first, _) = rule {
+            return first
+        }
+        return nil
+    }).first {
+        resolved = resolved.settingRoleAptitudeChoice(roleAptitudeChoice ?? firstRoleChoice)
+    }
+
+    for (index, options) in resolved.backgroundSkillOptionGroups.enumerated() {
+        resolved = resolved.settingBackgroundSkillChoice(backgroundSkillChoices[safe: index] ?? options.first, at: index)
+    }
+
+    if resolved.backgroundTalentOptions.isEmpty == false {
+        resolved = resolved.settingBackgroundTalentChoice(backgroundTalentChoice ?? resolved.backgroundTalentOptions.first)
+    }
+
+    for (index, options) in resolved.backgroundEquipmentOptionGroups.enumerated() {
+        resolved = resolved.settingBackgroundEquipmentChoice(backgroundEquipmentChoices[safe: index] ?? options.first, at: index)
+    }
+
+    if resolved.roleTalentOptions.isEmpty == false {
+        resolved = resolved.settingRoleTalentChoice(roleTalentChoice ?? resolved.roleTalentOptions.first)
+    }
+
+    return resolved
+        .settingStartingWoundsRoll(startingWoundsRoll)
+        .settingStartingFateRoll(startingFateRoll)
+}
+
+private extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }

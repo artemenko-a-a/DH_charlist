@@ -10,6 +10,9 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
     public var equipment: EquipmentState
     public var session: SessionState
     public var history: [CharacterHistoryEntry]
+    // Internal additive persistence seam for the DHII engine. This is not part of
+    // the stable public construction API for `Character`.
+    var dhiiEngineState: DHIICharacterEngineState?
     public var updatedAt: Date
 
     public init(
@@ -33,7 +36,36 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         self.equipment = equipment
         self.session = session
         self.history = history
+        dhiiEngineState = nil
         self.updatedAt = updatedAt
+    }
+
+    init(
+        id: UUID = UUID(),
+        profile: Profile,
+        characteristics: CharacteristicSet = .empty,
+        resources: ResourceState = .init(),
+        skills: [Skill] = [],
+        notes: NotesState = .init(),
+        equipment: EquipmentState = .init(),
+        session: SessionState = .init(),
+        history: [CharacterHistoryEntry] = [],
+        dhiiEngineState: DHIICharacterEngineState? = nil,
+        updatedAt: Date = .now
+    ) {
+        self.init(
+            id: id,
+            profile: profile,
+            characteristics: characteristics,
+            resources: resources,
+            skills: skills,
+            notes: notes,
+            equipment: equipment,
+            session: session,
+            history: history,
+            updatedAt: updatedAt
+        )
+        self.dhiiEngineState = dhiiEngineState
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -46,6 +78,7 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         case equipment
         case session
         case history
+        case dhiiEngineState
         case updatedAt
     }
 
@@ -60,6 +93,7 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         equipment = try container.decode(EquipmentState.self, forKey: .equipment)
         session = try container.decode(SessionState.self, forKey: .session)
         history = try container.decodeIfPresent([CharacterHistoryEntry].self, forKey: .history) ?? []
+        dhiiEngineState = try container.decodeIfPresent(DHIICharacterEngineState.self, forKey: .dhiiEngineState)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
 
@@ -74,6 +108,7 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         try container.encode(equipment, forKey: .equipment)
         try container.encode(session, forKey: .session)
         try container.encode(history, forKey: .history)
+        try container.encodeIfPresent(dhiiEngineState, forKey: .dhiiEngineState)
         try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
@@ -216,6 +251,7 @@ public enum SkillTrainingLevel: String, Codable, CaseIterable, Sendable {
     case untrained
     case known
     case trained
+    case experienced
     case veteran
 
     public var modifier: Int {
@@ -223,7 +259,8 @@ public enum SkillTrainingLevel: String, Codable, CaseIterable, Sendable {
         case .untrained: return -20
         case .known: return 0
         case .trained: return 10
-        case .veteran: return 20
+        case .experienced: return 20
+        case .veteran: return 30
         }
     }
 }

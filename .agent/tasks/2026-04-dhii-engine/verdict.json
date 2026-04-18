@@ -1,0 +1,68 @@
+{
+  "task_id": "2026-04-dhii-engine",
+  "title": "DHII Engine architecture freeze with Tasks 01-08 creation foundations, persistence seam, and engine-backed flow",
+  "status": "accepted_with_conditions",
+  "summary": "Tasks 01-08 are accepted locally. The repo now has a frozen DHII Engine roadmap, canonical creation catalogs, explainable aptitude composition, a typed creation draft, standard DHII characteristic generation, bounded starting-package projection, additive engine-state persistence, and a staged engine-backed creation/edit flow. Validation is green locally, including targeted guided-flow smoke, full make ci, host/UI coverage, schema-compatibility tests, and coverage-policy checks.",
+  "accepted_scope": [
+    "DHII Engine roadmap and ordered task decomposition",
+    "typed home-world, background, and role catalogs with rulebook-backed previews",
+    "deterministic aptitude composition with explicit unresolved-choice handling",
+    "typed creation draft aggregate and safe recomposition",
+    "standard DHII characteristic generation with transient Influence",
+    "bounded starting-package projection into the legacy Character snapshot",
+    "additive persisted DHII engine state for canonical selections, supported choice slots, starting rolls, fallback aptitudes, and characteristic-generation provenance",
+    "legacy-compatible import/export migration from schema 1 to schema 2",
+    "staged engine-backed create/edit flow with safe reprojection of engine-backed characters",
+    "Task 01-08 regression hardening and proof-bundle updates"
+  ],
+  "rejected_scope": [
+    "full DHII character creation pipeline",
+    "engine-first persistence cutover replacing the legacy Character snapshot",
+    "full background and role package automation beyond the supported bounded projection surface",
+    "real-device behavior claims"
+  ],
+  "blockers": [],
+  "residual_risks": [
+    "real-device behavior is not verified",
+    "Influence is still not a first-class public field on the persisted Character snapshot",
+    "the staged flow remains intentionally bounded to supported creation mechanics",
+    "web does not yet consume the new creation engine seam directly"
+  ],
+  "required_followups": [
+    "Harden progression and dependency evaluation against persisted engine state",
+    "Decide whether first-class Influence, broader package automation, or web limitation is the next priority",
+    "Decide the longer-term migration path from additive engine state to engine-first persistence"
+  ],
+  "evidence_bundle": [
+    ".agent/tasks/2026-04-dhii-engine/spec.md",
+    ".agent/tasks/2026-04-dhii-engine/acceptance.md",
+    ".agent/tasks/2026-04-dhii-engine/evidence.md",
+    ".agent/tasks/2026-04-dhii-engine/problems.md"
+  ],
+  "tested_in_this_environment": [
+    "swift build",
+    "swift test --filter CharacterCreationEngineTests",
+    "swift test --filter DHCharListTests",
+    "targeted xcodebuild guided-flow smoke",
+    "swift test",
+    "web npm test",
+    "web typecheck",
+    "web production build",
+    "make fmt",
+    "make lint",
+    "make typecheck",
+    "make test",
+    "full make ci including host/UI coverage and coverage policy"
+  ],
+  "not_verified_in_this_environment": [
+    "real-device behavior",
+    "manual visual review of the new engine state through the UI",
+    "real-device ergonomics of the staged engine-backed flow"
+  ],
+  "trust_assessment": {
+    "logic_confidence": "high",
+    "runtime_confidence": "high",
+    "ui_confidence": "medium_high",
+    "real_device_confidence": "low"
+  }
+}

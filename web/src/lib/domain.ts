@@ -45,6 +45,7 @@ export const trainingLabels: Record<SkillTrainingLevel, string> = {
   untrained: 'Untrained',
   known: 'Known',
   trained: 'Trained',
+  experienced: 'Experienced',
   veteran: 'Veteran'
 }
 
@@ -52,7 +53,21 @@ export const trainingModifiers: Record<SkillTrainingLevel, number> = {
   untrained: -20,
   known: 0,
   trained: 10,
-  veteran: 20
+  experienced: 20,
+  veteran: 30
+}
+
+const canonicalSkillAdvanceAptitudes: Record<string, { characteristic: CharacteristicKey; aptitudes: [string, string] }> = {
+  awareness: { characteristic: 'perception', aptitudes: ['Perception', 'Fieldcraft'] },
+  'tech use': { characteristic: 'intelligence', aptitudes: ['Intelligence', 'Tech'] },
+  dodge: { characteristic: 'agility', aptitudes: ['Agility', 'Defence'] },
+  parry: { characteristic: 'weaponSkill', aptitudes: ['Weapon Skill', 'Defence'] },
+  scrutiny: { characteristic: 'perception', aptitudes: ['Perception', 'General'] },
+  inquiry: { characteristic: 'fellowship', aptitudes: ['Fellowship', 'Social'] },
+  stealth: { characteristic: 'agility', aptitudes: ['Agility', 'Fieldcraft'] },
+  medicae: { characteristic: 'intelligence', aptitudes: ['Intelligence', 'Fieldcraft'] },
+  athletics: { characteristic: 'strength', aptitudes: ['Strength', 'General'] },
+  psyniscience: { characteristic: 'perception', aptitudes: ['Perception', 'Psyker'] }
 }
 
 export const demoWeaponCatalog: WeaponCompendiumCatalog = {
@@ -62,6 +77,7 @@ export const demoWeaponCatalog: WeaponCompendiumCatalog = {
     { id: 'local-demo.autogun', catalogID: 'local-demo', name: 'Autogun', type: 'Basic', range: '100m', damage: '1d10+3 I', penetration: '0', clip: '30', reload: 'Half', traits: ['Reliable'], notes: '' },
     { id: 'local-demo.autopistol', catalogID: 'local-demo', name: 'Autopistol', type: 'Pistol', range: '30m', damage: '1d10+2 I', penetration: '0', clip: '18', reload: 'Half', traits: ['Reliable'], notes: '' },
     { id: 'local-demo.chainsword', catalogID: 'local-demo', name: 'Chainsword', type: 'Melee', range: 'Melee', damage: '1d10+2 R', penetration: '2', clip: '-', reload: '-', traits: ['Balanced', 'Tearing'], notes: '' },
+    { id: 'local-demo.combat-shotgun', catalogID: 'local-demo', name: 'Combat Shotgun', type: 'Basic', range: '30m', damage: '1d10+4 I', penetration: '0', clip: '18', reload: 'Full', traits: ['Scatter'], notes: '' },
     { id: 'local-demo.lasgun', catalogID: 'local-demo', name: 'Lasgun', type: 'Basic', range: '100m', damage: '1d10+3 E', penetration: '0', clip: '60', reload: 'Full', traits: ['Reliable'], notes: '' },
     { id: 'local-demo.laspistol', catalogID: 'local-demo', name: 'Laspistol', type: 'Pistol', range: '30m', damage: '1d10+2 E', penetration: '0', clip: '30', reload: 'Half', traits: ['Reliable'], notes: '' }
   ]
@@ -72,9 +88,9 @@ export const demoArmourCatalog: ArmourCompendiumCatalog = {
   displayName: 'Local Demo Armour Catalog',
   definitions: [
     { id: 'local-demo.carapace-breastplate', catalogID: 'local-demo', name: 'Carapace Breastplate', category: 'Body Armour', coverage: ['Body'], armourPoints: 6, weight: '15kg', availability: 'Very Rare', traits: ['Rigid'], notes: '' },
-    { id: 'local-demo.flak-coat', catalogID: 'local-demo', name: 'Flak Coat', category: 'Body Armour', coverage: ['Body', 'Arms'], armourPoints: 4, weight: '8kg', availability: 'Scarce', traits: ['Flak'], notes: '' },
-    { id: 'local-demo.guard-helm', catalogID: 'local-demo', name: 'Guard Helm', category: 'Head Armour', coverage: ['Head'], armourPoints: 3, weight: '2kg', availability: 'Common', traits: ['Enclosed'], notes: '' },
-    { id: 'local-demo.mesh-vest', catalogID: 'local-demo', name: 'Mesh Vest', category: 'Body Armour', coverage: ['Body'], armourPoints: 5, weight: '5kg', availability: 'Rare', traits: ['Flexible'], notes: '' }
+    { id: 'local-demo.flak-coat', catalogID: 'local-demo', name: 'Flak Coat', category: 'Body Armour', coverage: ['Body', 'Arms'], armourPoints: 3, weight: '8kg', availability: 'Scarce', traits: ['Flak'], notes: '' },
+    { id: 'local-demo.guard-helm', catalogID: 'local-demo', name: 'Guard Helm', category: 'Head Armour', coverage: ['Head'], armourPoints: 2, weight: '2kg', availability: 'Common', traits: ['Enclosed'], notes: '' },
+    { id: 'local-demo.mesh-vest', catalogID: 'local-demo', name: 'Mesh Vest', category: 'Body Armour', coverage: ['Body'], armourPoints: 4, weight: '5kg', availability: 'Rare', traits: ['Flexible'], notes: '' }
   ]
 }
 
@@ -87,40 +103,32 @@ export function createDefaultCharacter(name = 'New Acolyte'): Character {
       homeWorld: '',
       background: '',
       role: '',
-      aptitudes: ['Perception'],
+      aptitudes: [],
       description: ''
     },
     characteristics: {
-      weaponSkill: 30,
-      ballisticSkill: 30,
-      strength: 30,
-      toughness: 30,
-      agility: 30,
-      intelligence: 30,
-      perception: 30,
-      willpower: 30,
-      fellowship: 30
+      weaponSkill: 0,
+      ballisticSkill: 0,
+      strength: 0,
+      toughness: 0,
+      agility: 0,
+      intelligence: 0,
+      perception: 0,
+      willpower: 0,
+      fellowship: 0
     },
     resources: {
-      currentWounds: 10,
-      maxWounds: 10,
+      currentWounds: 0,
+      maxWounds: 0,
       fatigue: 0,
       corruption: 0,
       insanity: 0,
-      currentFate: 1,
-      maxFate: 1,
+      currentFate: 0,
+      maxFate: 0,
       experienceSpent: 0,
-      experienceTotal: 400
+      experienceTotal: 0
     },
-    skills: [
-      {
-        id: crypto.randomUUID(),
-        name: 'Awareness',
-        characteristic: 'perception',
-        training: 'known',
-        specialisations: []
-      }
-    ],
+    skills: [],
     notes: {
       talents: [],
       traits: [],
@@ -133,7 +141,7 @@ export function createDefaultCharacter(name = 'New Acolyte'): Character {
     equipment: {
       weapons: [],
       armour: [],
-      movement: { halfMove: 3, fullMove: 6, charge: 9, run: 18 },
+      movement: { halfMove: 0, fullMove: 0, charge: 0, run: 0 },
       inventory: []
     },
     session: {
@@ -181,6 +189,51 @@ export function characteristicValue(characteristics: CharacteristicSet, key: Cha
 
 export function skillTarget(skill: Skill, characteristics: CharacteristicSet): number {
   return characteristicValue(characteristics, skill.characteristic) + trainingModifiers[skill.training]
+}
+
+export function nextTrainingLevel(currentTraining: SkillTrainingLevel): SkillTrainingLevel | null {
+  const currentIndex = trainingOrder.indexOf(currentTraining)
+  const next = trainingOrder[currentIndex + 1]
+  return next ?? null
+}
+
+export function suggestedSkillAdvanceCost(
+  character: Character,
+  skill: Skill,
+  targetTraining: SkillTrainingLevel
+): number | null {
+  const nextTraining = nextTrainingLevel(skill.training)
+  if (!nextTraining || nextTraining !== targetTraining) {
+    return null
+  }
+
+  const metadata = canonicalSkillAdvanceAptitudes[normalizedToken(skill.name)]
+  if (!metadata || metadata.characteristic !== skill.characteristic) {
+    return null
+  }
+
+  const knownAptitudes = new Set(character.profile.aptitudes.map((item) => normalizedToken(item)))
+  const matchingAptitudes = metadata.aptitudes.filter((aptitude) => knownAptitudes.has(normalizedToken(aptitude))).length
+
+  if (matchingAptitudes === 2) {
+    if (targetTraining === 'known') return 100
+    if (targetTraining === 'trained') return 200
+    if (targetTraining === 'experienced') return 300
+    if (targetTraining === 'veteran') return 400
+  }
+
+  if (matchingAptitudes === 1) {
+    if (targetTraining === 'known') return 200
+    if (targetTraining === 'trained') return 400
+    if (targetTraining === 'experienced') return 600
+    if (targetTraining === 'veteran') return 800
+  }
+
+  if (targetTraining === 'known') return 300
+  if (targetTraining === 'trained') return 600
+  if (targetTraining === 'experienced') return 900
+  if (targetTraining === 'veteran') return 1200
+  return null
 }
 
 export function addDetachedWeapon(character: Character, definition: WeaponCompendiumDefinition): Character {
@@ -269,6 +322,13 @@ function modifierContributions(
   return [...manual, ...temporary]
 }
 
+function cappedModifierTotal(contributions: MechanicsContribution[]): number {
+  const rawModifier = contributions
+    .filter((entry) => entry.kind === 'modifier' && entry.appliesToFinalTarget)
+    .reduce((sum, entry) => sum + entry.value, 0)
+  return Math.max(-60, Math.min(60, rawModifier))
+}
+
 export function resolveCharacteristicCheck(
   characteristics: CharacteristicSet,
   characteristic: CharacteristicKey,
@@ -290,15 +350,16 @@ export function resolveCharacteristicCheck(
   const appliedModifier = contributions
     .filter((entry) => entry.kind === 'modifier')
     .reduce((sum, entry) => sum + entry.value, 0)
+  const cappedModifier = cappedModifierTotal(contributions)
   return {
     checkName: `${characteristicLabels[characteristic]} Check`,
     sourceName: characteristicLabels[characteristic],
     baseValue,
     derivedBonus,
     trainingContribution: null,
-    appliedModifier,
+    appliedModifier: cappedModifier,
     contributions,
-    finalTarget: baseValue + appliedModifier,
+    finalTarget: baseValue + cappedModifier,
     conditions
   }
 }
@@ -331,15 +392,16 @@ export function resolveSkillCheck(
   const appliedModifier = contributions
     .filter((entry) => entry.kind === 'modifier')
     .reduce((sum, entry) => sum + entry.value, 0)
+  const cappedModifier = cappedModifierTotal(contributions)
   return {
     checkName: normalizeText(skill.name, 'Unnamed Skill'),
     sourceName: characteristicLabels[skill.characteristic],
     baseValue,
     derivedBonus,
     trainingContribution,
-    appliedModifier,
+    appliedModifier: cappedModifier,
     contributions,
-    finalTarget: baseValue + trainingContribution + appliedModifier,
+    finalTarget: baseValue + trainingContribution + cappedModifier,
     conditions
   }
 }
@@ -529,29 +591,31 @@ function evaluatePrerequisite(character: Character, prerequisite: XPPrerequisite
 }
 
 export function validateOrApplyXPSpend(character: Character, upgrade: XPUpgrade, apply: boolean): XPSpendResult {
-  const cost = Math.max(0, upgrade.cost)
+  const cost = upgrade.cost
+  const effectiveCost = Math.max(0, cost)
   const available = experienceAvailable(character)
-  const prerequisites: XPPrerequisite[] = [{ kind: 'availableExperience', required: cost }, ...upgrade.prerequisites]
+  const prerequisites: XPPrerequisite[] = [{ kind: 'availableExperience', required: effectiveCost }, ...upgrade.prerequisites]
   const prerequisiteEvaluations = prerequisites.map((item) => evaluatePrerequisite(character, item))
   const validationErrors: string[] = []
 
   if (upgrade.kind === 'characteristicAdvance') {
     if (upgrade.delta <= 0) validationErrors.push('Characteristic advances must increase the selected characteristic.')
-    if (upgrade.cost < 0) validationErrors.push('XP cost cannot be negative.')
+    if (upgrade.delta !== 5) validationErrors.push('Characteristic advances in DH2 must be purchased as single +5 steps.')
+    if (upgrade.cost <= 0) validationErrors.push('XP cost must be greater than 0.')
   }
 
   if (upgrade.kind === 'skillAdvance') {
     const currentSkill = character.skills.find((skill) => skill.id === upgrade.skillID)
-    if (upgrade.cost < 0) validationErrors.push('XP cost cannot be negative.')
+    if (upgrade.cost <= 0) validationErrors.push('XP cost must be greater than 0.')
     if (!currentSkill) {
       validationErrors.push('The selected skill no longer exists on this character.')
-    } else if (trainingOrder.indexOf(currentSkill.training) >= trainingOrder.indexOf(upgrade.targetTraining)) {
-      validationErrors.push('Skill advances must move to a higher training level than the character already has.')
+    } else if (nextTrainingLevel(currentSkill.training) !== upgrade.targetTraining) {
+      validationErrors.push('Skill advances in DH2 must be purchased one rank at a time.')
     }
   }
 
   if (upgrade.kind === 'talentUnlock') {
-    if (upgrade.cost < 0) validationErrors.push('XP cost cannot be negative.')
+    if (upgrade.cost <= 0) validationErrors.push('XP cost must be greater than 0.')
     const talentName = normalizeText(upgrade.talentName, 'Unnamed Talent')
     if (talentName === 'Unnamed Talent') {
       validationErrors.push('Talent unlocks require a talent name.')
@@ -563,7 +627,7 @@ export function validateOrApplyXPSpend(character: Character, upgrade: XPUpgrade,
   for (const evaluation of prerequisiteEvaluations) {
     if (!evaluation.isSatisfied) {
       validationErrors.push(evaluation.label.startsWith('Available XP')
-        ? `Requires ${cost} XP but only ${available} XP is currently available.`
+        ? `Requires ${effectiveCost} XP but only ${available} XP is currently available.`
         : `Requirement not met: ${evaluation.label}.`)
     }
   }
@@ -573,7 +637,7 @@ export function validateOrApplyXPSpend(character: Character, upgrade: XPUpgrade,
       isValid: validationErrors.length === 0,
       cost,
       availableExperience: available,
-      projectedRemainingExperience: available - cost,
+      projectedRemainingExperience: available - effectiveCost,
       validationErrors,
       prerequisiteEvaluations,
       appliedCharacter: null,
@@ -592,12 +656,12 @@ export function validateOrApplyXPSpend(character: Character, upgrade: XPUpgrade,
     updated.notes.talents = [...updated.notes.talents, normalizeText(upgrade.talentName, 'Unnamed Talent')]
   }
 
-  updated.resources.experienceSpent += cost
+  updated.resources.experienceSpent += effectiveCost
   const historyTitle = `Advancement: ${xpUpgradeSummary(upgrade)}`
   const historyBody = [
-    `Spent ${cost} XP on ${xpUpgradeSummary(upgrade)}.`,
+    `Spent ${effectiveCost} XP on ${xpUpgradeSummary(upgrade)}.`,
     `Available before: ${available} XP.`,
-    `Available after: ${available - cost} XP.`
+    `Available after: ${available - effectiveCost} XP.`
   ].join('\n')
   const entry: CharacterHistoryEntry = {
     id: crypto.randomUUID(),
@@ -615,7 +679,7 @@ export function validateOrApplyXPSpend(character: Character, upgrade: XPUpgrade,
     isValid: true,
     cost,
     availableExperience: available,
-    projectedRemainingExperience: available - cost,
+    projectedRemainingExperience: available - effectiveCost,
     validationErrors: [],
     prerequisiteEvaluations,
     appliedCharacter: updated,
@@ -986,15 +1050,15 @@ function clampNumber(value: unknown, fallback = 0): number {
 function migratedCharacteristics(record: Record<string, unknown>): CharacteristicSet {
   const source = isRecord(record.characteristics) ? record.characteristics : record
   return {
-    weaponSkill: clampNumber(source.weaponSkill ?? source.ws, 30),
-    ballisticSkill: clampNumber(source.ballisticSkill ?? source.bs, 30),
-    strength: clampNumber(source.strength ?? source.s, 30),
-    toughness: clampNumber(source.toughness ?? source.t, 30),
-    agility: clampNumber(source.agility ?? source.ag, 30),
-    intelligence: clampNumber(source.intelligence ?? source.int, 30),
-    perception: clampNumber(source.perception ?? source.per, 30),
-    willpower: clampNumber(source.willpower ?? source.wp, 30),
-    fellowship: clampNumber(source.fellowship ?? source.fel, 30)
+    weaponSkill: clampNumber(source.weaponSkill ?? source.ws, 0),
+    ballisticSkill: clampNumber(source.ballisticSkill ?? source.bs, 0),
+    strength: clampNumber(source.strength ?? source.s, 0),
+    toughness: clampNumber(source.toughness ?? source.t, 0),
+    agility: clampNumber(source.agility ?? source.ag, 0),
+    intelligence: clampNumber(source.intelligence ?? source.int, 0),
+    perception: clampNumber(source.perception ?? source.per, 0),
+    willpower: clampNumber(source.willpower ?? source.wp, 0),
+    fellowship: clampNumber(source.fellowship ?? source.fel, 0)
   }
 }
 
@@ -1048,15 +1112,15 @@ export function coerceCharacter(value: unknown): Character | null {
     },
     characteristics: migratedCharacteristics(value),
     resources: {
-      currentWounds: clampNumber(resourcesSource.currentWounds ?? resourcesSource.wounds, 10),
-      maxWounds: clampNumber(resourcesSource.maxWounds ?? resourcesSource.wounds, 10),
+      currentWounds: clampNumber(resourcesSource.currentWounds ?? resourcesSource.wounds, 0),
+      maxWounds: clampNumber(resourcesSource.maxWounds ?? resourcesSource.wounds, 0),
       fatigue: clampNumber(resourcesSource.fatigue, 0),
       corruption: clampNumber(resourcesSource.corruption, 0),
       insanity: clampNumber(resourcesSource.insanity, 0),
-      currentFate: clampNumber(resourcesSource.currentFate, 1),
-      maxFate: clampNumber(resourcesSource.maxFate, 1),
+      currentFate: clampNumber(resourcesSource.currentFate, 0),
+      maxFate: clampNumber(resourcesSource.maxFate, 0),
       experienceSpent: clampNumber(resourcesSource.experienceSpent, 0),
-      experienceTotal: clampNumber(resourcesSource.experienceTotal ?? resourcesSource.xpAvailable, 400)
+      experienceTotal: clampNumber(resourcesSource.experienceTotal ?? resourcesSource.xpAvailable, 0)
     },
     skills,
     notes: {

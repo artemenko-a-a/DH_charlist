@@ -58,7 +58,7 @@ import Testing
             SkillAdvance(
                 skillID: awareness.id,
                 skillName: awareness.displayName,
-                targetTraining: .veteran,
+                targetTraining: .experienced,
                 cost: 100,
                 prerequisites: [
                     .requiredAptitude("Offence"),
@@ -92,7 +92,7 @@ import Testing
             SkillAdvance(
                 skillID: awareness.id,
                 skillName: awareness.displayName,
-                targetTraining: .veteran,
+                targetTraining: .experienced,
                 cost: 200,
                 prerequisites: [
                     .requiredSkill(name: "Awareness", minimumTraining: .trained),
@@ -106,7 +106,7 @@ import Testing
     let result = XPProgressionResolver.apply(request)
 
     #expect(result.isValid)
-    #expect(result.appliedCharacter?.skills.first?.training == .veteran)
+    #expect(result.appliedCharacter?.skills.first?.training == .experienced)
     #expect(result.appliedCharacter?.resources.experienceSpent == 300)
 }
 
@@ -114,7 +114,10 @@ import Testing
     let character = progressionSampleCharacter(name: "Registry Characteristic")
     let upgrade = CharacteristicAdvanceCatalogRegistry
         .entry(for: .agility)
-        .makeAdvance(extraPrerequisites: [.minimumCharacteristic(.agility, 40)])
+        .makeAdvance(
+            costOverride: 100,
+            extraPrerequisites: [.minimumCharacteristic(.agility, 40)]
+        )
 
     let result = XPProgressionResolver.apply(
         XPSpendRequest(character: character, upgrade: .characteristicAdvance(upgrade))
@@ -162,12 +165,13 @@ import Testing
     #expect(missingPrerequisite.isValid == false)
     #expect(
         missingPrerequisite.validationErrors
-            == [.unmetPrerequisite(.requiredSkill(name: "Tech-Use", minimumTraining: .known))]
+            == [.unmetPrerequisite(.requiredSkill(name: "Tech-Use", minimumTraining: .trained))]
     )
     #expect(
         missingPrerequisite.breakdown.prerequisiteEvaluations.map(\.detail)
             == [
                 "400 XP currently available.",
+                "Intelligence is currently 43.",
                 "Tech-Use is currently Untrained."
             ]
     )
@@ -179,6 +183,7 @@ import Testing
     )
 }
 
+#if canImport(SwiftUI)
 @Test @MainActor func viewModelApplyXPSpendPersistsTalentUnlockAndAdvancementHistory() async throws {
     let fileURL = progressionUniqueTestFileURL("batch49-viewmodel-talent-unlock")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -206,6 +211,7 @@ import Testing
     #expect(persisted?.history.first?.title == "Advancement: Talent: Rapid Reload")
     #expect(viewModel.character(by: source.id)?.notes.talents == ["Meditation", "Rapid Reload"])
 }
+#endif
 
 @Test func invalidSkillAdvanceDoesNotAllowSameTrainingLevel() {
     let character = progressionSampleCharacter(name: "No Change")
@@ -225,7 +231,7 @@ import Testing
     let result = XPProgressionResolver.validate(request)
 
     #expect(result.isValid == false)
-    #expect(result.validationErrors == [.invalidUpgrade("Skill advances must move to a higher training level than the character already has.")])
+    #expect(result.validationErrors == [.invalidUpgrade("Skill advances in DH2 must be purchased one rank at a time.")])
 }
 
 @Test func xpSpendMessagesAndLabelsRemainExplainableForEdgeCases() {
@@ -298,7 +304,51 @@ import Testing
     #expect(negativeCost.isValid == false)
     #expect(
         negativeCost.validationErrors
-            == [.invalidUpgrade("XP cost cannot be negative.")]
+            == [.invalidUpgrade("XP cost must be greater than 0.")]
+    )
+}
+
+@Test func characteristicAdvanceValidationRejectsSkippingPastSingleDh2Step() {
+    let character = progressionSampleCharacter(name: "Skip Characteristic")
+
+    let result = XPProgressionResolver.validate(
+        XPSpendRequest(
+            character: character,
+            upgrade: .characteristicAdvance(
+                CharacteristicAdvance(characteristic: .weaponSkill, delta: 10, cost: 250)
+            )
+        )
+    )
+
+    #expect(result.isValid == false)
+    #expect(
+        result.validationErrors
+            == [.invalidUpgrade("Characteristic advances in DH2 must be purchased as single +5 steps.")]
+    )
+}
+
+@Test func skillAdvanceValidationRejectsSkippingIntermediateRanks() {
+    let character = progressionSampleCharacter(name: "Skip Skill")
+    let awareness = character.skills[0]
+
+    let result = XPProgressionResolver.validate(
+        XPSpendRequest(
+            character: character,
+            upgrade: .skillAdvance(
+                SkillAdvance(
+                    skillID: awareness.id,
+                    skillName: awareness.displayName,
+                    targetTraining: .veteran,
+                    cost: 300
+                )
+            )
+        )
+    )
+
+    #expect(result.isValid == false)
+    #expect(
+        result.validationErrors
+            == [.invalidUpgrade("Skill advances in DH2 must be purchased one rank at a time.")]
     )
 }
 
@@ -340,7 +390,7 @@ import Testing
     #expect(negativeCost.isValid == false)
     #expect(
         negativeCost.validationErrors
-            == [.invalidUpgrade("XP cost cannot be negative.")]
+            == [.invalidUpgrade("XP cost must be greater than 0.")]
     )
 }
 
@@ -372,7 +422,7 @@ import Testing
             CharacteristicAdvance(
                 characteristic: .fellowship,
                 delta: 5,
-                cost: 0,
+                cost: 50,
                 prerequisites: [
                     .requiredAptitude("fieldcraft"),
                     .requiredTalent(" rapid reload "),
@@ -396,6 +446,31 @@ import Testing
     #expect(result.breakdown.prerequisiteEvaluations[7].detail == "tech use is currently Veteran.")
 }
 
+@Test func requiredAptitudeUsesEngineBackedCompositionBeforeRawProfileFallback() {
+    var character = progressionSampleCharacter(name: "Engine Aptitudes")
+    character.profile.homeWorld = "Hive World"
+    character.profile.background = "Adeptus Administratum"
+    character.profile.role = "Seeker"
+    character.profile.aptitudes = ["Knowledge"]
+
+    let result = XPProgressionResolver.validate(
+        XPSpendRequest(
+            character: character,
+            upgrade: .characteristicAdvance(
+                CharacteristicAdvance(
+                    characteristic: .fellowship,
+                    delta: 5,
+                    cost: 50,
+                    prerequisites: [.requiredAptitude("Tech")]
+                )
+            )
+        )
+    )
+
+    #expect(result.isValid)
+    #expect(result.breakdown.prerequisiteEvaluations[1].detail == "Character already has Tech via DHII creation composition.")
+}
+
 @Test func characteristicAdvanceCanApplyAcrossAllCharacteristics() {
     let character = progressionSampleCharacter(name: "All Characteristics")
     let expectations: [(SkillCharacteristic, KeyPath<CharacteristicSet, Int>)] = [
@@ -415,16 +490,17 @@ import Testing
             XPSpendRequest(
                 character: character,
                 upgrade: .characteristicAdvance(
-                    CharacteristicAdvance(characteristic: characteristic, delta: 1, cost: 0)
+                    CharacteristicAdvance(characteristic: characteristic, delta: 5, cost: 1)
                 )
             )
         )
 
         #expect(result.isValid)
-        #expect(result.appliedCharacter?.characteristics[keyPath: keyPath] == character.characteristics[keyPath: keyPath] + 1)
+        #expect(result.appliedCharacter?.characteristics[keyPath: keyPath] == character.characteristics[keyPath: keyPath] + 5)
     }
 }
 
+#if canImport(SwiftUI)
 @Test @MainActor func viewModelApplyXPSpendPersistsCharacterAndAdvancementHistory() async throws {
     let fileURL = progressionUniqueTestFileURL("batch48-viewmodel-apply")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -483,6 +559,7 @@ private func progressionViewModel(
         weaponCompendiumImportService: WeaponCompendiumJSONImportService()
     )
 }
+#endif
 
 private func progressionUniqueTestFileURL(_ suffix: String) -> URL {
     FileManager.default.temporaryDirectory

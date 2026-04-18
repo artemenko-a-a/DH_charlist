@@ -25,6 +25,7 @@ struct XPSpendScreen: View {
     private let onApply: @Sendable (XPSpendRequest) async -> Character?
 
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var focusedField: FocusField?
 
     @State private var upgradeKind: UpgradeKind = .characteristic
     @State private var selectedCharacteristic: SkillCharacteristic = .weaponSkill
@@ -34,7 +35,8 @@ struct XPSpendScreen: View {
     @State private var xpCost: Int = CharacteristicAdvanceCatalogRegistry
         .entry(for: .weaponSkill)
         .costModel
-        .defaultCost
+        .defaultCost ?? 0
+    @State private var xpCostText: String
     @State private var requiredAptitudesText = ""
     @State private var requiredTalent = ""
     @State private var requiredTrait = ""
@@ -43,12 +45,23 @@ struct XPSpendScreen: View {
     @State private var minimumCharacteristicValue = 30
     @State private var isApplying = false
 
+    private enum FocusField: Hashable {
+        case xpCost
+        case minimumCharacteristicValue
+    }
+
     init(
         character: Character,
         onApply: @escaping @Sendable (XPSpendRequest) async -> Character?
     ) {
         self.character = character
         self.onApply = onApply
+
+        let initialCost = CharacteristicAdvanceCatalogRegistry
+            .entry(for: .weaponSkill)
+            .costModel
+            .defaultCost ?? 0
+        _xpCostText = State(initialValue: String(initialCost))
 
         let sortedSkills = character.skills.sorted {
             $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
@@ -85,11 +98,8 @@ struct XPSpendScreen: View {
                         }
                         .accessibilityIdentifier("xp-spend.characteristic")
 
-                        Picker("Increase", selection: $characteristicDelta) {
-                            Text("+5").tag(5)
-                            Text("+10").tag(10)
-                        }
-                        .accessibilityIdentifier("xp-spend.characteristic-delta")
+                        LabeledContent("Increase", value: "+5")
+                            .accessibilityIdentifier("xp-spend.characteristic-delta")
 
                     case .skill:
                         if sortedSkills.isEmpty {
@@ -112,16 +122,22 @@ struct XPSpendScreen: View {
                                 }
                             }
                             .accessibilityIdentifier("xp-spend.skill.target")
+
+                            if allowedTargetTraining == [selectedSkill?.training].compactMap({ $0 }) {
+                                Text("This skill is already at the highest supported training rank.")
+                                    .cogitatorSupportingText()
+                            }
                         }
                     }
 
                     HStack {
                         Text("XP Cost")
                         Spacer()
-                        TextField("XP Cost", value: $xpCost, format: .number)
+                        TextField("XP Cost", text: $xpCostText)
                             .multilineTextAlignment(.trailing)
                             .frame(maxWidth: 100)
                             .accessibilityIdentifier("xp-spend.cost")
+                            .focused($focusedField, equals: .xpCost)
 #if os(iOS)
                             .keyboardType(.numberPad)
 #endif
@@ -129,6 +145,9 @@ struct XPSpendScreen: View {
                     .cogitatorPanelRow()
                 } header: {
                     CogitatorSectionHeader("Upgrade", subtitle: "Choose a bounded spend target")
+                } footer: {
+                    Text(upgradeGuidanceText)
+                        .cogitatorSupportingText()
                 }
 
                 Section {
@@ -156,6 +175,7 @@ struct XPSpendScreen: View {
                                 .multilineTextAlignment(.trailing)
                                 .frame(maxWidth: 100)
                                 .accessibilityIdentifier("xp-spend.prerequisite.minimum.value")
+                                .focused($focusedField, equals: .minimumCharacteristicValue)
 #if os(iOS)
                                 .keyboardType(.numberPad)
 #endif
@@ -266,7 +286,28 @@ struct XPSpendScreen: View {
                     .disabled(validationResult.isValid == false || isApplying)
                     .accessibilityIdentifier("xp-spend.apply")
                 }
+
+#if os(iOS)
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+
+                    Button("Done") {
+                        focusedField = nil
+                    }
+                }
+#endif
             }
+        }
+        .onAppear(perform: syncProgressionDefaults)
+        .onChange(of: upgradeKind) { _, _ in syncProgressionDefaults() }
+        .onChange(of: selectedCharacteristic) { _, _ in syncProgressionDefaults() }
+        .onChange(of: selectedSkillID) { _, _ in syncProgressionDefaults() }
+        .onChange(of: targetTraining) { _, _ in
+            guard upgradeKind == .skill else { return }
+            syncProgressionDefaults()
+        }
+        .onChange(of: xpCostText) { _, newValue in
+            syncXPSpendCostText(newValue)
         }
     }
 
@@ -288,7 +329,7 @@ struct XPSpendScreen: View {
                     .entry(for: selectedCharacteristic)
                     .makeAdvance(
                         deltaOverride: characteristicDelta,
-                        costOverride: max(0, xpCost),
+                        costOverride: xpCost,
                         extraPrerequisites: manualPrerequisites
                     )
             )
@@ -302,7 +343,7 @@ struct XPSpendScreen: View {
                     .entry(for: selectedSkill, targetTraining: targetTraining)
                     .makeAdvance(
                         skill: selectedSkill,
-                        costOverride: max(0, xpCost),
+                        costOverride: xpCost,
                         extraPrerequisites: manualPrerequisites
                     )
             )
@@ -345,17 +386,74 @@ struct XPSpendScreen: View {
 
     private var allowedTargetTraining: [SkillTrainingLevel] {
         guard let selectedSkill else {
-            return SkillTrainingLevel.allCases
+            return [.known]
         }
 
-        let higherLevels = SkillTrainingLevel.allCases.filter {
-            $0.progressionRank > selectedSkill.training.progressionRank
+        guard let nextLevel = nextTrainingLevel(after: selectedSkill.training) else {
+            return [selectedSkill.training]
         }
-        return higherLevels.isEmpty ? [selectedSkill.training] : higherLevels
+        return [nextLevel]
     }
 
     private var validationResult: XPSpendResult {
         XPProgressionResolver.validate(currentRequest)
+    }
+
+    private var upgradeGuidanceText: String {
+        switch upgradeKind {
+        case .characteristic:
+            "DH2 characteristic advances are purchased in single +5 steps. This bounded flow requires manual XP entry because the app does not yet track characteristic advance tiers."
+        case .skill:
+            "DH2 skill advances are purchased one rank at a time. When the selected skill has a verified aptitude pair, the XP field is prefilled from the next-rank rulebook cost; otherwise it remains manual."
+        }
+    }
+
+    private func syncProgressionDefaults() {
+        switch upgradeKind {
+        case .characteristic:
+            characteristicDelta = 5
+            setXPSpendCost(0)
+
+        case .skill:
+            guard let selectedSkill else {
+                targetTraining = .known
+                setXPSpendCost(0)
+                return
+            }
+
+            let nextLevel = nextTrainingLevel(after: selectedSkill.training) ?? selectedSkill.training
+            if targetTraining != nextLevel {
+                targetTraining = nextLevel
+                return
+            }
+
+            let entry = SkillAdvanceCatalogRegistry.entry(for: selectedSkill, targetTraining: targetTraining)
+            setXPSpendCost(entry.defaultCost(for: character) ?? 0)
+        }
+    }
+
+    private func nextTrainingLevel(after currentTraining: SkillTrainingLevel) -> SkillTrainingLevel? {
+        SkillTrainingLevel.allCases.first { $0.progressionRank == currentTraining.progressionRank + 1 }
+    }
+
+    private func syncXPSpendCostText(_ newValue: String) {
+        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard trimmed.isEmpty == false else {
+            xpCost = 0
+            return
+        }
+
+        guard let parsedValue = Int(trimmed) else {
+            return
+        }
+
+        xpCost = parsedValue
+    }
+
+    private func setXPSpendCost(_ value: Int) {
+        xpCost = value
+        xpCostText = String(value)
     }
 }
 #endif

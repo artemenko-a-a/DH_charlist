@@ -8,6 +8,8 @@ Important: this is a roadmap, not a claim that the project already has a full ru
 
 As of 2026-03-13, Stages 1, 2, 3, 4, 5, 6, 7, and 8 are now implemented in a bounded form through `Sources/DHCharList/Rules/MechanicsChecks.swift`, `Sources/DHCharList/Rules/RulesRegistries.swift`, `Sources/DHCharList/Rules/DamagePipeline.swift`, `Sources/DHCharList/Rules/XPProgression.swift`, `Sources/DHCharList/Rules/ProgressionRegistries.swift`, and `Tests/DHCharListTests/RulesGoldenScenarioTests.swift`. The project still does **not** have a full rules engine.
 
+The next architectural expansion for a full DHII creation/progression engine is tracked separately in `Docs/dhii-engine-roadmap.md` so the repository can grow from bounded rules helpers into a canonical creation engine without losing the current accepted scope.
+
 ## Goals
 
 The long-term goal is to build a rules engine that is:

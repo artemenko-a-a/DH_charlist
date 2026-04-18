@@ -133,6 +133,74 @@ final class CharacterListViewModel: ObservableObject {
         }
     }
 
+    func createDHIICharacter(name: String, description: String, draft: DHIICreationDraft) async -> UUID? {
+        let preview = DHIICharacterCreationEngine.previewStartingPackage(
+            for: draft,
+            baseCharacter: Character(
+                profile: Profile(
+                    name: name,
+                    description: description
+                )
+            ),
+            weaponCatalog: weaponCompendiumCatalog,
+            armourCatalog: armourCompendiumCatalog
+        )
+
+        guard var projected = preview.projectedCharacter, preview.validationMessages.isEmpty else {
+            errorMessage = dhiiCreationErrorMessage(from: preview)
+            return nil
+        }
+
+        projected.profile.name = name
+        projected.profile.description = description
+
+        do {
+            try await useCases.upsertCharacter(projected)
+            await load()
+            errorMessage = nil
+            return projected.id
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    func updateDHIICharacter(characterID: UUID, name: String, description: String, draft: DHIICreationDraft) async -> Character? {
+        guard let existing = character(by: characterID) else {
+            errorMessage = "Character not found."
+            return nil
+        }
+
+        let preview = DHIICharacterCreationEngine.reprojectExistingCharacter(
+            existing,
+            with: draft,
+            weaponCatalog: weaponCompendiumCatalog,
+            armourCatalog: armourCompendiumCatalog
+        )
+
+        guard var projected = preview.projectedCharacter, preview.validationMessages.isEmpty else {
+            errorMessage = dhiiCreationErrorMessage(from: preview)
+            return nil
+        }
+
+        projected.profile.name = name
+        projected.profile.description = description
+
+        do {
+            try await useCases.upsertCharacter(projected)
+            guard let persisted = try await useCases.fetchCharacter(id: projected.id) else {
+                errorMessage = "Updated character could not be reloaded."
+                return nil
+            }
+            replaceInMemory(persisted)
+            errorMessage = nil
+            return persisted
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
     func createCharacter(fromTemplateID templateID: UUID) async {
         guard let templateUseCases else {
             errorMessage = "Template support is unavailable."
@@ -551,6 +619,13 @@ final class CharacterListViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+
+    private func dhiiCreationErrorMessage(from preview: DHIICreationStartingPackagePreview) -> String {
+        let messages = preview.validationMessages.isEmpty
+            ? ["DHII creation state is incomplete or unsupported for projection."]
+            : preview.validationMessages
+        return messages.joined(separator: "\n")
+    }
 }
 
 @available(iOS 17, macOS 14, *)
@@ -826,6 +901,27 @@ private struct TemplateQuickStartSheet: View {
         NavigationStack {
             List {
                 Section {
+                    NavigationLink {
+                        DHIICreationFlowScreen(mode: .create, viewModel: viewModel) {
+                            dismiss()
+                        }
+                    } label: {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "book.pages")
+                                .foregroundStyle(CogitatorPalette.amber)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("DHII Guided Creation")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(CogitatorPalette.textPrimary)
+                                Text("Use the bounded DHII Engine to build an engine-backed starting character.")
+                                    .cogitatorSupportingText()
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("quickstart.dhii-guided")
+                    .cogitatorPanelRow()
+
                     Button {
                         Task { await viewModel.createBlankCharacter() }
                         dismiss()
@@ -1127,11 +1223,25 @@ struct CharacterDetailScreen: View {
                     } label: {
                         CharacterSectionLinkRow(
                             title: "Edit Profile",
-                            summary: "Name, world, background, role, aptitudes, and description.",
+                            summary: character.dhiiEngineState?.creation == nil
+                                ? "Name, world, background, role, aptitudes, and description."
+                                : "Name and description remain editable here. Engine-backed origin fields move through DHII Creation.",
                             systemImage: "person.text.rectangle"
                         )
                     }
                     .cogitatorPanelRow()
+                    if character.dhiiEngineState?.creation != nil {
+                        NavigationLink {
+                            DHIICreationFlowScreen(mode: .edit(characterID), viewModel: viewModel)
+                        } label: {
+                            CharacterSectionLinkRow(
+                                title: "DHII Creation",
+                                summary: "Review or revise canonical home world, background, role, and other engine-backed creation choices safely.",
+                                systemImage: "book.pages"
+                            )
+                        }
+                        .cogitatorPanelRow()
+                    }
                     NavigationLink {
                         CharacteristicsScreen(characterID: characterID, viewModel: viewModel)
                     } label: {

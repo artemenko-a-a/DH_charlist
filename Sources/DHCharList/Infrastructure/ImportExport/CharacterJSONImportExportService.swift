@@ -22,6 +22,7 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
     public let equipment: EquipmentState
     public let session: SessionState
     public let history: [CharacterHistoryEntry]
+    let dhiiEngineState: DHIICharacterEngineState?
     public let updatedAt: Date
 
     public init(character: Character) {
@@ -34,6 +35,7 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
         equipment = character.equipment
         session = character.session
         history = character.history
+        dhiiEngineState = character.dhiiEngineState
         updatedAt = character.updatedAt
     }
 
@@ -48,6 +50,7 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
             equipment: equipment,
             session: session,
             history: history,
+            dhiiEngineState: dhiiEngineState,
             updatedAt: updatedAt
         )
     }
@@ -62,6 +65,7 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
         case equipment
         case session
         case history
+        case dhiiEngineState
         case updatedAt
     }
 
@@ -76,12 +80,17 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
         equipment = try container.decode(EquipmentState.self, forKey: .equipment)
         session = try container.decode(SessionState.self, forKey: .session)
         history = try container.decodeIfPresent([CharacterHistoryEntry].self, forKey: .history) ?? []
+        dhiiEngineState = try container.decodeIfPresent(DHIICharacterEngineState.self, forKey: .dhiiEngineState)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
     }
 }
 
 public struct CharacterJSONImportExportService: CharacterImportExportService {
-    public static let supportedSchema = 1
+    public static let supportedSchema = 2
+    // Older builds intentionally reject envelopes emitted by newer schema
+    // versions. Within supported schemas, additive fields remain tolerant via
+    // decodeIfPresent-based DTO decoding.
+    static let supportedSchemas: Set<Int> = [1, 2]
 
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
@@ -96,13 +105,16 @@ public struct CharacterJSONImportExportService: CharacterImportExportService {
     }
 
     public func exportCharacters(_ characters: [Character]) throws -> Data {
-        let envelope = CharacterExportEnvelope(characters: characters.map(CharacterDTO.init(character:)))
+        let envelope = CharacterExportEnvelope(
+            schemaVersion: Self.supportedSchema,
+            characters: characters.map(CharacterDTO.init(character:))
+        )
         return try encoder.encode(envelope)
     }
 
     public func `import`(_ data: Data) throws -> [Character] {
         let envelope = try decoder.decode(CharacterExportEnvelope.self, from: data)
-        guard envelope.schemaVersion == Self.supportedSchema else {
+        guard Self.supportedSchemas.contains(envelope.schemaVersion) else {
             throw CharacterRepositoryError.invalidData("Unsupported schema version: \(envelope.schemaVersion)")
         }
         return envelope.characters.map(\.domain)

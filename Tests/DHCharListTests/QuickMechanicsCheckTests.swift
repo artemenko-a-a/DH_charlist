@@ -80,6 +80,30 @@ import Testing
     #expect(result.breakdown.contribution(of: .training)?.appliesToFinalTarget == true)
 }
 
+@Test func skillTrainingRanksMatchDh2KnownTrainedExperiencedVeteranBonuses() {
+    let characteristics = CharacteristicSet(
+        weaponSkill: 30,
+        ballisticSkill: 30,
+        strength: 30,
+        toughness: 30,
+        agility: 30,
+        intelligence: 30,
+        perception: 40,
+        willpower: 30,
+        fellowship: 30
+    )
+
+    let known = Skill(name: "Awareness", characteristic: .perception, training: .known)
+    let trained = Skill(name: "Awareness", characteristic: .perception, training: .trained)
+    let experienced = Skill(name: "Awareness", characteristic: .perception, training: .experienced)
+    let veteran = Skill(name: "Awareness", characteristic: .perception, training: .veteran)
+
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(known, characteristics: characteristics, modifiers: [])).finalTarget == 40)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(trained, characteristics: characteristics, modifiers: [])).finalTarget == 50)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(experienced, characteristics: characteristics, modifiers: [])).finalTarget == 60)
+    #expect(MechanicsCheckResolver.resolve(CheckRequest.skill(veteran, characteristics: characteristics, modifiers: [])).finalTarget == 70)
+}
+
 @Test func standardQuickMechanicsPresetsRemainExpected() {
     #expect(DifficultyPresetRegistry.standard.map(\.value) == [30, 20, 10, 0, -10, -20, -30])
     #expect(DifficultyPresetRegistry.preset(for: 20)?.source == "Difficulty Preset Registry")
@@ -177,6 +201,46 @@ import Testing
     #expect(result.breakdown.appliedModifierContributions.map(\.label) == ["Custom Modifier", "Smoke"])
     #expect(result.breakdown.activeConditions.map(\.kind) == [.cover, .pinned])
     #expect(result.finalTarget == 40)
+}
+
+@Test func quickCheckModifiersClampToDh2PlusSixtyMinusSixtyLimits() {
+    let characteristics = CharacteristicSet(
+        weaponSkill: 40,
+        ballisticSkill: 40,
+        strength: 40,
+        toughness: 40,
+        agility: 40,
+        intelligence: 40,
+        perception: 40,
+        willpower: 40,
+        fellowship: 40
+    )
+
+    let positive = MechanicsCheckResolver.resolve(
+        .characteristic(
+            .agility,
+            characteristics: characteristics,
+            modifiers: [
+                .manual(value: 50),
+                .preset(value: 30)
+            ]
+        )
+    )
+    let negative = MechanicsCheckResolver.resolve(
+        .skill(
+            Skill(name: "Awareness", characteristic: .perception, training: .known),
+            characteristics: characteristics,
+            modifiers: [
+                .manual(value: -50),
+                .manual(value: -30)
+            ]
+        )
+    )
+
+    #expect(positive.breakdown.appliedModifier == 60)
+    #expect(positive.finalTarget == 100)
+    #expect(negative.breakdown.appliedModifier == -60)
+    #expect(negative.finalTarget == -20)
 }
 
 @Test func unifiedExplainableCheckEngineKeepsStableContributionOrdering() {

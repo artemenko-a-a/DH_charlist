@@ -99,7 +99,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         let createButton = app.buttons["Create Character"]
         XCTAssertTrue(createButton.waitForExistence(timeout: 5))
         createButton.tap()
-        XCTAssertTrue(app.navigationBars["Create Character"].waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForCreateCharacterEntryPoint())
 
         let blankCharacterButton = app.buttons["quickstart.blank-character"]
         if blankCharacterButton.waitForExistence(timeout: 5) {
@@ -151,6 +151,98 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         importExportMenu.tap()
         XCTAssertTrue(app.buttons["Import JSON"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Export JSON"].waitForExistence(timeout: 5))
+    }
+
+    func testGuidedDHIIFlowCreatesEngineBackedCharacterAndAllowsReentry() {
+        launchForSmoke()
+
+        let createButton = app.buttons["Create Character"]
+        XCTAssertTrue(createButton.waitForExistence(timeout: 5))
+        createButton.tap()
+        XCTAssertTrue(waitForCreateCharacterEntryPoint())
+
+        let guidedButton = app.buttons["quickstart.dhii-guided"]
+        if guidedButton.waitForExistence(timeout: 5) {
+            guidedButton.tap()
+        } else {
+            let guidedRow = app.otherElements["quickstart.dhii-guided"]
+            XCTAssertTrue(guidedRow.waitForExistence(timeout: 5))
+            guidedRow.tap()
+        }
+
+        XCTAssertTrue(app.navigationBars["DHII Creation"].waitForExistence(timeout: 8))
+
+        let nameField = textInput("dhii-creation.name")
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5))
+        nameField.clearAndEnterText("Engine Smoke")
+
+        app.buttons["dhii-creation.home-world.hiveWorld"].tap()
+        app.buttons["dhii-creation.background.adeptusArbites"].tap()
+        app.buttons["dhii-creation.role.assassin"].tap()
+
+        let choicesStageButton = app.buttons["dhii-creation.advance-to-choices"]
+        XCTAssertTrue(choicesStageButton.waitForExistence(timeout: 5))
+        choicesStageButton.tap()
+
+        let backgroundAptitudeButton = app.buttons["dhii-creation.background-aptitude.offence"]
+        reveal(backgroundAptitudeButton, maxSwipes: 3)
+        XCTAssertTrue(backgroundAptitudeButton.waitForExistence(timeout: 5))
+        backgroundAptitudeButton.tap()
+
+        let roleAptitudeButton = app.buttons["dhii-creation.role-aptitude.ballistic-skill"]
+        reveal(roleAptitudeButton, maxSwipes: 3)
+        XCTAssertTrue(roleAptitudeButton.waitForExistence(timeout: 5))
+        roleAptitudeButton.tap()
+
+        let backgroundSkillButton = app.buttons["dhii-creation.background-skill.0.inquiry"]
+        reveal(backgroundSkillButton, maxSwipes: 3)
+        XCTAssertTrue(backgroundSkillButton.waitForExistence(timeout: 5))
+        backgroundSkillButton.tap()
+
+        let primaryEquipmentButton = app.buttons["dhii-creation.background-equipment.0.shotgun"]
+        reveal(primaryEquipmentButton, maxSwipes: 3)
+        XCTAssertTrue(primaryEquipmentButton.waitForExistence(timeout: 5))
+        primaryEquipmentButton.tap()
+
+        let secondaryEquipmentButton = app.buttons["dhii-creation.background-equipment.1.enforcer-light-carapace-armour"]
+        reveal(secondaryEquipmentButton, maxSwipes: 3)
+        XCTAssertTrue(secondaryEquipmentButton.waitForExistence(timeout: 5))
+        secondaryEquipmentButton.tap()
+
+        let roleTalentButton = app.buttons["dhii-creation.role-talent.jaded"]
+        reveal(roleTalentButton, maxSwipes: 3)
+        XCTAssertTrue(roleTalentButton.waitForExistence(timeout: 5))
+        roleTalentButton.tap()
+        app.buttons["dhii-creation.roll-wounds"].tap()
+        app.buttons["dhii-creation.roll-fate"].tap()
+
+        let characteristicsStageButton = app.buttons["dhii-creation.advance-to-characteristics"]
+        XCTAssertTrue(characteristicsStageButton.waitForExistence(timeout: 5))
+        characteristicsStageButton.tap()
+        let balancedButton = app.buttons["dhii-creation.point-allocation.balanced"]
+        XCTAssertTrue(balancedButton.waitForExistence(timeout: 5))
+        balancedButton.tap()
+
+        let reviewStageButton = app.buttons["dhii-creation.advance-to-review"]
+        reveal(reviewStageButton, maxSwipes: 3)
+        XCTAssertTrue(reviewStageButton.waitForExistence(timeout: 5))
+        reviewStageButton.tap()
+        let saveButton = app.buttons["dhii-creation.save"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(saveButton.isEnabled)
+        saveButton.tap()
+
+        XCTAssertTrue(app.staticTexts["Engine Smoke"].waitForExistence(timeout: 8))
+
+        openCharacterDetail(named: "Engine Smoke")
+        XCTAssertTrue(app.navigationBars["Engine Smoke"].waitForExistence(timeout: 8))
+
+        let creationEntry = app.staticTexts["DHII Creation"]
+        reveal(creationEntry, maxSwipes: 3)
+        XCTAssertTrue(creationEntry.waitForExistence(timeout: 5))
+        creationEntry.tap()
+
+        XCTAssertTrue(app.navigationBars["Edit DHII Creation"].waitForExistence(timeout: 8))
     }
 
     func testQuickMechanicsHelpersAcrossCharacteristicSkillAndSessionFlows() {
@@ -219,10 +311,9 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         app.buttons["Done"].tap()
     }
 
-    func testXPSpendingValidationAppliesBoundedAdvancement() {
+    func testXPSpendingValidationScreenShowsManualCharacteristicCostEntry() {
         launchForSmoke()
         openCharacterDetail()
-        XCTAssertTrue(app.navigationBars["Smoke Acolyte"].waitForExistence(timeout: 8))
 
         let characteristicsSection = app.staticTexts["Characteristics & Resources"]
         XCTAssertTrue(characteristicsSection.waitForExistence(timeout: 5))
@@ -236,21 +327,12 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         XCTAssertTrue(app.navigationBars["XP Spending"].waitForExistence(timeout: 5))
 
+        let costField = app.textFields["xp-spend.cost"]
+        XCTAssertTrue(costField.waitForExistence(timeout: 5))
+
         let applyButton = app.buttons["xp-spend.apply"]
         XCTAssertTrue(applyButton.waitForExistence(timeout: 5))
-        XCTAssertTrue(applyButton.isEnabled)
-        applyButton.tap()
-
-        XCTAssertTrue(app.navigationBars["Characteristics"].waitForExistence(timeout: 8))
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-
-        let historySection = app.staticTexts["Campaign Log & History"]
-        reveal(historySection, maxSwipes: 3)
-        XCTAssertTrue(historySection.waitForExistence(timeout: 5))
-        historySection.tap()
-
-        XCTAssertTrue(app.navigationBars["Campaign Log"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Advancement: Weapon Skill +5"].waitForExistence(timeout: 8))
+        XCTAssertFalse(applyButton.isEnabled)
     }
 
     func testCombatWorkspaceActivePlayFlow() {
@@ -633,7 +715,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
 
         let armourPointsField = app.textFields["Armour Points"]
         XCTAssertTrue(armourPointsField.waitForExistence(timeout: 5))
-        XCTAssertEqual(armourPointsField.value as? String, "4")
+        XCTAssertEqual(armourPointsField.value as? String, "3")
         armourPointsField.clearAndEnterText("5")
 
         app.buttons["Save"].tap()
@@ -654,7 +736,7 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         secondFlakSuggestion.tap()
 
         XCTAssertEqual(app.textFields["Armour Location"].value as? String, "Flak Coat (Body, Arms)")
-        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "4")
+        XCTAssertEqual(app.textFields["Armour Points"].value as? String, "3")
         app.buttons["Cancel"].tap()
 
         XCTAssertTrue(labeledElement(containing: "Custom Flak Coat").waitForExistence(timeout: 5))
@@ -802,6 +884,20 @@ final class DHCharListHostSmokeUITests: DHCharListHostUITestCase {
         }
         XCTAssertTrue(finalTarget.waitForExistence(timeout: 5))
         XCTAssertEqual(finalTarget.label, expectedValue)
+    }
+
+    private func waitForCreateCharacterEntryPoint() -> Bool {
+        if app.navigationBars["Create Character"].waitForExistence(timeout: 5) {
+            return true
+        }
+
+        let blankCharacterButton = app.buttons["quickstart.blank-character"]
+        if blankCharacterButton.waitForExistence(timeout: 5) {
+            return true
+        }
+
+        let blankCharacterRow = app.otherElements["quickstart.blank-character"]
+        return blankCharacterRow.waitForExistence(timeout: 5)
     }
 
     private func reveal(_ element: XCUIElement, maxSwipes: Int) {

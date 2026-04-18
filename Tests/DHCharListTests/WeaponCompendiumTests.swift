@@ -293,6 +293,7 @@ import Testing
     #expect(definition.traitsText == "Reliable")
 }
 
+#if canImport(SwiftUI)
 @MainActor
 @Test func cancelPendingWeaponCompendiumImportLeavesCurrentCatalogUnchanged() async throws {
     let characterRepository = JSONFileCharacterRepository(fileURL: uniqueCompendiumTestFileURL("characters"))
@@ -329,6 +330,7 @@ import Testing
     #expect(viewModel.pendingWeaponCompendiumImportSummary == nil)
     #expect(after == before)
 }
+#endif
 
 @Test func compendiumWeaponInstancePersistsThroughAcceptedEquipmentFlow() async throws {
     let fileURL = uniqueCompendiumTestFileURL("equipment-compendium-copy")

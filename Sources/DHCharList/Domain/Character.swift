@@ -10,6 +10,8 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
     public var equipment: EquipmentState
     public var session: SessionState
     public var history: [CharacterHistoryEntry]
+    // Internal additive persistence seam for the DHII engine. This is not part of
+    // the stable public construction API for `Character`.
     var dhiiEngineState: DHIICharacterEngineState?
     public var updatedAt: Date
 
@@ -51,17 +53,19 @@ public struct Character: Identifiable, Codable, Equatable, Sendable {
         dhiiEngineState: DHIICharacterEngineState? = nil,
         updatedAt: Date = .now
     ) {
-        self.id = id
-        self.profile = profile
-        self.characteristics = characteristics
-        self.resources = resources
-        self.skills = skills
-        self.notes = notes
-        self.equipment = equipment
-        self.session = session
-        self.history = history
+        self.init(
+            id: id,
+            profile: profile,
+            characteristics: characteristics,
+            resources: resources,
+            skills: skills,
+            notes: notes,
+            equipment: equipment,
+            session: session,
+            history: history,
+            updatedAt: updatedAt
+        )
         self.dhiiEngineState = dhiiEngineState
-        self.updatedAt = updatedAt
     }
 
     private enum CodingKeys: String, CodingKey {

@@ -2025,6 +2025,7 @@ private func makeSwiftDataTemplateRepository(testName: String) throws -> SwiftDa
 }
 #endif
 
+#if canImport(SwiftUI)
 @MainActor
 private func makeCharacterListViewModel(
     useCases: CharacterUseCases,
@@ -2047,6 +2048,7 @@ private func makeCharacterListViewModel(
         weaponCompendiumImportService: WeaponCompendiumJSONImportService()
     )
 }
+#endif
 
 private func sampleCharacter(name: String) -> Character {
     let weapon = Weapon(

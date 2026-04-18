@@ -19,7 +19,7 @@ struct DHIICharacteristicModifierRule: Equatable, Sendable {
     let delta: Int
 
     var summary: String {
-        "\(delta >= 0 ? "+" : "-")\(target.displayName)"
+        "\(delta >= 0 ? "+" : "")\(delta) \(target.displayName)"
     }
 }
 
@@ -658,6 +658,10 @@ struct DHIICreationDraft: Equatable, Sendable {
 }
 
 enum DHIICharacterCreationEngine {
+    // Dark Heresy Second Edition Core Rulebook p. 78: new Acolytes begin with
+    // 1,000 xp to spend during Stage 4 of character creation.
+    static let startingExperienceTotal = 1_000
+
     static let backgroundCreationNotes: [String] = [
         "Starting skills from a background are gained at Known (+0).",
         "Starting talents granted by a background ignore normal prerequisites during character creation.",
@@ -816,7 +820,7 @@ enum DHIICharacterCreationEngine {
                 "Intimidate",
                 "Scrutiny"
             ],
-            startingTalents: ["Weapon Training (Shock or Solid Projectile)"],
+            startingTalents: ["Weapon Training (Shock or Solid Projectile, choose one)"],
             startingTraits: [],
             startingEquipment: [
                 "Shotgun or shock maul",
@@ -1665,6 +1669,8 @@ private func characteristicGenerationState(
     }
 }
 
+// Shared internal helper so engine parsing and projection coercion normalize
+// rulebook choice strings the same way.
 func validatedChoice(_ choice: String?, options: [String]) -> String? {
     guard let choice,
           let normalizedChoice = normalizedCatalogToken(choice) else {

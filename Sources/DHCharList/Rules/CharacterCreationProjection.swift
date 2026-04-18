@@ -183,7 +183,7 @@ extension DHIICharacterCreationEngine {
             currentFate: homeWorld.fateThreshold.baseThreshold + (startingFateRoll >= homeWorld.fateThreshold.emperorsBlessingTarget ? 1 : 0),
             maxFate: homeWorld.fateThreshold.baseThreshold + (startingFateRoll >= homeWorld.fateThreshold.emperorsBlessingTarget ? 1 : 0),
             experienceSpent: 0,
-            experienceTotal: 1_000
+            experienceTotal: DHIICharacterCreationEngine.startingExperienceTotal
         )
         projected.skills = projectedPackage.skills
         projected.notes = projectedPackage.notes

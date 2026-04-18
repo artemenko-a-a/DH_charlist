@@ -15,12 +15,17 @@ import Testing
 @Test func shrineWorldPreviewCarriesRulebookBackedStartingValues() {
     let preview = try! #require(DHIICharacterCreationEngine.previewHomeWorldSelection(rawValue: "Shrine World"))
 
-    #expect(preview.definition.characteristicModifierSummary == "+Fellowship, +Willpower, -Perception")
+    #expect(preview.definition.characteristicModifierSummary == "+1 Fellowship, +1 Willpower, -1 Perception")
     #expect(preview.definition.fateThreshold == DHIIFateThresholdRule(baseThreshold: 3, emperorsBlessingTarget: 6))
     #expect(preview.definition.aptitude == "Willpower")
     #expect(preview.definition.wounds.summary == "7+1d5")
     #expect(preview.definition.homeWorldBonus.name == "Faith in the Creed")
     #expect(preview.definition.recommendedBackgrounds == ["Adeptus Administratum", "Adeptus Arbites", "Adeptus Ministorum", "Imperial Guard"])
+}
+
+@Test func characteristicModifierSummaryIncludesSignedMagnitude() {
+    #expect(DHIICharacteristicModifierRule(target: .characteristic(.fellowship), delta: 1).summary == "+1 Fellowship")
+    #expect(DHIICharacteristicModifierRule(target: .influence, delta: -1).summary == "-1 Influence")
 }
 
 @Test func influenceBasedHomeWorldEffectsAreFlaggedAsCurrentModelGap() {
@@ -615,7 +620,7 @@ import Testing
         currentFate: 3,
         maxFate: 3,
         experienceSpent: 0,
-        experienceTotal: 1_000
+        experienceTotal: DHIICharacterCreationEngine.startingExperienceTotal
     ))
     #expect(projected.skills.contains {
         $0.name == "Athletics" && $0.characteristic == .strength && $0.training == .known
@@ -856,7 +861,7 @@ import Testing
             startingFateRoll: 2,
             expectedWeapons: ["Shock Maul"],
             expectedInventoryItems: ["Carapace Chestplate", "3 Doses of Stimm"],
-            expectedTalents: ["Weapon Training (Shock or Solid Projectile)", "Iron Jaw"],
+            expectedTalents: ["Weapon Training (Shock or Solid Projectile, choose one)", "Iron Jaw"],
             expectedTraits: [],
             expectedSkillNames: ["Awareness", "Common Lore", "Interrogation", "Intimidate", "Scrutiny"],
             expectedSpecialAbilityNames: ["The Face of the Law", "Expert at Violence", "The Old Ways"]

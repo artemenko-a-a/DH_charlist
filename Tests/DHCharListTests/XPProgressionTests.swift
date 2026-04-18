@@ -183,6 +183,7 @@ import Testing
     )
 }
 
+#if canImport(SwiftUI)
 @Test @MainActor func viewModelApplyXPSpendPersistsTalentUnlockAndAdvancementHistory() async throws {
     let fileURL = progressionUniqueTestFileURL("batch49-viewmodel-talent-unlock")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -210,6 +211,7 @@ import Testing
     #expect(persisted?.history.first?.title == "Advancement: Talent: Rapid Reload")
     #expect(viewModel.character(by: source.id)?.notes.talents == ["Meditation", "Rapid Reload"])
 }
+#endif
 
 @Test func invalidSkillAdvanceDoesNotAllowSameTrainingLevel() {
     let character = progressionSampleCharacter(name: "No Change")
@@ -498,6 +500,7 @@ import Testing
     }
 }
 
+#if canImport(SwiftUI)
 @Test @MainActor func viewModelApplyXPSpendPersistsCharacterAndAdvancementHistory() async throws {
     let fileURL = progressionUniqueTestFileURL("batch48-viewmodel-apply")
     let repository = JSONFileCharacterRepository(fileURL: fileURL)
@@ -556,6 +559,7 @@ private func progressionViewModel(
         weaponCompendiumImportService: WeaponCompendiumJSONImportService()
     )
 }
+#endif
 
 private func progressionUniqueTestFileURL(_ suffix: String) -> URL {
     FileManager.default.temporaryDirectory

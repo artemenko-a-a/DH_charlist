@@ -188,9 +188,13 @@ final class CharacterListViewModel: ObservableObject {
 
         do {
             try await useCases.upsertCharacter(projected)
-            replaceInMemory(projected)
+            guard let persisted = try await useCases.fetchCharacter(id: projected.id) else {
+                errorMessage = "Updated character could not be reloaded."
+                return nil
+            }
+            replaceInMemory(persisted)
             errorMessage = nil
-            return projected
+            return persisted
         } catch {
             errorMessage = error.localizedDescription
             return nil

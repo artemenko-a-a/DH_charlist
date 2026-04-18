@@ -87,6 +87,9 @@ public struct CharacterDTO: Codable, Equatable, Sendable {
 
 public struct CharacterJSONImportExportService: CharacterImportExportService {
     public static let supportedSchema = 2
+    // Older builds intentionally reject envelopes emitted by newer schema
+    // versions. Within supported schemas, additive fields remain tolerant via
+    // decodeIfPresent-based DTO decoding.
     static let supportedSchemas: Set<Int> = [1, 2]
 
     private let encoder: JSONEncoder

@@ -6,7 +6,6 @@ import {
 } from './types'
 import {
   coerceCharacter,
-  createDefaultCharacter,
   demoArmourCatalog,
   demoWeaponCatalog
 } from './domain'
@@ -38,7 +37,7 @@ function createRaibosCharacter(): Character {
       aptitudes: ['Общая', 'Интеллект', 'Техно', 'Полевое', 'Внимательность', 'Познание'],
       description: [
         'Возраст: 27. Пол: М. Комплекция: худой. Кожа: бледная. Волосы: лысый.',
-        'Распознано с бумажного чарника перед игровой сессией. Нечёткие строки сохранены в заметках и требуют сверки.'
+        'Внесено с бумажного чарника и сверено по пользовательским уточнениям перед игровой сессией.'
       ].join('\n')
     },
     characteristics: {
@@ -69,7 +68,7 @@ function createRaibosCharacter(): Character {
       { id: 'skill-logic', name: 'Логика', characteristic: 'intelligence', training: 'known', specialisations: [] },
       { id: 'skill-medicae', name: 'Медика', characteristic: 'intelligence', training: 'veteran', specialisations: [] },
       { id: 'skill-operate-voidship', name: 'Управление (Космическое)', characteristic: 'agility', training: 'known', specialisations: ['Космическое'] },
-      { id: 'skill-scrutiny', name: 'Проницательность', characteristic: 'perception', training: 'trained', specialisations: [] },
+      { id: 'skill-scrutiny', name: 'Проницательность', characteristic: 'perception', training: 'known', specialisations: [] },
       { id: 'skill-tech-use', name: 'Технопользование', characteristic: 'intelligence', training: 'veteran', specialisations: [] },
       { id: 'skill-trade-chemist', name: 'Ремесло', characteristic: 'intelligence', training: 'veteran', specialisations: ['Химик'] },
       { id: 'skill-trade-armourer', name: 'Ремесло', characteristic: 'intelligence', training: 'known', specialisations: ['Оружейник'] }
@@ -96,11 +95,11 @@ function createRaibosCharacter(): Character {
       psychicPowers: [],
       specialAbilities: [
         'Замена слабой плоти (кибернетика на 2 уровня ниже)',
-        'Преданный целитель (автоуспех за очко судьбы по БИ)'
+        'Преданный Целитель: можно потратить очко Судьбы для автоматического успеха на проваленной проверке Первой Помощи; степени успеха равны бонусу Интеллекта Хирургеона.'
       ],
       notes: [
         'Оружие из чарника: лазпистолет и лазган. Для обоих прочитана лазерная настройка: Ус: +1 урон, x2 БК; П: +2 урон, +2 пробивание, x4 БК.',
-        'Нечётко прочитано: страница/точная формулировка таланта «Искусный Стук»; строка «Преданный целитель … по БИ»; боезапас лазгана записан как 60x3.'
+        'Сверено пользователем: Искусный Стук — корректное название таланта; Преданный Целитель — базовый бонус роли Хирургеона; боезапас лазгана оставлен как 60x3.'
       ].join('\n')
     },
     equipment: {
@@ -153,11 +152,26 @@ function createRaibosCharacter(): Character {
         createdAt: '2026-05-15T00:00:00.000Z',
         title: 'Импортирован бумажный чарник',
         type: 'sessionNote',
-        body: 'Персонаж внесён по двум фотографиям бумажного листа Dark Heresy II. Неясные строки вынесены в заметки для быстрой сверки перед игрой.',
+        body: 'Персонаж внесён по двум фотографиям бумажного листа Dark Heresy II и уточнён по пользовательской сверке с рульником.',
         tags: ['import', 'paper-sheet']
       }
     ],
     updatedAt: '2026-05-15T00:00:00.000Z'
+  }
+}
+
+function isRaibosCharacter(character: Character): boolean {
+  return character.id === RAIBOS_CHARACTER_ID || character.profile.name === 'Райбос-2 Д-2'
+}
+
+function mergeRaibosSeed(existing: Character): Character {
+  const seed = createRaibosCharacter()
+  return {
+    ...seed,
+    id: existing.id,
+    resources: existing.resources,
+    history: existing.history.length > 0 ? existing.history : seed.history,
+    updatedAt: new Date().toISOString()
   }
 }
 
@@ -181,11 +195,11 @@ function loadCharactersWithWarnings(warnings: string[]): Character[] {
     return [createRaibosCharacter()]
   }
 
-  if (!characters.some((character) => character.id === RAIBOS_CHARACTER_ID || character.profile.name === 'Райбос-2 Д-2')) {
-    return [createRaibosCharacter(), ...characters]
+  if (characters.some(isRaibosCharacter)) {
+    return characters.map((character) => isRaibosCharacter(character) ? mergeRaibosSeed(character) : character)
   }
 
-  return characters
+  return [createRaibosCharacter(), ...characters]
 }
 
 function coerceWeaponCatalog(parsed: unknown): WeaponCompendiumCatalog | null {

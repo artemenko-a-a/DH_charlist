@@ -1,0 +1,4 @@
+14:01:41  Acquired tunnel connection to device.
+14:01:42  Enabling developer disk image services.
+14:01:42  Acquired usage assertion.
+Launched application with com.example.DHCharListHost bundle identifier.

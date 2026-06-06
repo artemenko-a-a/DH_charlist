@@ -55,17 +55,19 @@ private struct HostBootstrapView: View {
     }
 
     private func bootstrapIfNeeded() async {
-        guard launchConfiguration.isUITesting else {
-            return
+        if launchConfiguration.isUITesting {
+            if launchConfiguration.shouldResetData {
+                await resetLocalData()
+            }
+
+            if launchConfiguration.shouldSeedSmokeData {
+                await seedSmokeDataIfNeeded()
+            }
         }
 
-        if launchConfiguration.shouldResetData {
-            await resetLocalData()
-        }
+        await seedRaibosIfNeeded()
 
-        if launchConfiguration.shouldSeedSmokeData {
-            await seedSmokeDataIfNeeded()
-        }
+        guard launchConfiguration.isUITesting else { return }
 
         if launchConfiguration.shouldStageImportPreview {
             await stageImportPreviewIfNeeded()
@@ -120,6 +122,14 @@ private struct HostBootstrapView: View {
             )
         } catch {
             // Intentionally ignore seed failures; tests will fail visibly if data is missing.
+        }
+    }
+
+    private func seedRaibosIfNeeded() async {
+        do {
+            try await RaibosCharacterSeedBootstrap.standard().seedIfNeeded(useCases: container.characterUseCases)
+        } catch {
+            assertionFailure("Raibos seed bootstrap failed: \(error.localizedDescription)")
         }
     }
 

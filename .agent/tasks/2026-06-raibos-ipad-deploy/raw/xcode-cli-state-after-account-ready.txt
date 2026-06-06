@@ -1,0 +1,6 @@
+xcode_select=/Applications/Xcode.app/Contents/Developer
+xcode_apps=/Applications/Xcode.app
+mobileprovision_count=0
+
+IDEProvisioningTeamByBundleIdentifier=<empty>
+IDEProvisioningTeamByTargetIdentifier=<empty>

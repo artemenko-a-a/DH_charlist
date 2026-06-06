@@ -1,0 +1,17 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination platform=iOS,id=00008122-000A242936DA801C -derivedDataPath /tmp/dh_charlist-device-build build
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  DHCharList: /Users/an.artemenko/repos/DH_charlist @ local
+
+2026-06-06 11:00:55.615 xcodebuild[71049:66183217] Writing error result bundle to /var/folders/k_/1qw6bnr54391ct7f12grc3vc986zhs/T/ResultBundle_2026-06-06_11-00-0055.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ platform:iOS, id:00008122-000A242936DA801C }
+
+	Ineligible destinations for the "DHCharListHost" scheme:
+		{ platform:iOS, arch:arm64e, id:00008122-000A242936DA801C, name:iPad (Андрей), error:iOS 26.5 is not installed. Please download and install the platform from Xcode > Settings > Components. }
+		{ platform:iOS, arch:arm64e, id:00008120-001A2D380152201E, name:iPhone, error:iOS 26.5 is not installed. Please download and install the platform from Xcode > Settings > Components. }
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 26.5 is not installed. Please download and install the platform from Xcode > Settings > Components. }

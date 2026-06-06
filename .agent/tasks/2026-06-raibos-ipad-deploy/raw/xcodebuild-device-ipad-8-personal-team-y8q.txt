@@ -1,0 +1,890 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project DHCharListHost/DHCharListHost.xcodeproj -scheme DHCharListHost -configuration Debug -destination platform=iOS,id=00008122-000A242936DA801C -derivedDataPath /tmp/dh_charlist-device-build -allowProvisioningUpdates -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=Y8QK9BKTCW CODE_SIGN_STYLE=Automatic build
+
+Build settings from command line:
+    CODE_SIGN_STYLE = Automatic
+    DEVELOPMENT_TEAM = Y8QK9BKTCW
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  DHCharList: /Users/an.artemenko/repos/DH_charlist @ local
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'DHCharListHost' in project 'DHCharListHost'
+        ➜ Explicit dependency on target 'DHCharList' in project 'DHCharList'
+    Target 'DHCharList' in project 'DHCharList'
+        ➜ Explicit dependency on target 'DHCharList' in project 'DHCharList'
+    Target 'DHCharList' in project 'DHCharList' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 07889eb8b9cc051a1093a4957bb42e1f
+Build description path: /tmp/dh_charlist-device-build/Build/Intermediates.noindex/XCBuildData/07889eb8b9cc051a1093a4957bb42e1f.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -o /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Intermediates.noindex
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Intermediates.noindex
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Products
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Products
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost-ebf5146f09e31d842afc71305bb89661-VFS-iphoneos/all-product-headers.yaml
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost-ebf5146f09e31d842afc71305bb89661-VFS-iphoneos/all-product-headers.yaml
+
+CreateBuildDirectory /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-create-build-directory /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_const_extract_protocols.json (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_const_extract_protocols.json
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.LinkFileList (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.LinkFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-OutputFileMap.json (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-OutputFileMap.json
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.modulemap (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.modulemap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftConstValuesFileList (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/empty-DHCharListHost.plist (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/empty-DHCharListHost.plist
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_const_extract_protocols.json (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_const_extract_protocols.json
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftConstValuesFileList (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.LinkFileList (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.LinkFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-OutputFileMap.json (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-OutputFileMap.json
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/Entitlements.plist (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/Entitlements.plist
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyStaticMetadataFileList (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyMetadataFileList (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyMetadataFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-project-headers.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-project-headers.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-own-target-headers.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-own-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-generated-files.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-generated-files.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-target-headers.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-non-framework-target-headers.hmap (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibPath-normal-arm64.txt (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibInstallName-normal-arm64.txt (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyStaticMetadataFileList (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyMetadataFileList (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    write-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyMetadataFileList
+
+MkDir /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /bin/mkdir -p /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app
+
+Copy /tmp/dh_charlist-device-build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/DHCharList.modulemap /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.modulemap (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.modulemap /tmp/dh_charlist-device-build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos
+
+SwiftDriver DHCharList normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharList -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.0 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -suppress-warnings -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk/Developer/Library/Frameworks -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -package-name dh_charlist -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_const_extract_protocols.json -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stddef-DXA9QK0OH27AD47X9YCY46CQ7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdbool-DKM1Q99KFR5QR48TRWDZ5O5WO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_SwiftConcurrencyShims-DL7TM1H8D42L5QZ6B9BTDKK1I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_AvailabilityInternal-1ECFX3MHWOGHQFJ9UV0ZPVJPF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_float-1MN1MLC00LE5D8RSRQMODFX4W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdarg-381CRYU93U0S65MDNHT1XHTSS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ptrcheck-4QGFVPKR02VEXE7QE9VX7XVCX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/DeveloperToolsSupport-62PT9Q8CWHMU3LNWEZTBAP1AH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftShims-4ZXJAE6W3JT8MZKLKU972Z4KN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ptrauth-HP1B0L3QBMRO5IHU5FF9XUD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation1-5WE5JLQHHTHOU8JF6857YNVUI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation2-BE3J1QDP4VPLV2JN7WTW1LDFF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_limits-94DNP5QJPLN8DHZYWXRHYHOG0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_tgmath-310Z2IXG9X6P28CHGK8HYDXL3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdint-CY84BRP92CHAUSWN32LYXD4EK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/sys_types-1CWW8OAGWWF53FSC43BSCOUCR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdatomic-67C7JPUPB0JPWZCIV7R3VEMQT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation3-CCBNAFNRJFMQZIJN2EAWZMILQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_intrinsics-8XPEWLYYGPP87RQAW074NQZ65.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_inttypes-3V1RWVH93OUFZVG43D69RGSO3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Darwin-6ZYQ40HJ2NSVQ3CVW26VC8RLB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/simd-1YPH1BIJ37F615IFVK5MPJCB1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/MachO-B329D52A26A0HUG1LLB5PMRT7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ObjectiveC-DMYFT0KXBN72NDRGDHUBYMYWJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os_object-6NBYZX1Y6LLY8GBV0BU5406A3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os_workgroup-EDCPCD79UVFBEQ843VG6GKLK8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Dispatch-5K11EW7YSJGHK0HW7RO9BTJGY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Spatial-35MVBP8HGVCQ8TEFW5YD9JKA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreFoundation-1X7NKKXZ35YJ3J9HSJ7WZ6TDW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/XPC-3OS6TXV78HOQ4IUA0JVDPYDQ9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os-4O3DBLMAF647Q99DPMZ4O7UKB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CFNetwork-CHW30CKQ7SHM03NE2LL0Z1CA1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Security-1HFFRBZWND4F8DH71PY2N94KX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreGraphics-5YQ67BWRF6LHNPZS48BNDHZ8T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Foundation-BEEUQ5703IADDU476WSXT3HN5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreText-7CX2TH43XN6E1AEX865K50HWO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ImageIO-BBIZ36FQ4DJCS1BS3PJI4WUAX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Symbols-F3R1VKSILE2Q1BN0MDUIY1II0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/OSLog-BP1QIW307GJZVO88AJ12X6M4R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/DataDetection-DACLVGEY1VJ1BAZLB2M2KAGS7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreTransferable-W8128R4FW1ZCYRTFRQ0YD0Q1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UniformTypeIdentifiers-8F53HBC8QCUXPZRQ521OPWS1M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/IOSurface-70V0I2VFJ6XY3M7X5RCVXIY3T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UIUtilities-C5YGW3CWCCXKECSMV6VQU52U2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UserNotifications-3X71GX2E2504YFHA9GH8SQS14.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Accessibility-1KJHAQJNNBQCI51NTIGFSM6EK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreData-8OSU4NAWY579CUBUQK33115E0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/FileProvider-EL8F3FKEBKGD2P9UZK52IZGFU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Metal-A1IRC3C8UC2ZUDQXEFAE0S9XY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/OpenGLES-BT328ILI43LTLLDIH4EP2AATL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreVideo-DWGE8UEJKXHWGUXHBVIVZNY5I.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreImage-81KI5TI98DJ9IR6IPEJ4XMZMT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/QuartzCore-238K4HSS5GHM7IGVO29APBIZ8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftUICore-CBPPYAUNVUGPZ1KSHNYIBDX5E.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UIKit-6L6S1C2FDA4099CBEEV9J2OD2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftUI-BZSMAST4VW0I7EGCHQS850CHF.pcm
+
+SwiftCompile normal arm64 Compiling\ QuickMechanicsHelperView.swift,\ NotesScreen.swift,\ ProfileScreen.swift,\ XPSpendScreen.swift,\ SessionModeScreen.swift,\ SkillsScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Mechanics/QuickMechanicsHelperView.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Notes/NotesScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Progression/XPSpendScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/SessionMode/SessionModeScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Skills/SkillsScreen.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Mechanics/QuickMechanicsHelperView.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Notes/NotesScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Profile/ProfileScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Progression/XPSpendScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/SessionMode/SessionModeScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Skills/SkillsScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ DHCharList (in target 'DHCharList' from project 'DHCharList')
+
+EmitSwiftModule normal arm64 (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ CogitatorTheme.swift,\ CharacterCreationCharacteristics.swift,\ CharacterCreationEngine.swift,\ CharacterCreationProjection.swift,\ CombatActionShortcuts.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Theme/CogitatorTheme.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationEngine.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationProjection.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CombatActionShortcuts.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Theme/CogitatorTheme.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationCharacteristics.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationEngine.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CharacterCreationProjection.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/CombatActionShortcuts.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ CharacterListScreen.swift,\ CharacteristicsScreen.swift,\ PersistenceStatusScreen.swift,\ CharacterDossierScreen.swift,\ EquipmentScreen.swift,\ CampaignHistoryScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterList/CharacterListScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Characteristics/CharacteristicsScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Diagnostics/PersistenceStatusScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Dossier/CharacterDossierScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/History/CampaignHistoryScreen.swift (in target 'DHCharList' from project 'DHCharList')
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterList/CharacterListScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Characteristics/CharacteristicsScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Diagnostics/PersistenceStatusScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Dossier/CharacterDossierScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/Equipment/EquipmentScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/History/CampaignHistoryScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ CharacterEngineState.swift,\ CharacterTemplate.swift,\ CharacterJSONImportExportService.swift,\ JSONFileArmourCompendiumRepository.swift,\ JSONFileCharacterRepository.swift,\ JSONFileCharacterTemplateRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/CharacterEngineState.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/CharacterTemplate.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/ImportExport/CharacterJSONImportExportService.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileArmourCompendiumRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileCharacterRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileCharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/CharacterEngineState.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/CharacterTemplate.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/ImportExport/CharacterJSONImportExportService.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileArmourCompendiumRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileCharacterRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileCharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ CharacterTemplateUseCases.swift,\ CharacterUseCases.swift,\ ProfileAutosaveCoordinator.swift,\ RaibosCharacterSeed.swift,\ WeaponCompendium.swift,\ Character.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterTemplateUseCases.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterUseCases.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/ProfileAutosaveCoordinator.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/RaibosCharacterSeed.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/WeaponCompendium.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/Character.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterTemplateUseCases.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterUseCases.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/ProfileAutosaveCoordinator.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/RaibosCharacterSeed.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/WeaponCompendium.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Domain/Character.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ JSONFileWeaponCompendiumRepository.swift,\ SwiftDataCharacterRepository.swift,\ SwiftDataCharacterTemplateRepository.swift,\ AdaptiveLayout.swift,\ DHCharListAppShell.swift,\ DHIICreationFlowScreen.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileWeaponCompendiumRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/SwiftDataCharacterRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/SwiftDataCharacterTemplateRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/AdaptiveLayout.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/AppShell/DHCharListAppShell.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterCreation/DHIICreationFlowScreen.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/JSONFileWeaponCompendiumRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/SwiftDataCharacterRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Infrastructure/Persistence/SwiftDataCharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/AdaptiveLayout.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/AppShell/DHCharListAppShell.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Presentation/Features/CharacterCreation/DHIICreationFlowScreen.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ DamagePipeline.swift,\ MechanicsChecks.swift,\ ProgressionRegistries.swift,\ RulesRegistries.swift,\ XPProgression.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/DamagePipeline.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/MechanicsChecks.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/ProgressionRegistries.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/RulesRegistries.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/XPProgression.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/DamagePipeline.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/MechanicsChecks.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/ProgressionRegistries.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/RulesRegistries.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Rules/XPProgression.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 Compiling\ AppContainer.swift,\ ArmourCompendium.swift,\ CharacterDossier.swift,\ CharacterImportPreviewSummary.swift,\ CharacterRepository.swift,\ CharacterTemplateRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/App/AppContainer.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/ArmourCompendium.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterDossier.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterImportPreviewSummary.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterRepository.swift /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/App/AppContainer.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/ArmourCompendium.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterDossier.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterImportPreviewSummary.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/Sources/DHCharList/Application/CharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for DHCharList (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriver\ Compilation\ Requirements DHCharList normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharList -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.0 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -suppress-warnings -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk/Developer/Library/Frameworks -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -package-name dh_charlist -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_const_extract_protocols.json -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling CharacterEngineState.swift, CharacterTemplate.swift, CharacterJSONImportExportService.swift, JSONFileArmourCompendiumRepository.swift, JSONFileCharacterRepository.swift, JSONFileCharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DamagePipeline.swift, MechanicsChecks.swift, ProgressionRegistries.swift, RulesRegistries.swift, XPProgression.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftMergeGeneratedHeaders /tmp/dh_charlist-device-build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/DHCharList-Swift.h /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-Swift.h (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-swiftHeaderTool -arch arm64 /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-Swift.h -o /tmp/dh_charlist-device-build/Build/Intermediates.noindex/GeneratedModuleMaps-iphoneos/DHCharList-Swift.h
+
+SwiftDriverJobDiscovery normal arm64 Compiling CharacterTemplateUseCases.swift, CharacterUseCases.swift, ProfileAutosaveCoordinator.swift, RaibosCharacterSeed.swift, WeaponCompendium.swift, Character.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriverJobDiscovery normal arm64 Compiling AppContainer.swift, ArmourCompendium.swift, CharacterDossier.swift, CharacterImportPreviewSummary.swift, CharacterRepository.swift, CharacterTemplateRepository.swift (in target 'DHCharList' from project 'DHCharList')
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.swiftmodule /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.swiftdoc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftdoc (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftdoc /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.abi.json /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.abi.json (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.abi.json /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftsourceinfo (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftsourceinfo /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+ProcessProductPackaging "" /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+    Entitlements:
+
+    {
+    "application-identifier" = "Y8QK9BKTCW.com.example.DHCharListHost";
+    "com.apple.developer.team-identifier" = Y8QK9BKTCW;
+    "get-task-allow" = 1;
+}
+
+    builtin-productPackagingUtility -entitlements -format xml -o /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent
+
+ProcessProductPackaging /Users/an.artemenko/Library/Developer/Xcode/UserData/Provisioning\ Profiles/3c235d4e-27dc-4119-9734-530bd3cc7c61.mobileprovision /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/embedded.mobileprovision (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-productPackagingUtility /Users/an.artemenko/Library/Developer/Xcode/UserData/Provisioning\ Profiles/3c235d4e-27dc-4119-9734-530bd3cc7c61.mobileprovision -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/embedded.mobileprovision
+
+ProcessProductPackagingDER /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent.der (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /usr/bin/derq query -f xml -i /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent -o /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent.der --raw
+
+MkDir /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /bin/mkdir -p /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned
+
+MkDir /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/unthinned (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /bin/mkdir -p /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/unthinned
+
+GenerateAssetSymbols /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets --compile /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app --output-format human-readable-text --notices --warnings --export-dependency-info /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_dependencies --output-partial-info-plist /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 17.6 --platform iphoneos --bundle-identifier com.example.DHCharListHost --generate-swift-asset-symbols /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.h
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CompileAssetCatalogVariant thinned /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets --compile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_dependencies_thinned --output-partial-info-plist /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPad15,3 --filter-for-device-os-version 26.3.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 17.6 --platform iphoneos
+/* com.apple.actool.compilation-results */
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist_thinned
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned/Assets.car
+
+
+SwiftDriver DHCharListHost normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharListHost -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.6 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-generated-files.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-own-target-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost-ebf5146f09e31d842afc71305bb89661-VFS-iphoneos/all-product-headers.yaml -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-project-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdbool-A69K0Y0THADKXKR98HD8F9K48.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdarg-DKFHX91VO229GX80ECOSJZUJP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftShims-6P5HQXONDX524KBY6LQ11R3U9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/DeveloperToolsSupport-9BMGAKCAFCZNEEFF7ZQNZHNE6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ptrcheck-4RPUC6JH7XANMGQWFZCYY9GD0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ptrauth-5QMMIV4PG2TV18Z7JKIVD1KUW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_SwiftConcurrencyShims-9C87P4O3IF2W1E5VQZ0EHLTCZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_float-5H92QFWWPEAD1VYVUKBJ890A.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_AvailabilityInternal-LWOZQPCLYNG45PRXHLKJ6TGL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stddef-D6IKINNDDZZQ4WMLVQXQBZH77.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation1-EIIBESI2SJ189WL4QJ7V0DX19.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation2-C23EA2HQXKPP3WURBHCFUWKS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_limits-BQDEDK2FGN5I71SR7GSQFFMCM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_tgmath-3I70OX65HTBN1TVF4Q9FM6F57.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/sys_types-DK41KOSACHMRX4WNQ38GY1ZOU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdint-D8KC7JVMGJ82AF9QE2QR0E4G4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_stdatomic-4DH5VIY29JVNAMNC9Y5Z1Q434.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_intrinsics-A4X6QQE36XBPQWBTHLJLQ089H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_DarwinFoundation3-M760BCTQVGQTHXQRTW5TBPFC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/_Builtin_inttypes-7LJSP9EB202QVWZMX0CFTXB52.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Darwin-4K89AMQ44SIL20TT59MPFLFT0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/simd-96QQZDB3MDU7A2GSCARCL5HHW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/MachO-B21I19YVIAOYQ4UL4Z3YVUJWQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ObjectiveC-4X09VQ01KM5LRWGV9FJB04TPS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os_object-ANLD5VR9GGDH6KWNQBDJKKUM0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os_workgroup-2MO2R188UN19RSZFOMZRQZRKK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Spatial-9T2XEQGWM3OX5WK1VS3DSM5XR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Dispatch-5N37U2VB16GB42WBYUD0EQPYO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreFoundation-7WULQE4YWJQLG7UM3CQHA9YVI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/XPC-6OW6A5YZLOSFX4FS3TZIVNP4B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/os-GPMG8MQ8SKMWZ2I20VDJ8H54.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Security-BZS3RFNM3PYU6HZOFRXYHGHQW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreGraphics-1Q06QVUYS5S0BGUPI3GBFSIOB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CFNetwork-C96HSYDLNDKRV07PTXC3B9QE9.pcm
+
+SwiftDriverJobDiscovery normal arm64 Compiling JSONFileWeaponCompendiumRepository.swift, SwiftDataCharacterRepository.swift, SwiftDataCharacterTemplateRepository.swift, AdaptiveLayout.swift, DHCharListAppShell.swift, DHIICreationFlowScreen.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriverJobDiscovery normal arm64 Compiling CogitatorTheme.swift, CharacterCreationCharacteristics.swift, CharacterCreationEngine.swift, CharacterCreationProjection.swift, CombatActionShortcuts.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Foundation-DKRFOMZTITPMWT8RC0HYX6AU3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/ImageIO-DF01JVBKZ0IUUDX25XE3801QB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreText-6EHMEBTZ8G58JE9X2E17Q8HKU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UniformTypeIdentifiers-DCEVFKUU4992E7FF0A06LMA3W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/FileProvider-D692AXWRYMQN4GQNGK2A6H9QW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UserNotifications-5G35MSI5860EYWOHP5PHKGQZE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreTransferable-659FMH0D2PICN5WKD0DXR3GSO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/IOSurface-90NP9IOHMXHFXI5DFR1CVTSPL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreData-1OEBOA3F2V4D4Y6VF2MDCW7DV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Symbols-49S12T3ZFHTCQYJ3Q8Q0DR8ZS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UIUtilities-74WMGB76P2IJYUAMJT0JRY52C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Accessibility-803787EY7TFA8Z6BOWTHCK6U2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/OpenGLES-7YG0MMXPHS82V71E9OY35TJO2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/OSLog-5VYKOJFD4QD3ER04VBBBEDG2B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/DataDetection-DGNNBMRHNKO8CBPLCJNYIGXG8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/Metal-59HXIH8N1AOBA4MKBLNNQL2L7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreVideo-38YO9VKWJ94DTPQMTK98DKRRR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/QuartzCore-14Z2OATKSFZZFP0AHB4FBEWP0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/CoreImage-BHYZQV6PA1FZNTHFHBG1VEMQ5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftUICore-13H3OEM52STC9WXQ44HBGG470.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/UIKit-32PGOM2234FM14CRDLGFYMF22.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/dh_charlist-device-build/ModuleCache.noindex/SwiftUI-9NI003GSU3UHM5F4LHUPKL4YH.pcm
+
+LinkAssetCatalog /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/Assets.xcassets (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-linkAssetCatalog --thinned /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/thinned --thinned-dependencies /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist_thinned --unthinned /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_output/unthinned --unthinned-dependencies /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist_unthinned --output /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app --plist-output /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist
+note: Emplaced /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/AppIcon60x60@2x.png (in target 'DHCharListHost' from project 'DHCharListHost')
+note: Emplaced /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Assets.car (in target 'DHCharListHost' from project 'DHCharListHost')
+note: Emplaced /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/AppIcon76x76@2x~ipad.png (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftCompile normal arm64 Compiling\ GeneratedAssetSymbols.swift /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftCompile normal arm64 /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ DHCharListHost (in target 'DHCharListHost' from project 'DHCharListHost')
+
+EmitSwiftModule normal arm64 (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+
+SwiftCompile normal arm64 Compiling\ DHCharListHostLaunchConfiguration.swift /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/DHCharListHostLaunchConfiguration.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/DHCharListHostLaunchConfiguration.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+
+SwiftCompile normal arm64 Compiling\ DHCharListHostApp.swift /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/DHCharListHostApp.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/DHCharListHostApp.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+
+SwiftCompile normal arm64 Compiling\ ContentView.swift /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/ContentView.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftCompile normal arm64 /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost/ContentView.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for DHCharListHost (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftDriver\ Compilation\ Requirements DHCharListHost normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharListHost -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.6 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-generated-files.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-own-target-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost-ebf5146f09e31d842afc71305bb89661-VFS-iphoneos/all-product-headers.yaml -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-project-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/DHCharListHost-Swift.h /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-Swift.h (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-swiftHeaderTool -arch arm64 /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-Swift.h -o /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/DHCharListHost-Swift.h
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.swiftmodule /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.swiftmodule
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.swiftdoc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftdoc (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftdoc /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.swiftdoc
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.abi.json /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.abi.json (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.abi.json /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/arm64-apple-ios.abi.json
+
+Copy /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftsourceinfo (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftsourceinfo /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.swiftmodule/Project/arm64-apple-ios.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling DHCharListHostLaunchConfiguration.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GeneratedAssetSymbols.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ContentView.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DHCharListHostApp.swift (in target 'DHCharListHost' from project 'DHCharListHost')
+
+SwiftDriver\ Compilation DHCharListHost normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharListHost -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.6 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -emit-localized-strings -emit-localized-strings-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-generated-files.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-own-target-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-all-non-framework-target-headers.hmap -Xcc -ivfsoverlay -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost-ebf5146f09e31d842afc71305bb89661-VFS-iphoneos/all-product-headers.yaml -Xcc -iquote -Xcc /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-project-headers.hmap -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling QuickMechanicsHelperView.swift, NotesScreen.swift, ProfileScreen.swift, XPSpendScreen.swift, SessionModeScreen.swift, SkillsScreen.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriverJobDiscovery normal arm64 Compiling CharacterListScreen.swift, CharacteristicsScreen.swift, PersistenceStatusScreen.swift, CharacterDossierScreen.swift, EquipmentScreen.swift, CampaignHistoryScreen.swift (in target 'DHCharList' from project 'DHCharList')
+
+SwiftDriver\ Compilation DHCharList normal arm64 com.apple.xcode.tools.swift.compiler (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name DHCharList -Onone @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -target arm64-apple-ios17.0 -g -module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -suppress-warnings -index-store-path /tmp/dh_charlist-device-build/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib -F /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk/Developer/Library/Frameworks -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/dh_charlist-device-build/SDKStatCaches.noindex/iphoneos26.5-23F73-32daed1954a7d5dd0789fcaf2a9bb78b.sdkstatcache -output-file-map /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -sdk-module-cache-path /tmp/dh_charlist-device-build/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/dh_charlist-device-build/ModuleCache.noindex/Session.modulevalidation -package-name dh_charlist -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_const_extract_protocols.json -Xcc -I/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/include -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources-normal/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources/arm64 -Xcc -I/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-Swift.h -working-directory /Users/an.artemenko/repos/DH_charlist/DHCharListHost/DHCharListHost.xcodeproj -experimental-emit-module-separately -disable-cmo
+
+Ld /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.o normal (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0 -r -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -w -F/tmp/dh_charlist-device-build/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk/Developer/Library/Frameworks -filelist /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.LinkFileList -nostdlib -Xlinker -object_path_lto -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_lto.o -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-linker-args.resp -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.o
+
+ExtractAppIntentsMetadata (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name DHCharList --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk --xcode-version 17F42 --platform-family iOS --deployment-target 17.0 --bundle-identifier dh-charlist.DHCharList --output /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.appintents --target-triple arm64-apple-ios17.0 --binary-file /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.o --dependency-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList_dependency_info.dat --stringsdata-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftFileList --metadata-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyMetadataFileList --static-metadata-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/DHCharList.DependencyStaticMetadataFileList --swift-const-vals-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.SwiftConstValuesFileList --force --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-06-06 13:58:06.812 appintentsmetadataprocessor[34481:66536335] Starting appintentsmetadataprocessor export
+2026-06-06 13:58:06.844 appintentsmetadataprocessor[34481:66536335] Extracted no relevant App Intents symbols, skipping writing output
+
+RegisterExecutionPolicyException /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.o (in target 'DHCharList' from project 'DHCharList')
+    cd /Users/an.artemenko/repos/DH_charlist
+    builtin-RegisterExecutionPolicyException /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharList.o
+
+Ld /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/__preview.dylib normal (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.6 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -install_name @rpath/DHCharListHost.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_dependency_info.dat -Xlinker -no_adhoc_codesign -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/__preview.dylib
+
+Ld /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib normal (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.6 -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/tmp/dh_charlist-device-build/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -L/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F/tmp/dh_charlist-device-build/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphoneos -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -filelist /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.LinkFileList -install_name @rpath/DHCharListHost.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.swiftmodule @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost-linker-args.resp -Wl,-no_warn_duplicate_libraries -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib -Xlinker -add_ast_path -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList.swiftmodule @/tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharList.build/Debug-iphoneos/DHCharList.build/Objects-normal/arm64/DHCharList-linker-args.resp
+
+ProcessInfoPlistFile /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Info.plist /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/empty-DHCharListHost.plist (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-infoPlistUtility /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/empty-DHCharListHost.plist -producttype com.apple.product-type.application -genpkginfo /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/PkgInfo -expandbuildsettings -format binary -platform iphoneos -additionalcontentfile /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/assetcatalog_generated_info.plist -requiredArchitecture arm64 -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Info.plist
+
+ConstructStubExecutorLinkFileList /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-ExecutorLinkFileList-normal-arm64.txt (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    construct-stub-executor-link-file-list /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'DHCharListHost' from project 'DHCharListHost')
+
+Ld /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost normal (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk -O0 -L/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -F/tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/PackageFrameworks -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost-ExecutorLinkFileList-normal-arm64.txt /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib -Xlinker -no_adhoc_codesign -o /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost
+
+CopySwiftLibs /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-swiftStdLibTool --copy --verbose --sign D9B0840E48DCD3B5924AF544CDA6C5376F8E1B8D --scan-executable /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib --scan-folder /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Frameworks --scan-folder /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/PlugIns --scan-folder /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/SystemExtensions --scan-folder /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Extensions --platform iphoneos --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ExtractAppIntentsMetadata (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name DHCharListHost --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.5.sdk --xcode-version 17F42 --platform-family iOS --deployment-target 17.6 --bundle-identifier com.example.DHCharListHost --output /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app --target-triple arm64-apple-ios17.6 --binary-file /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost --dependency-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost_dependency_info.dat --stringsdata-file /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftFileList --metadata-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyMetadataFileList --static-metadata-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyStaticMetadataFileList --swift-const-vals-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/Objects-normal/arm64/DHCharListHost.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-06-06 13:58:07.682 appintentsmetadataprocessor[34489:66536381] Starting appintentsmetadataprocessor export
+2026-06-06 13:58:07.686 appintentsmetadataprocessor[34489:66536381] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+AppIntentsSSUTraining (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Info.plist --temp-dir-path /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/ssu --bundle-id com.example.DHCharListHost --product-path /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app --extracted-metadata-path /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Metadata.appintents --metadata-file-list /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.DependencyMetadataFileList --source-file /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/Info.plist --archive-ssu-assets
+2026-06-06 13:58:07.779 appintentsnltrainingprocessor[34490:66536384] Parsing options for appintentsnltrainingprocessor
+2026-06-06 13:58:07.780 appintentsnltrainingprocessor[34490:66536384] Starting AppIntents SSU YAML Generation
+2026-06-06 13:58:07.787 appintentsnltrainingprocessor[34490:66536384] No AppShortcuts found - Skipping.
+
+CodeSign /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+    Signing Identity:     "Apple Development: artemenko.nsk@gmail.com (J7NPK94U5Y)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.example.DHCharListHost"
+                          (3c235d4e-27dc-4119-9734-530bd3cc7c61)
+
+    /usr/bin/codesign --force --sign D9B0840E48DCD3B5924AF544CDA6C5376F8E1B8D --timestamp\=none --generate-entitlement-der /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/DHCharListHost.debug.dylib
+
+CodeSign /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/__preview.dylib (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+    Signing Identity:     "Apple Development: artemenko.nsk@gmail.com (J7NPK94U5Y)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.example.DHCharListHost"
+                          (3c235d4e-27dc-4119-9734-530bd3cc7c61)
+
+    /usr/bin/codesign --force --sign D9B0840E48DCD3B5924AF544CDA6C5376F8E1B8D --timestamp\=none --generate-entitlement-der /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app/__preview.dylib
+
+CodeSign /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+
+    Signing Identity:     "Apple Development: artemenko.nsk@gmail.com (J7NPK94U5Y)"
+    Provisioning Profile: "iOS Team Provisioning Profile: com.example.DHCharListHost"
+                          (3c235d4e-27dc-4119-9734-530bd3cc7c61)
+
+    /usr/bin/codesign --force --sign D9B0840E48DCD3B5924AF544CDA6C5376F8E1B8D --entitlements /tmp/dh_charlist-device-build/Build/Intermediates.noindex/DHCharListHost.build/Debug-iphoneos/DHCharListHost.build/DHCharListHost.app.xcent --timestamp\=none --generate-entitlement-der /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app
+
+RegisterExecutionPolicyException /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-RegisterExecutionPolicyException /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app
+
+Validate /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    builtin-validationUtility /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app (in target 'DHCharListHost' from project 'DHCharListHost')
+    cd /Users/an.artemenko/repos/DH_charlist/DHCharListHost
+    /usr/bin/touch -c /tmp/dh_charlist-device-build/Build/Products/Debug-iphoneos/DHCharListHost.app
+
+** BUILD SUCCEEDED **

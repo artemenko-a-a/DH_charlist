@@ -1,0 +1,4 @@
+ M DHCharListHost/DHCharListHost/DHCharListHostApp.swift
+?? .agent/tasks/2026-06-raibos-ipad-deploy/
+?? Sources/DHCharList/Application/RaibosCharacterSeed.swift
+?? Tests/DHCharListTests/RaibosCharacterSeedTests.swift

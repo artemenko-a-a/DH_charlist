@@ -1,0 +1,21 @@
+{
+  "taskId": "2026-06-raibos-ipad-deploy",
+  "overall": "PASS",
+  "acceptance": {
+    "AC1": "PASS",
+    "AC2": "PASS",
+    "AC3": "PASS",
+    "AC4": "PASS",
+    "AC5": "PASS"
+  },
+  "confidence": {
+    "logic": "HIGH",
+    "runtime": "HIGH",
+    "ui": "HIGH",
+    "realDevice": "HIGH"
+  },
+  "limitations": [
+    "The first physical-device launch was blocked until the user manually trusted the developer profile on the iPad.",
+    "A user/Xcode UI state file remains modified and intentionally unstaged: .swiftpm/xcode/package.xcworkspace/xcuserdata/an.artemenko.xcuserdatad/UserInterfaceState.xcuserstate."
+  ]
+}

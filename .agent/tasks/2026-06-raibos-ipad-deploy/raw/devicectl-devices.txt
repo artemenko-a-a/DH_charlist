@@ -1,0 +1,4 @@
+Name            Hostname                       Identifier                             State                Model
+-------------   ----------------------------   ------------------------------------   ------------------   --------------------------------
+iPad (Андрей)   iPad-Andrej.coredevice.local   90DEFFEE-3BF3-59C6-A8D2-B29632AC0998   available (paired)   iPad Air 11-inch (M3) (iPad15,3)
+iPhone          iPhone.coredevice.local        2D52FDD4-8893-5920-9515-712B8D3A2294   unavailable          iPhone15,4

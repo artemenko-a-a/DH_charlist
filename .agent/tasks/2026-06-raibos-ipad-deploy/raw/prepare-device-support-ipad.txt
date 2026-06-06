@@ -1,0 +1,4 @@
+Starting Device Support Preparation
+-----------------------------------
+Searching for 60.0 seconds with [:]
+Located iPhone 00008120-001A2D380152201E

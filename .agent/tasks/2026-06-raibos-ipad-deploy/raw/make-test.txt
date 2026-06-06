@@ -1,0 +1,433 @@
+swift test --disable-sandbox --package-path /Users/an.artemenko/repos/DH_charlist --build-path /tmp/dh_charlist-build
+[0/1] Planning build
+Building for debugging...
+[0/2] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (1.90s)
+Test Suite 'All tests' started at 2026-06-06 10:55:50.727.
+Test Suite 'All tests' passed at 2026-06-06 10:55:50.728.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 0.99.0
+◇ Test aptitudeCompositionUsesCanonicalSelectionsAndLegacyFallbackForChoiceSlots() started.
+◇ Test legacySessionDecodingDefaultsCombatWorkspaceFields() started.
+◇ Test useCasesExportProducesValidJSONEnvelope() started.
+◇ Test combatShortcutRollClampsMinimumRollAndSupportsFailureMargins() started.
+◇ Test skillTrainingRanksMatchDh2KnownTrainedExperiencedVeteranBonuses() started.
+◇ Test useCasesImportRestoresCharacterDataCorrectly() started.
+◇ Test importPreviewSummaryMakesReplaceAllSemanticsExplicit() started.
+◇ Test sessionEditsRemainScopedToSelectedCharacter() started.
+◇ Test swiftDataBootstrapFailureFallsBackToJSONWithDiagnosticReason() started.
+◇ Test canonicalRoleCatalogStaysCompleteAndUnique() started.
+◇ Test "golden damage scenario" started.
+◇ Test characterCodableRoundtripPreservesDhiiEngineStateAndDefaultsMissingIt() started.
+◇ Test aptitudeCompositionFlagsUnresolvedChoiceSlotsWhenSelectionsNeedTypedChoices() started.
+◇ Test creationDraftKeepsUnknownFreeformSelectionsExplicitInsteadOfPretendingTheyAreCanonical() started.
+◇ Test homeWorldPreviewResolvesCanonicalNamesAndAliases() started.
+◇ Test validWeaponCompendiumImportReplacesLocalCatalogAndPowersFutureAutocomplete() started.
+◇ Test registryBackedTalentUnlockAppliesAndProducesExplainableHistory() started.
+◇ Test replacingCompendiumDoesNotMutateExistingCharacterOwnedArmour() started.
+◇ Test updateOperationsThrowNotFoundForMissingCharacter() started.
+◇ Test skillAdvanceValidationRejectsMissingSkillAndNegativeCost() started.
+◇ Test skillAdvanceRequiresHigherTrainingAndAppliesWhenValid() started.
+◇ Test derivedSkillTargetReflectsEditedCharacteristicValuesAndTrainingLevel() started.
+◇ Test multiModifierBreakdownRemainsExplainableAndKeepsConditionsVisible() started.
+◇ Test exportSuccessClearsPreviousViewModelError() started.
+◇ Test addEditDeleteArmourPersistsCorrectly() started.
+◇ Test armourCompendiumDefinitionPreviewOmitsBlankSupportingFields() started.
+◇ Test startingPackageProjectionPersistsDhiiEngineStateIntoProjectedCharacter() started.
+◇ Test combatCheckPreparationContextBuildsStructuredSessionCombatRequest() started.
+◇ Test attackShortcutRequiresActiveWeaponAndIgnoresZeroAdditionalModifier() started.
+◇ Test difficultyPresetRegistryReturnsNilForUnsupportedValue() started.
+◇ Test saveTemplateAndCreateCharacterDoNotCreateHistoryLinkage() started.
+◇ Test armourCompendiumAutocompleteMatchesKnownArmourByName() started.
+◇ Test pointAllocationGenerationTracksRemainingPointsAndProjectsSupportedCharacteristics() started.
+◇ Test unifiedExplainableCheckEngineKeepsStableContributionOrdering() started.
+◇ Test influenceBasedHomeWorldEffectsAreFlaggedAsCurrentModelGap() started.
+◇ Test derivedValueCalculatorUsesCharacteristicAndTraining() started.
+◇ Test deleteNotesListEntryPersistsCorrectly() started.
+◇ Test mysticRolePreviewCarriesRulebookBackedPackageSummary() started.
+◇ Test xpSpendValidationExplainsUnmetPrerequisites() started.
+◇ Test editSkillPersistsCorrectly() started.
+◇ Test confirmedImportReplacesCurrentDataAsAdvertised() started.
+◇ Test profileAutosaveCoordinatorKeepsIndependentCharacters() started.
+◇ Test useCasesImportReplacesExistingRepositoryState() started.
+◇ Test creationDraftLeavesAmbiguousLegacyChoiceMatchesUnresolved() started.
+◇ Test talentCatalogRegistryProvidesBoundedStructuredTalentMetadata() started.
+◇ Test profileAutosaveCoordinatorDoesNotDropNewerTrackingAfterOlderCompletion() started.
+◇ Test cancelPendingImportLeavesCurrentDataUnchanged() started.
+◇ Test deleteCharacterUseCaseRemovesRecord() started.
+◇ Test importRejectsUnsupportedSchema() started.
+◇ Test skillAdvanceDefaultCostCanReadEngineBackedEffectiveAptitudes() started.
+◇ Test armourCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() started.
+◇ Test addSkillPersistsCorrectly() started.
+◇ Test combatShortcutRegistryProvidesBoundedQuickTogglesAndReloadLabel() started.
+◇ Test weaponCompendiumAutocompleteMatchesKnownWeaponsByName() started.
+◇ Test startingPackageProjectionBuildsResolvedImperialGuardWarriorPackage() started.
+◇ Test registryBackedCharacteristicAdvanceUsesStructuredCatalogDefaults() started.
+◇ Test profileUpdatePersistsDataAndUpdatesTimestamp() started.
+◇ Test requiredAptitudeUsesEngineBackedCompositionBeforeRawProfileFallback() started.
+◇ Test equipmentEditsRemainScopedToSelectedCharacter() started.
+◇ Test characteristicUpdatePersistsAndBonusReflectsEditedValues() started.
+◇ Test quickCheckModifiersClampToDh2PlusSixtyMinusSixtyLimits() started.
+◇ Test backgroundCompatibilityFlagsUnsupportedCurrentModelRules() started.
+◇ Test startingPackageProjectionDoesNotGuessMissingChoicesOrRolls() started.
+◇ Test startingPackageProjectionRoundTripsThroughLegacyCharacterCodableShape() started.
+◇ Test canonicalBackgroundCatalogStaysCompleteAndUnique() started.
+◇ Test weaponCompendiumImportRejectsUnsupportedSchemaVersion() started.
+◇ Test rangedAttackShortcutUsesBallisticSkillAndActiveSessionModifiers() started.
+◇ Test viewModelApplyXPSpendPersistsCharacterAndAdvancementHistory() started.
+◇ Test difficultyPresetRegistryProvidesStructuredStandardPresets() started.
+◇ Test registryBackedTalentUnlockValidationExplainsMissingPrerequisitesAndDuplicateTalent() started.
+◇ Test prerequisiteEvaluationMatchesNormalizedTokensAndAllTrainingRanks() started.
+◇ Test historySearchFiltersByTypeAndText() started.
+◇ Test deleteSkillPersistsCorrectly() started.
+◇ Test mechanicsResolverConsumesRegistryBackedSkillAndPresetMetadata() started.
+◇ Test randomCharacteristicGenerationSupportsHomeWorldModifiersSingleRerollAndTransientInfluence() started.
+◇ Test meleeAttackShortcutUsesWeaponSkill() started.
+◇ Test profileAutosaveCoordinatorKeepsTrackingIsolatedAcrossCharacters() started.
+◇ Test manualDamageShortcutUsesOverridePenetrationAndManualSource() started.
+◇ Test conditionMetadataRegistryResolvesCanonicalAndCustomLabels() started.
+◇ Passing 1 argument scenario → mitigation-zero-floor to "golden damage scenario"
+◇ Passing 1 argument scenario → manual-damage-with-armour-and-toughness to "golden damage scenario"
+◇ Passing 1 argument scenario → overflow-tracking to "golden damage scenario"
+◇ Passing 1 argument scenario → combat-damage-uses-active-weapon-penetration to "golden damage scenario"
+◇ Test "golden combat scenario" started.
+◇ Test raibosSeedBootstrapSkipsRepositoryWhenMarkerIsAlreadySet() started.
+◇ Test adeptusMechanicusBackgroundPreviewCarriesRulebookBackedPackageSummary() started.
+◇ Test importSuccessClearsPreviousViewModelError() started.
+◇ Test derivedValueCalculatorRemainsConsistentWithMechanicsCheckResolver() started.
+◇ Test combatContextFormalizesActiveWeaponPinnedChecksConditionsAndModifiers() started.
+◇ Test attackShortcutRollAndDamageHandoffStayExplainable() started.
+◇ Test characteristicAdvanceValidationRejectsSkippingPastSingleDh2Step() started.
+◇ Test duplicateKeepsOriginalIntactAndCreatesDistinctID() started.
+◇ Test deleteSuccessClearsPreviousViewModelError() started.
+◇ Test pointAllocationRejectsOverspendAndCapViolations() started.
+◇ Test jsonBootstrapStatusExposesJSONAsActiveBackend() started.
+◇ Test weaponRegistriesHandleNilAliasAndAdHocFallbackCases() started.
+◇ Test creationDraftInfersCanonicalSelectionsAndSeparatesChoiceProvenanceFromLegacyFallback() started.
+◇ Test pointAllocationRecomposesAcrossHomeWorldChangesAndCanBecomeInvalid() started.
+◇ Test importRefreshesCharacterListViewModelSourceOfTruth() started.
+◇ Test creationDraftSelectionSettersValidateChoicesAndClearUnknownInputs() started.
+◇ Test templateRenamePersists() started.
+◇ Test duplicateCharacterDoesNotCarryHistoryEntries() started.
+◇ Test templateDeletePersists() started.
+◇ Test saveCharacterAsTemplatePersistsDetachedSnapshot() started.
+◇ Test characterCodableRoundtripPreservesHistoryAndDefaultsMissingHistory() started.
+◇ Test combatDamageRequestUsesCombatContextWeaponPenetrationAndToughnessBonus() started.
+◇ Test characterLifecycleRemainsStableWhenTemplateUseCasesAreEnabled() started.
+◇ Test weaponCompendiumImportRejectsMalformedJSON() started.
+◇ Test addNotesListEntryPersistsCorrectly() started.
+◇ Test viewModelUpdateDHIICharacterReprojectsEngineBackedCharacterAndKeepsIdentity() started.
+◇ Test equipmentSearchFiltersWeaponsArmourAndInventory() started.
+◇ Test damageResolverClampsAppliedDamageAtZeroWhenMitigationExceedsRawDamage() started.
+◇ Test skillSpecialisationsPersistCorrectly() started.
+◇ Test addEditDeleteTemporaryModifierPersistsCorrectly() started.
+◇ Test conditionMetadataRegistryHandlesSuppressionMetadataAndBlankFallback() started.
+◇ Test viewModelCreateDHIICharacterPersistsProjectedCharacterAndRefreshesList() started.
+◇ Test raibosSeedContainsExpectedProfileAndPlayableData() started.
+◇ Test armourCompendiumImportRejectsDuplicateDefinitionIDs() started.
+◇ Test damageRequestNormalizesNegativeInputsToSafeValues() started.
+◇ Test compendiumArmourInstancePersistsThroughAcceptedEquipmentFlow() started.
+◇ Test bootstrapDiagnosticMessageFallsBackToNSErrorLocalizedDescription() started.
+◇ Test historyStaysCharacterScopedAndIsRemovedOnDelete() started.
+◇ Test bootstrapDiagnosticMessagePrefersLocalizedErrorDescription() started.
+◇ Test reprojectingExistingCharacterRequiresPersistedEngineState() started.
+◇ Test armourCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() started.
+◇ Test changingBackgroundPrunesStaleStartingPackageChoiceState() started.
+◇ Test editNotesListEntryPersistsCorrectly() started.
+◇ Test characterDossierComposerOmitsEmptyOptionalSectionsForSparseCharacter() started.
+◇ Test parryReactionShortcutPrefersExistingCharacterSkill() started.
+◇ Test armourCompendiumDefinitionCopiesIntoDetachedArmourInstances() started.
+◇ Test resourceUpdatePersistsAndExperienceAvailableReflectsEditedValues() started.
+◇ Test notesSearchReturnsOriginalIndexesForFilteredMatches() started.
+◇ Test raibosSeedBootstrapAddsCharacterWhenRosterLacksIt() started.
+◇ Test characteristicModifierSummaryIncludesSignedMagnitude() started.
+◇ Test sessionStateNormalizesTemporaryModifiersAndCombatConditions() started.
+◇ Test addEditDeleteInventoryItemPersistsCorrectly() started.
+◇ Test characteristicAdvanceValidationRejectsNegativeDeltaAndNegativeCost() started.
+◇ Test characteristicQuickCheckAppliesModifierAndExposesBonus() started.
+◇ Test importExportRoundtrip() started.
+◇ Test weaponCompendiumDefinitionFormatsPreviewSupportingAndPlaceholderFields() started.
+◇ Test armourCompendiumDefinitionFormatsPreviewSupportingAndPlaceholderFields() started.
+◇ Test startingPackageProjectionRequiresCanonicalSelectionsAndSanitizesChoiceHelpers() started.
+◇ Test importSupportsLegacySchemaOneWithoutDhiiEngineState() started.
+◇ Test damageResolverTracksOverflowWhenAppliedDamageExceedsRemainingWounds() started.
+◇ Test characterDossierFilenameStemSanitizesCharacterName() started.
+◇ Test changingBackgroundPrunesNoLongerApplicableChoiceStateWithoutReconsumingLegacyFallback() started.
+◇ Test historyEntryAddEditDeletePersists() started.
+◇ Test weaponCompendiumImportRejectsDuplicateDefinitionIDs() started.
+◇ Test editingWeaponInstanceDoesNotMutateCompendiumDefinition() started.
+◇ Test skillsSearchMatchesNameSpecialisationAndTraining() started.
+◇ Test skillQuickCheckAppliesTrainingAndModifierWithTransparentBreakdown() started.
+◇ Test invalidSkillAdvanceDoesNotAllowSameTrainingLevel() started.
+◇ Test useCasesImportRejectsUnsupportedSchemaVersion() started.
+◇ Test weaponMetadataRegistriesResolveTypesAndTraitsForCombatContext() started.
+◇ Test backgroundPreviewResolvesCanonicalNamesAndAliases() started.
+◇ Test cancelPendingWeaponCompendiumImportLeavesCurrentCatalogUnchanged() started.
+◇ Test characterListSearchMatchesVisibleProfileFields() started.
+◇ Test compendiumWeaponInstancePersistsThroughAcceptedEquipmentFlow() started.
+◇ Test weaponCompendiumDefinitionPreviewOmitsBlankSupportingFields() started.
+◇ Test standardQuickMechanicsPresetsRemainExpected() started.
+◇ Test addEditDeleteWeaponPersistsCorrectly() started.
+◇ Test changingRolePrunesStaleRoleChoiceAndKeepsOtherValidSelections() started.
+◇ Test attackShortcutParsesPenetrationFromWeaponSummaryAndCombatContextCanReplaceWeapon() started.
+◇ Test reprojectingExistingEngineCharacterPreservesPlayerDeltasAndCustomEntries() started.
+◇ Test addEditDeletePinnedCheckPersistsCorrectly() started.
+◇ Test cancelPendingArmourCompendiumImportLeavesCurrentCatalogUnchanged() started.
+◇ Test sessionModeTogglePersistsCorrectly() started.
+◇ Test canonicalHomeWorldCatalogStaysCompleteAndUnique() started.
+◇ Test freeformNotesPersistCorrectly() started.
+◇ Test templateDuplicatePersistsDistinctIdentity() started.
+◇ Test armourCompendiumImportRejectsUnsupportedSchemaVersion() started.
+◇ Test validArmourCompendiumCatalogReplacePersistsAndPowersFutureAutocomplete() started.
+◇ Test advanceCatalogRegistriesProvideStructuredCharacteristicAndSkillDefaults() started.
+◇ Test importFailureSetsViewModelErrorAndKeepsCurrentVisibleState() started.
+◇ Test weaponCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() started.
+◇ Test randomCharacteristicGenerationBecomesInvalidWhenHomeWorldChangesAfterRolling() started.
+◇ Test applyingTemplateDoesNotCreateSharedMutableLinkage() started.
+◇ Test weaponCompendiumAutocompleteHandlesExactContainsLimitAndBlankQueries() started.
+◇ Test importExportRoundtripPreservesDhiiEngineStateAndExportsMigratedSchema() started.
+◇ Test shrineWorldPreviewCarriesRulebookBackedStartingValues() started.
+◇ Test movementEditsPersistCorrectly() started.
+◇ Test startingPackageProjectionSupportsEveryBackgroundBranchWithResolvedSelections() started.
+◇ Test dodgeReactionShortcutFallsBackToCanonicalUntrainedSkillWhenCharacterLacksIt() started.
+◇ Test skillAdvanceValidationRejectsSkippingIntermediateRanks() started.
+◇ Test replacingCompendiumDoesNotMutateExistingCharacterOwnedWeapons() started.
+◇ Test bootstrapDiagnosticMessageUsesStringDescriptionWhenDescriptionsAreBlank() started.
+◇ Test characteristicAdvanceCanApplyAcrossAllCharacteristics() started.
+◇ Test viewModelApplyXPSpendPersistsTalentUnlockAndAdvancementHistory() started.
+◇ Test activeWeaponSelectionAndCombatConditionsPersistCorrectly() started.
+◇ Test characteristicAdvanceAppliesXPSpendAndProducesExplainableBreakdown() started.
+◇ Test xpSpendValidationRejectsInsufficientExperience() started.
+◇ Test profileAutosaveCoordinatorCoalescesPendingEdits() started.
+◇ Test weaponCompendiumDefinitionCopiesIntoDetachedWeaponInstances() started.
+◇ Test notesEditsRemainScopedToSelectedCharacter() started.
+◇ Test armourCompendiumImportRejectsMalformedJSON() started.
+◇ Test blankAdHocSkillMetadataFallsBackToPlaceholderNameAndStableToken() started.
+◇ Test creationDraftUsesPersistedEngineStateWhenCharacterCarriesIt() started.
+◇ Test weaponCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() started.
+◇ Test characterDossierComposerBuildsStructuredReadableSummary() started.
+◇ Test combatContextDropsMissingActiveWeaponWithoutDiscardingOtherCombatState() started.
+◇ Test armourCompendiumAutocompleteHandlesExactContainsLimitAndBlankQueries() started.
+◇ Test rolePreviewResolvesCanonicalNamesAndAliases() started.
+◇ Test raibosSeedBootstrapDoesNotDuplicateExistingRaibos() started.
+◇ Test structuredModifiersRespectScopeFilteringAndOrigin() started.
+◇ Test createCharacterFromTemplateProducesDistinctCharacterID() started.
+◇ Test editingArmourInstanceDoesNotMutateCompendiumDefinition() started.
+◇ Test damageResolverAppliesPenetrationArmourAndToughnessWithExplainableBreakdown() started.
+◇ Test xpSpendMessagesAndLabelsRemainExplainableForEdgeCases() started.
+◇ Test skillMetadataRegistryResolvesCanonicalAndAdHocSkills() started.
+◇ Test "golden explainable check scenario" started.
+◇ Test profileAutosaveCoordinatorCoalescesAfterPerformStarts() started.
+✔ Test combatShortcutRollClampsMinimumRollAndSupportsFailureMargins() passed after 0.014 seconds.
+✔ Test aptitudeCompositionUsesCanonicalSelectionsAndLegacyFallbackForChoiceSlots() passed after 0.015 seconds.
+✔ Test legacySessionDecodingDefaultsCombatWorkspaceFields() passed after 0.015 seconds.
+✔ Test skillTrainingRanksMatchDh2KnownTrainedExperiencedVeteranBonuses() passed after 0.015 seconds.
+✔ Test importPreviewSummaryMakesReplaceAllSemanticsExplicit() passed after 0.016 seconds.
+✔ Test canonicalRoleCatalogStaysCompleteAndUnique() passed after 0.017 seconds.
+◇ Passing 1 argument scenario → combat-context-and-preparation-lock-accepted-session-flow to "golden combat scenario"
+✔ Test "golden damage scenario" passed after 0.017 seconds.
+✔ Test aptitudeCompositionFlagsUnresolvedChoiceSlotsWhenSelectionsNeedTypedChoices() passed after 0.017 seconds.
+✔ Test creationDraftKeepsUnknownFreeformSelectionsExplicitInsteadOfPretendingTheyAreCanonical() passed after 0.018 seconds.
+✔ Test homeWorldPreviewResolvesCanonicalNamesAndAliases() passed after 0.018 seconds.
+✔ Test swiftDataBootstrapFailureFallsBackToJSONWithDiagnosticReason() passed after 0.019 seconds.
+✔ Test characterCodableRoundtripPreservesDhiiEngineStateAndDefaultsMissingIt() passed after 0.020 seconds.
+✔ Test skillAdvanceValidationRejectsMissingSkillAndNegativeCost() passed after 0.021 seconds.
+✔ Test registryBackedTalentUnlockAppliesAndProducesExplainableHistory() passed after 0.022 seconds.
+✔ Test skillAdvanceRequiresHigherTrainingAndAppliesWhenValid() passed after 0.024 seconds.
+✔ Test useCasesExportProducesValidJSONEnvelope() passed after 0.025 seconds.
+✔ Test multiModifierBreakdownRemainsExplainableAndKeepsConditionsVisible() passed after 0.025 seconds.
+✔ Test updateOperationsThrowNotFoundForMissingCharacter() passed after 0.025 seconds.
+✔ Test useCasesImportRestoresCharacterDataCorrectly() passed after 0.026 seconds.
+✔ Test validWeaponCompendiumImportReplacesLocalCatalogAndPowersFutureAutocomplete() passed after 0.030 seconds.
+✔ Test armourCompendiumDefinitionPreviewOmitsBlankSupportingFields() passed after 0.030 seconds.
+✔ Test combatCheckPreparationContextBuildsStructuredSessionCombatRequest() passed after 0.030 seconds.
+✔ Test attackShortcutRequiresActiveWeaponAndIgnoresZeroAdditionalModifier() passed after 0.031 seconds.
+✔ Test difficultyPresetRegistryReturnsNilForUnsupportedValue() passed after 0.031 seconds.
+✔ Test armourCompendiumAutocompleteMatchesKnownArmourByName() passed after 0.031 seconds.
+✔ Test pointAllocationGenerationTracksRemainingPointsAndProjectsSupportedCharacteristics() passed after 0.035 seconds.
+✔ Test unifiedExplainableCheckEngineKeepsStableContributionOrdering() passed after 0.037 seconds.
+✔ Test influenceBasedHomeWorldEffectsAreFlaggedAsCurrentModelGap() passed after 0.039 seconds.
+✔ Test derivedValueCalculatorUsesCharacteristicAndTraining() passed after 0.039 seconds.
+✔ Test startingPackageProjectionPersistsDhiiEngineStateIntoProjectedCharacter() passed after 0.040 seconds.
+✔ Test replacingCompendiumDoesNotMutateExistingCharacterOwnedArmour() passed after 0.040 seconds.
+◇ Passing 1 argument scenario → characteristic-custom-modifier to "golden explainable check scenario"
+◇ Passing 1 argument scenario → skill-preset-modifier to "golden explainable check scenario"
+◇ Passing 1 argument scenario → session-skill-with-structured-modifiers-and-condition to "golden explainable check scenario"
+✔ Test sessionEditsRemainScopedToSelectedCharacter() passed after 0.042 seconds.
+✔ Test mysticRolePreviewCarriesRulebookBackedPackageSummary() passed after 0.041 seconds.
+✔ Test creationDraftLeavesAmbiguousLegacyChoiceMatchesUnresolved() passed after 0.042 seconds.
+✔ Test xpSpendValidationExplainsUnmetPrerequisites() passed after 0.042 seconds.
+✔ Test importRejectsUnsupportedSchema() passed after 0.042 seconds.
+✔ Test talentCatalogRegistryProvidesBoundedStructuredTalentMetadata() passed after 0.042 seconds.
+✔ Test derivedSkillTargetReflectsEditedCharacteristicValuesAndTrainingLevel() passed after 0.043 seconds.
+✔ Test skillAdvanceDefaultCostCanReadEngineBackedEffectiveAptitudes() passed after 0.043 seconds.
+✔ Test armourCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() passed after 0.042 seconds.
+✔ Test weaponCompendiumAutocompleteMatchesKnownWeaponsByName() passed after 0.042 seconds.
+✔ Test startingPackageProjectionBuildsResolvedImperialGuardWarriorPackage() passed after 0.042 seconds.
+✔ Test deleteCharacterUseCaseRemovesRecord() passed after 0.043 seconds.
+✔ Test deleteNotesListEntryPersistsCorrectly() passed after 0.043 seconds.
+✔ Test combatShortcutRegistryProvidesBoundedQuickTogglesAndReloadLabel() passed after 0.043 seconds.
+✔ Test registryBackedCharacteristicAdvanceUsesStructuredCatalogDefaults() passed after 0.043 seconds.
+✔ Test requiredAptitudeUsesEngineBackedCompositionBeforeRawProfileFallback() passed after 0.043 seconds.
+✔ Test addEditDeleteArmourPersistsCorrectly() passed after 0.044 seconds.
+✔ Test quickCheckModifiersClampToDh2PlusSixtyMinusSixtyLimits() passed after 0.043 seconds.
+✔ Test backgroundCompatibilityFlagsUnsupportedCurrentModelRules() passed after 0.043 seconds.
+✔ Test editSkillPersistsCorrectly() passed after 0.043 seconds.
+✔ Test addSkillPersistsCorrectly() passed after 0.043 seconds.
+✔ Test canonicalBackgroundCatalogStaysCompleteAndUnique() passed after 0.043 seconds.
+✔ Test saveTemplateAndCreateCharacterDoNotCreateHistoryLinkage() passed after 0.044 seconds.
+✔ Test rangedAttackShortcutUsesBallisticSkillAndActiveSessionModifiers() passed after 0.043 seconds.
+✔ Test difficultyPresetRegistryProvidesStructuredStandardPresets() passed after 0.043 seconds.
+✔ Test weaponCompendiumImportRejectsUnsupportedSchemaVersion() passed after 0.043 seconds.
+✔ Test historySearchFiltersByTypeAndText() passed after 0.043 seconds.
+✔ Test registryBackedTalentUnlockValidationExplainsMissingPrerequisitesAndDuplicateTalent() passed after 0.043 seconds.
+✔ Test mechanicsResolverConsumesRegistryBackedSkillAndPresetMetadata() passed after 0.043 seconds.
+✔ Test prerequisiteEvaluationMatchesNormalizedTokensAndAllTrainingRanks() passed after 0.043 seconds.
+✔ Test startingPackageProjectionDoesNotGuessMissingChoicesOrRolls() passed after 0.043 seconds.
+✔ Test manualDamageShortcutUsesOverridePenetrationAndManualSource() passed after 0.043 seconds.
+✔ Test characteristicUpdatePersistsAndBonusReflectsEditedValues() passed after 0.043 seconds.
+✔ Test meleeAttackShortcutUsesWeaponSkill() passed after 0.043 seconds.
+✔ Test conditionMetadataRegistryResolvesCanonicalAndCustomLabels() passed after 0.043 seconds.
+✔ Test randomCharacteristicGenerationSupportsHomeWorldModifiersSingleRerollAndTransientInfluence() passed after 0.043 seconds.
+✔ Test "golden combat scenario" passed after 0.043 seconds.
+✔ Test attackShortcutRollAndDamageHandoffStayExplainable() passed after 0.042 seconds.
+✔ Test raibosSeedBootstrapSkipsRepositoryWhenMarkerIsAlreadySet() passed after 0.043 seconds.
+✔ Test combatContextFormalizesActiveWeaponPinnedChecksConditionsAndModifiers() passed after 0.042 seconds.
+✔ Test derivedValueCalculatorRemainsConsistentWithMechanicsCheckResolver() passed after 0.043 seconds.
+✔ Test weaponRegistriesHandleNilAliasAndAdHocFallbackCases() passed after 0.042 seconds.
+✔ Test characteristicAdvanceValidationRejectsSkippingPastSingleDh2Step() passed after 0.042 seconds.
+✔ Test startingPackageProjectionRoundTripsThroughLegacyCharacterCodableShape() passed after 0.044 seconds.
+✔ Test adeptusMechanicusBackgroundPreviewCarriesRulebookBackedPackageSummary() passed after 0.043 seconds.
+✔ Test jsonBootstrapStatusExposesJSONAsActiveBackend() passed after 0.042 seconds.
+✔ Test pointAllocationRejectsOverspendAndCapViolations() passed after 0.042 seconds.
+✔ Test pointAllocationRecomposesAcrossHomeWorldChangesAndCanBecomeInvalid() passed after 0.042 seconds.
+✔ Test creationDraftInfersCanonicalSelectionsAndSeparatesChoiceProvenanceFromLegacyFallback() passed after 0.042 seconds.
+✔ Test useCasesImportReplacesExistingRepositoryState() passed after 0.045 seconds.
+✔ Test creationDraftSelectionSettersValidateChoicesAndClearUnknownInputs() passed after 0.042 seconds.
+✔ Test equipmentEditsRemainScopedToSelectedCharacter() passed after 0.044 seconds.
+✔ Test combatDamageRequestUsesCombatContextWeaponPenetrationAndToughnessBonus() passed after 0.042 seconds.
+✔ Test deleteSkillPersistsCorrectly() passed after 0.043 seconds.
+✔ Test characterCodableRoundtripPreservesHistoryAndDefaultsMissingHistory() passed after 0.042 seconds.
+✔ Test equipmentSearchFiltersWeaponsArmourAndInventory() passed after 0.042 seconds.
+✔ Test weaponCompendiumImportRejectsMalformedJSON() passed after 0.042 seconds.
+✔ Test damageResolverClampsAppliedDamageAtZeroWhenMitigationExceedsRawDamage() passed after 0.042 seconds.
+✔ Test duplicateKeepsOriginalIntactAndCreatesDistinctID() passed after 0.043 seconds.
+✔ Test skillSpecialisationsPersistCorrectly() passed after 0.041 seconds.
+✔ Test templateDeletePersists() passed after 0.042 seconds.
+✔ Test addNotesListEntryPersistsCorrectly() passed after 0.042 seconds.
+✔ Test conditionMetadataRegistryHandlesSuppressionMetadataAndBlankFallback() passed after 0.041 seconds.
+✔ Test armourCompendiumImportRejectsDuplicateDefinitionIDs() passed after 0.041 seconds.
+✔ Test raibosSeedContainsExpectedProfileAndPlayableData() passed after 0.041 seconds.
+✔ Test damageRequestNormalizesNegativeInputsToSafeValues() passed after 0.041 seconds.
+✔ Test templateRenamePersists() passed after 0.042 seconds.
+✔ Test armourCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() passed after 0.041 seconds.
+✔ Test bootstrapDiagnosticMessageFallsBackToNSErrorLocalizedDescription() passed after 0.041 seconds.
+✔ Test reprojectingExistingCharacterRequiresPersistedEngineState() passed after 0.041 seconds.
+✔ Test duplicateCharacterDoesNotCarryHistoryEntries() passed after 0.042 seconds.
+✔ Test changingBackgroundPrunesStaleStartingPackageChoiceState() passed after 0.041 seconds.
+✔ Test parryReactionShortcutPrefersExistingCharacterSkill() passed after 0.041 seconds.
+✔ Test bootstrapDiagnosticMessagePrefersLocalizedErrorDescription() passed after 0.041 seconds.
+✔ Test armourCompendiumDefinitionCopiesIntoDetachedArmourInstances() passed after 0.041 seconds.
+✔ Test notesSearchReturnsOriginalIndexesForFilteredMatches() passed after 0.041 seconds.
+✔ Test saveCharacterAsTemplatePersistsDetachedSnapshot() passed after 0.042 seconds.
+✔ Test characteristicModifierSummaryIncludesSignedMagnitude() passed after 0.041 seconds.
+✔ Test compendiumArmourInstancePersistsThroughAcceptedEquipmentFlow() passed after 0.042 seconds.
+✔ Test characterLifecycleRemainsStableWhenTemplateUseCasesAreEnabled() passed after 0.042 seconds.
+✔ Test characteristicQuickCheckAppliesModifierAndExposesBonus() passed after 0.041 seconds.
+✔ Test sessionStateNormalizesTemporaryModifiersAndCombatConditions() passed after 0.041 seconds.
+✔ Test weaponCompendiumDefinitionFormatsPreviewSupportingAndPlaceholderFields() passed after 0.041 seconds.
+✔ Test addEditDeleteTemporaryModifierPersistsCorrectly() passed after 0.042 seconds.
+✔ Test armourCompendiumDefinitionFormatsPreviewSupportingAndPlaceholderFields() passed after 0.041 seconds.
+✔ Test importExportRoundtrip() passed after 0.041 seconds.
+✔ Test startingPackageProjectionRequiresCanonicalSelectionsAndSanitizesChoiceHelpers() passed after 0.041 seconds.
+✔ Test damageResolverTracksOverflowWhenAppliedDamageExceedsRemainingWounds() passed after 0.041 seconds.
+✔ Test characteristicAdvanceValidationRejectsNegativeDeltaAndNegativeCost() passed after 0.041 seconds.
+✔ Test characterDossierFilenameStemSanitizesCharacterName() passed after 0.041 seconds.
+✔ Test importSupportsLegacySchemaOneWithoutDhiiEngineState() passed after 0.041 seconds.
+✔ Test changingBackgroundPrunesNoLongerApplicableChoiceStateWithoutReconsumingLegacyFallback() passed after 0.041 seconds.
+✔ Test resourceUpdatePersistsAndExperienceAvailableReflectsEditedValues() passed after 0.041 seconds.
+✔ Test characterDossierComposerOmitsEmptyOptionalSectionsForSparseCharacter() passed after 0.041 seconds.
+✔ Test invalidSkillAdvanceDoesNotAllowSameTrainingLevel() passed after 0.040 seconds.
+✔ Test skillQuickCheckAppliesTrainingAndModifierWithTransparentBreakdown() passed after 0.040 seconds.
+✔ Test skillsSearchMatchesNameSpecialisationAndTraining() passed after 0.041 seconds.
+✔ Test editNotesListEntryPersistsCorrectly() passed after 0.042 seconds.
+✔ Test weaponCompendiumImportRejectsDuplicateDefinitionIDs() passed after 0.041 seconds.
+✔ Test raibosSeedBootstrapAddsCharacterWhenRosterLacksIt() passed after 0.041 seconds.
+✔ Test weaponCompendiumDefinitionPreviewOmitsBlankSupportingFields() passed after 0.040 seconds.
+✔ Test characterListSearchMatchesVisibleProfileFields() passed after 0.040 seconds.
+✔ Test useCasesImportRejectsUnsupportedSchemaVersion() passed after 0.041 seconds.
+✔ Test editingWeaponInstanceDoesNotMutateCompendiumDefinition() passed after 0.041 seconds.
+✔ Test weaponMetadataRegistriesResolveTypesAndTraitsForCombatContext() passed after 0.040 seconds.
+✔ Test historyStaysCharacterScopedAndIsRemovedOnDelete() passed after 0.042 seconds.
+✔ Test standardQuickMechanicsPresetsRemainExpected() passed after 0.040 seconds.
+✔ Test attackShortcutParsesPenetrationFromWeaponSummaryAndCombatContextCanReplaceWeapon() passed after 0.040 seconds.
+✔ Test changingRolePrunesStaleRoleChoiceAndKeepsOtherValidSelections() passed after 0.041 seconds.
+✔ Test backgroundPreviewResolvesCanonicalNamesAndAliases() passed after 0.041 seconds.
+✔ Test canonicalHomeWorldCatalogStaysCompleteAndUnique() passed after 0.040 seconds.
+✔ Test addEditDeleteInventoryItemPersistsCorrectly() passed after 0.041 seconds.
+✔ Test sessionModeTogglePersistsCorrectly() passed after 0.040 seconds.
+✔ Test armourCompendiumImportRejectsUnsupportedSchemaVersion() passed after 0.040 seconds.
+✔ Test compendiumWeaponInstancePersistsThroughAcceptedEquipmentFlow() passed after 0.041 seconds.
+✔ Test randomCharacteristicGenerationBecomesInvalidWhenHomeWorldChangesAfterRolling() passed after 0.039 seconds.
+✔ Test advanceCatalogRegistriesProvideStructuredCharacteristicAndSkillDefaults() passed after 0.040 seconds.
+✔ Test weaponCompendiumImportPreviewSummaryMakesReplaceAllSemanticsExplicit() passed after 0.039 seconds.
+✔ Test freeformNotesPersistCorrectly() passed after 0.040 seconds.
+✔ Test weaponCompendiumAutocompleteHandlesExactContainsLimitAndBlankQueries() passed after 0.039 seconds.
+✔ Test addEditDeleteWeaponPersistsCorrectly() passed after 0.041 seconds.
+✔ Test historyEntryAddEditDeletePersists() passed after 0.041 seconds.
+✔ Test dodgeReactionShortcutFallsBackToCanonicalUntrainedSkillWhenCharacterLacksIt() passed after 0.039 seconds.
+✔ Test importExportRoundtripPreservesDhiiEngineStateAndExportsMigratedSchema() passed after 0.039 seconds.
+✔ Test validArmourCompendiumCatalogReplacePersistsAndPowersFutureAutocomplete() passed after 0.040 seconds.
+✔ Test shrineWorldPreviewCarriesRulebookBackedStartingValues() passed after 0.039 seconds.
+✔ Test skillAdvanceValidationRejectsSkippingIntermediateRanks() passed after 0.039 seconds.
+✔ Test reprojectingExistingEngineCharacterPreservesPlayerDeltasAndCustomEntries() passed after 0.040 seconds.
+✔ Test characteristicAdvanceCanApplyAcrossAllCharacteristics() passed after 0.039 seconds.
+✔ Test xpSpendValidationRejectsInsufficientExperience() passed after 0.039 seconds.
+✔ Test templateDuplicatePersistsDistinctIdentity() passed after 0.040 seconds.
+✔ Test weaponCompendiumDefinitionCopiesIntoDetachedWeaponInstances() passed after 0.039 seconds.
+✔ Test armourCompendiumImportRejectsMalformedJSON() passed after 0.038 seconds.
+✔ Test blankAdHocSkillMetadataFallsBackToPlaceholderNameAndStableToken() passed after 0.038 seconds.
+✔ Test characteristicAdvanceAppliesXPSpendAndProducesExplainableBreakdown() passed after 0.039 seconds.
+✔ Test weaponCompendiumImportValidatesRequiredFieldsWithActionableDiagnostics() passed after 0.038 seconds.
+✔ Test creationDraftUsesPersistedEngineStateWhenCharacterCarriesIt() passed after 0.038 seconds.
+✔ Test combatContextDropsMissingActiveWeaponWithoutDiscardingOtherCombatState() passed after 0.038 seconds.
+✔ Test characterDossierComposerBuildsStructuredReadableSummary() passed after 0.038 seconds.
+✔ Test armourCompendiumAutocompleteHandlesExactContainsLimitAndBlankQueries() passed after 0.038 seconds.
+✔ Test movementEditsPersistCorrectly() passed after 0.040 seconds.
+✔ Test rolePreviewResolvesCanonicalNamesAndAliases() passed after 0.038 seconds.
+✔ Test editingArmourInstanceDoesNotMutateCompendiumDefinition() passed after 0.038 seconds.
+✔ Test addEditDeletePinnedCheckPersistsCorrectly() passed after 0.040 seconds.
+✔ Test structuredModifiersRespectScopeFilteringAndOrigin() passed after 0.038 seconds.
+✔ Test damageResolverAppliesPenetrationArmourAndToughnessWithExplainableBreakdown() passed after 0.038 seconds.
+✔ Test xpSpendMessagesAndLabelsRemainExplainableForEdgeCases() passed after 0.038 seconds.
+✔ Test skillMetadataRegistryResolvesCanonicalAndAdHocSkills() passed after 0.038 seconds.
+✔ Test "golden explainable check scenario" passed after 0.038 seconds.
+✔ Test raibosSeedBootstrapDoesNotDuplicateExistingRaibos() passed after 0.038 seconds.
+✔ Test replacingCompendiumDoesNotMutateExistingCharacterOwnedWeapons() passed after 0.040 seconds.
+✔ Test notesEditsRemainScopedToSelectedCharacter() passed after 0.039 seconds.
+✔ Test activeWeaponSelectionAndCombatConditionsPersistCorrectly() passed after 0.039 seconds.
+✔ Test applyingTemplateDoesNotCreateSharedMutableLinkage() passed after 0.040 seconds.
+✔ Test bootstrapDiagnosticMessageUsesStringDescriptionWhenDescriptionsAreBlank() passed after 0.039 seconds.
+✔ Test createCharacterFromTemplateProducesDistinctCharacterID() passed after 0.038 seconds.
+✔ Test profileUpdatePersistsDataAndUpdatesTimestamp() passed after 0.048 seconds.
+✔ Test startingPackageProjectionSupportsEveryBackgroundBranchWithResolvedSelections() passed after 0.045 seconds.
+✔ Test exportSuccessClearsPreviousViewModelError() passed after 0.054 seconds.
+✔ Test importFailureSetsViewModelErrorAndKeepsCurrentVisibleState() passed after 0.047 seconds.
+✔ Test importSuccessClearsPreviousViewModelError() passed after 0.053 seconds.
+✔ Test viewModelApplyXPSpendPersistsCharacterAndAdvancementHistory() passed after 0.054 seconds.
+✔ Test cancelPendingWeaponCompendiumImportLeavesCurrentCatalogUnchanged() passed after 0.049 seconds.
+✔ Test cancelPendingImportLeavesCurrentDataUnchanged() passed after 0.054 seconds.
+✔ Test cancelPendingArmourCompendiumImportLeavesCurrentCatalogUnchanged() passed after 0.048 seconds.
+✔ Test deleteSuccessClearsPreviousViewModelError() passed after 0.053 seconds.
+✔ Test viewModelCreateDHIICharacterPersistsProjectedCharacterAndRefreshesList() passed after 0.052 seconds.
+✔ Test viewModelUpdateDHIICharacterReprojectsEngineBackedCharacterAndKeepsIdentity() passed after 0.052 seconds.
+✔ Test viewModelApplyXPSpendPersistsTalentUnlockAndAdvancementHistory() passed after 0.048 seconds.
+✔ Test importRefreshesCharacterListViewModelSourceOfTruth() passed after 0.053 seconds.
+✔ Test confirmedImportReplacesCurrentDataAsAdvertised() passed after 0.057 seconds.
+✔ Test profileAutosaveCoordinatorKeepsTrackingIsolatedAcrossCharacters() passed after 0.088 seconds.
+✔ Test profileAutosaveCoordinatorDoesNotDropNewerTrackingAfterOlderCompletion() passed after 0.125 seconds.
+✔ Test profileAutosaveCoordinatorKeepsIndependentCharacters() passed after 0.154 seconds.
+✔ Test profileAutosaveCoordinatorCoalescesAfterPerformStarts() passed after 0.145 seconds.
+✔ Test profileAutosaveCoordinatorCoalescesPendingEdits() passed after 0.169 seconds.
+✔ Test run with 207 tests passed after 0.178 seconds.

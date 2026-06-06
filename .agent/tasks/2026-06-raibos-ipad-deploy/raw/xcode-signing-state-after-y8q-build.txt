@@ -1,0 +1,15 @@
+IDEProvisioningTeamByIdentifier=
+{
+    "2B3CF5A0-7D60-45CA-A716-26D75CF3F6B3" =     (
+                {
+            isFreeProvisioningTeam = 1;
+            teamID = Y8QK9BKTCW;
+            teamName = "\\U0410\\U043d\\U0434\\U0440\\U0435\\U0439 \\U0410\\U0440\\U0442\\U0435\\U043c\\U0435\\U043d\\U043a\\U043e (Personal Team)";
+            teamType = "Personal Team";
+        }
+    );
+}
+
+IDEProvisioningTeamManagerLastSelectedTeamID=Y8QK9BKTCW
+
+mobileprovision_count=1

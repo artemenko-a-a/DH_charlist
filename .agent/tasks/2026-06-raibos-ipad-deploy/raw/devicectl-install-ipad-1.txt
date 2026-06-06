@@ -1,0 +1,10 @@
+13:58:32  Acquired tunnel connection to device.
+13:58:32  Enabling developer disk image services.
+13:58:32  Acquired usage assertion.
+App installed:
+• bundleID: com.example.DHCharListHost
+• installationURL: file:///private/var/containers/Bundle/Application/760F3FB6-7162-4CA0-A4A0-0FBA0934AD36/DHCharListHost.app/
+• launchServicesIdentifier: unknown
+• databaseUUID: C5D82EBE-7E63-4D13-9DD0-0EFF90815ADF
+• databaseSequenceNumber: 1800
+• options:
